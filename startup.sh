@@ -1,8 +1,17 @@
 #!/bin/bash
 set -e
 
-echo ">>> Running database migrations..."
-flask db upgrade
+echo ">>> Initializing database..."
+python - <<'EOF'
+from app import create_app, db
+app = create_app()
+with app.app_context():
+    db.create_all()
+    print("✅ All tables created.")
+EOF
+
+echo ">>> Stamping migrations as current..."
+flask db stamp head
 
 echo ">>> Creating admin user if not exists..."
 python create_admin.py
