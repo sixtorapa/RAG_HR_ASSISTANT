@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ project.name }} — HR Knowledge Base</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --up-dark:    #0E3A5A;
+            --up-mid:     #164A72;
+            --up-accent:  #6737e1;
+            --up-light:   #EEF4FB;
+            --up-sidebar: #1a1a2e;
+        }
+
+        body {
+            background: var(--up-light);
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            min-height: 100vh;
+        }
+
+        /* ── Topbar ── */
+        .topbar {
+            background: var(--up-mid);
+            height: 56px;
+            display: flex;
+            align-items: center;
+            padding: 0 1.5rem;
+            gap: 1rem;
+        }
+        .topbar img { height: 32px; }
+        .topbar-title {
+            color: #fff;
+            font-weight: 600;
+            font-size: 1rem;
+            letter-spacing: .3px;
+        }
+        .topbar-spacer { flex: 1; }
+        .topbar .btn-topbar {
+            color: rgba(255,255,255,.8);
+            background: rgba(255,255,255,.1);
+            border: 1px solid rgba(255,255,255,.15);
+            border-radius: 6px;
+            padding: 4px 12px;
+            font-size: .85rem;
+            text-decoration: none;
+            transition: background .15s;
+        }
+        .topbar .btn-topbar:hover { background: rgba(255,255,255,.2); color: #fff; }
+
+        /* ── Page wrapper ── */
+        .page-wrapper {
+            max-width: 860px;
+            margin: 2.5rem auto;
+            padding: 0 1rem;
+        }
+
+        /* ── Project header card ── */
+        .project-header {
+            background: #fff;
+            border-radius: 12px;
+            padding: 1.5rem 2rem;
+            box-shadow: 0 1px 4px rgba(0,0,0,.08);
+            display: flex;
+            align-items: center;
+            gap: 1.25rem;
+            margin-bottom: 1.25rem;
+        }
+        .project-icon {
+            width: 52px; height: 52px;
+            background: var(--up-light);
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            color: var(--up-mid);
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+        .project-name {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--up-dark);
+            margin: 0;
+        }
+        .project-path {
+            font-size: .82rem;
+            color: #888;
+            margin: 2px 0 0;
+        }
+        .project-actions { margin-left: auto; display: flex; gap: .5rem; }
+
+        /* ── Flash messages ── */
+        .flash-zone { margin-bottom: 1rem; }
+
+        /* ── Reindex card ── */
+        .reindex-card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 1.25rem 2rem;
+            box-shadow: 0 1px 4px rgba(0,0,0,.08);
+            margin-bottom: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .reindex-card .reindex-info { flex: 1; }
+        .reindex-card .reindex-info h6 {
+            margin: 0 0 2px;
+            font-weight: 600;
+            color: var(--up-dark);
+        }
+        .reindex-card .reindex-info p {
+            margin: 0;
+            font-size: .83rem;
+            color: #666;
+        }
+        .btn-reindex {
+            background: var(--up-accent);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 18px;
+            font-size: .88rem;
+            font-weight: 600;
+            white-space: nowrap;
+            transition: opacity .15s;
+        }
+        .btn-reindex:hover { opacity: .88; color: #fff; }
+
+        /* ── Conversations card ── */
+        .conv-card {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 1px 4px rgba(0,0,0,.08);
+            overflow: hidden;
+        }
+        .conv-card-header {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #eef0f3;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+        .conv-card-header h5 {
+            margin: 0;
+            font-weight: 600;
+            color: var(--up-dark);
+            font-size: 1rem;
+        }
+        .new-chat-form { display: flex; gap: .5rem; }
+        .new-chat-form input {
+            border-radius: 7px;
+            border: 1px solid #dde2ea;
+            padding: 6px 12px;
+            font-size: .88rem;
+            min-width: 180px;
+        }
+        .new-chat-form input:focus { outline: none; border-color: var(--up-accent); box-shadow: 0 0 0 2px rgba(103,55,225,.12); }
+        .btn-new-chat {
+            background: var(--up-accent);
+            color: #fff;
+            border: none;
+            border-radius: 7px;
+            padding: 6px 14px;
+            font-size: .88rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        .btn-new-chat:hover { opacity: .88; color: #fff; }
+
+        /* ── Session list ── */
+        .session-item {
+            display: flex;
+            align-items: center;
+            padding: .85rem 1.5rem;
+            border-bottom: 1px solid #f3f5f8;
+            transition: background .12s;
+        }
+        .session-item:last-child { border-bottom: none; }
+        .session-item:hover { background: var(--up-light); }
+        .session-link {
+            flex: 1;
+            text-decoration: none;
+            color: inherit;
+        }
+        .session-link h6 {
+            margin: 0 0 2px;
+            font-size: .95rem;
+            font-weight: 600;
+            color: var(--up-dark);
+        }
+        .session-link small { color: #999; font-size: .78rem; }
+        .btn-delete {
+            background: none;
+            border: 1px solid #e0e4ea;
+            border-radius: 6px;
+            color: #c0392b;
+            padding: 4px 8px;
+            font-size: .82rem;
+            transition: background .12s;
+        }
+        .btn-delete:hover { background: #fdf0ef; border-color: #c0392b; }
+
+        .empty-state {
+            padding: 3.5rem;
+            text-align: center;
+            color: #aaa;
+        }
+        .empty-state i { font-size: 2.5rem; display: block; margin-bottom: .75rem; }
+        .empty-state p { margin: 0; font-size: .9rem; }
+    </style>
+</head>
+<body>
+
+<!-- Topbar -->
+<div class="topbar">
+    <img src="{{ url_for('static', filename='img/logo-white.svg') }}" alt="HR KB">
+    <span class="topbar-title">HR Knowledge Base</span>
+    <div class="topbar-spacer"></div>
+    <a href="{{ url_for('main.index') }}" class="btn-topbar">
+        <i class="bi bi-grid-3x3-gap me-1"></i> All Projects
+    </a>
+    <a href="{{ url_for('main.logout') }}" class="btn-topbar">
+        <i class="bi bi-box-arrow-right me-1"></i> Sign out
+    </a>
+</div>
+
+<div class="page-wrapper">
+
+    <!-- Flash messages -->
+    <div class="flash-zone">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'success' if category == 'success' else 'warning' if category == 'warning' else 'danger' }} alert-dismissible fade show py-2 px-3" role="alert" style="border-radius:8px; font-size:.88rem;">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- Project header -->
+    <div class="project-header">
+        <div class="project-icon"><i class="bi bi-database"></i></div>
+        <div>
+            <h1 class="project-name">{{ project.name }}</h1>
+            <p class="project-path">{{ project.document_path }}</p>
+        </div>
+        <div class="project-actions">
+            <a href="{{ url_for('main.project_settings', project_id=project.id) }}"
+               class="btn btn-sm btn-outline-secondary">
+                <i class="bi bi-gear me-1"></i> Settings
+            </a>
+        </div>
+    </div>
+
+    <!-- Reindex -->
+    <div class="reindex-card">
+        <div class="reindex-icon" style="font-size:1.5rem; color: var(--up-accent);">
+            <i class="bi bi-arrow-repeat"></i>
+        </div>
+        <div class="reindex-info">
+            <h6>Document Index</h6>
+            <p>Re-index your knowledge base after adding or updating documents in the <code>knowledge_base/</code> folder.</p>
+        </div>
+        <form method="POST" action="{{ url_for('main.reindex') }}"
+              onsubmit="this.querySelector('button').disabled=true; this.querySelector('button').innerHTML='<i class=\'bi bi-hourglass-split me-1\'></i> Indexing...';">
+            <button type="submit" class="btn-reindex">
+                <i class="bi bi-arrow-repeat me-1"></i> Reindex
+            </button>
+        </form>
+    </div>
+
+    <!-- Conversations -->
+    <div class="conv-card">
+        <div class="conv-card-header">
+            <h5><i class="bi bi-chat-dots me-2"></i>My Conversations</h5>
+            <form action="{{ url_for('main.create_chat', project_id=project.id) }}"
+                  method="POST" class="new-chat-form">
+                <input type="text" name="chat_name" placeholder="Chat name..." required>
+                <button type="submit" class="btn-new-chat">
+                    <i class="bi bi-plus-lg me-1"></i> New Chat
+                </button>
+            </form>
+        </div>
+
+        {% if sessions %}
+            {% for session in sessions %}
+            <div class="session-item">
+                <a href="{{ url_for('main.chat_session', session_id=session.id) }}"
+                   class="session-link">
+                    <h6>{{ session.name }}</h6>
+                    <small><i class="bi bi-clock me-1"></i>{{ session.created_at.strftime('%d/%m/%Y %H:%M') }}</small>
+                </a>
+                <form action="{{ url_for('main.delete_chat', session_id=session.id) }}"
+                      method="POST"
+                      onsubmit="return confirm('Delete this chat?');">
+                    <button type="submit" class="btn-delete">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </form>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">
+                <i class="bi bi-chat-square-dots"></i>
+                <p>No active chats. Create one to get started!</p>
+            </div>
+        {% endif %}
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

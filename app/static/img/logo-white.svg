@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 44" fill="none">
+  <circle cx="18" cy="14" r="7" fill="white"/>
+  <path d="M6 38c0-6.627 5.373-12 12-12s12 5.373 12 12" stroke="white" stroke-width="3" stroke-linecap="round" fill="none"/>
+  <rect x="34" y="8" width="16" height="20" rx="3" fill="rgba(255,255,255,0.2)"/>
+  <rect x="34" y="8" width="16" height="20" rx="3" stroke="white" stroke-width="1.5" fill="none"/>
+  <line x1="37" y1="14" x2="47" y2="14" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="37" y1="18" x2="47" y2="18" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="37" y1="22" x2="43" y2="22" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+  <text x="58" y="28" font-family="Arial, sans-serif" font-weight="800" font-size="18" fill="white">HR</text>
+  <text x="82" y="28" font-family="Arial, sans-serif" font-weight="400" font-size="18" fill="white"> Knowledge Base</text>
+</svg>

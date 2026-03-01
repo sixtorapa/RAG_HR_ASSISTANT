@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 44" fill="none">
+  <!-- Icon: person + document -->
+  <circle cx="18" cy="14" r="7" fill="#164A72"/>
+  <path d="M6 38c0-6.627 5.373-12 12-12s12 5.373 12 12" stroke="#164A72" stroke-width="3" stroke-linecap="round" fill="none"/>
+  <rect x="34" y="8" width="16" height="20" rx="3" fill="#6737e1" opacity="0.15"/>
+  <rect x="34" y="8" width="16" height="20" rx="3" stroke="#6737e1" stroke-width="1.5" fill="none"/>
+  <line x1="37" y1="14" x2="47" y2="14" stroke="#6737e1" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="37" y1="18" x2="47" y2="18" stroke="#6737e1" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="37" y1="22" x2="43" y2="22" stroke="#6737e1" stroke-width="1.5" stroke-linecap="round"/>
+  <!-- Text -->
+  <text x="58" y="28" font-family="Arial, sans-serif" font-weight="800" font-size="18" fill="#164A72">HR</text>
+  <text x="82" y="28" font-family="Arial, sans-serif" font-weight="400" font-size="18" fill="#164A72"> Knowledge Base</text>
+</svg>

@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configuración - {{ project.name }}</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #6737e1;
+            --secondary-bg: #f8f9fa;
+        }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f4f6f9;
+            color: #333;
+        }
+        .navbar { background-color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .card { border: none; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
+        .card-header { background-color: white; border-bottom: 1px solid #eee; padding: 1.5rem; border-radius: 12px 12px 0 0 !important; }
+        .btn-primary { background-color: var(--primary-color); border: none; padding: 10px 24px; font-weight: 500; }
+        .btn-primary:hover { background-color: #5528c6; }
+        .form-label { font-weight: 600; color: #444; margin-bottom: 8px; }
+        .form-control, .form-select { border-radius: 8px; padding: 12px; border: 1px solid #dee2e6; }
+        .form-control:focus, .form-select:focus { border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(103, 55, 225, 0.1); }
+        .badge-template { background-color: #eef2ff; color: var(--primary-color); border: 1px solid #e0e7ff; padding: 5px 10px; border-radius: 20px; font-size: 0.85rem; }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light mb-4">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="{{ url_for('main.index') }}">
+                <i class="bi bi-robot text-primary"></i> RAG Dashboard
+            </a>
+            <div class="ms-auto">
+                <a href="{{ url_for('main.project_overview', project_id=project.id) }}" class="btn btn-outline-primary btn-sm me-2">
+                    <i class="bi bi-arrow-left"></i> Volver al Proyecto
+                </a>
+                <a href="{{ url_for('main.index') }}" class="btn btn-light btn-sm">
+                    <i class="bi bi-x-lg"></i> Salir
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container pb-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                
+                <!-- Header del Proyecto -->
+                <div class="text-center mb-4">
+                    <h2 class="fw-bold mb-1">Ajustes del Proyecto</h2>
+                    <p class="text-muted">Configura cómo se comporta la IA para: <strong>{{ project.name }}</strong></p>
+                </div>
+
+                <!-- Mensajes Flash -->
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show shadow-sm border-0" role="alert">
+                        <i class="bi bi-info-circle-fill me-2"></i> {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                    {% endfor %}
+                {% endif %}
+                {% endwith %}
+
+                <form method="POST" id="settingsForm">
+                    
+                    <!-- Tarjeta 1: Parámetros Técnicos -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="bi bi-sliders text-primary me-2"></i> Precisión y Recuperación</h5>
+                        </div>
+                        <div class="card-body p-4">
+                            <div class="mb-3">
+                                <label for="k_value" class="form-label d-flex justify-content-between">
+                                    <span>Profundidad de Contexto (Chunks)</span>
+                                    <span class="badge bg-light text-dark border">Valor actual: {{ settings.get('k_value', 5) }}</span>
+                                </label>
+                                <input type="range" class="form-range" min="3" max="15" step="1" id="k_range" 
+                                       value="{{ settings.get('k_value', 5) }}" oninput="syncKValue(this.value)">
+                                <div class="d-flex gap-2 align-items-center mt-2">
+                                    <input type="number" class="form-control w-25" id="k_value" name="k_value" 
+                                           value="{{ settings.get('k_value', 5) }}" min="1" max="20" oninput="syncKRange(this.value)">
+                                    <small class="text-muted">
+                                        Número de fragmentos de documento que la IA leerá para responder. 
+                                        <br>Recomendado: <strong>4-6</strong> para precisión, <strong>8-10</strong> para resúmenes amplios.
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tarjeta 2: Personalidad y Prompt -->
+                    <div class="card mb-4">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0"><i class="bi bi-person-badge text-primary me-2"></i> Personalidad del Chatbot</h5>
+                            {% if current_template != 'custom' and current_template is defined %}
+                                <span class="badge-template"><i class="bi bi-star-fill me-1"></i> {{ templates[current_template].nombre }}</span>
+                            {% else %}
+                                <span class="badge bg-secondary rounded-pill">Personalizado</span>
+                            {% endif %}
+                        </div>
+                        <div class="card-body p-4">
+                            
+                            <!-- Selector de Template -->
+                            <div class="mb-4">
+                                <label for="template_selected" class="form-label">Elige un Rol Predefinido</label>
+                                <select class="form-select" id="template_selected" name="template_selected" onchange="handleTemplateChange()">
+                                    <option value="custom" {% if current_template == 'custom' or current_template is not defined %}selected{% endif %}>
+                                        ✏️ Personalizado (Escribir mi propio prompt)
+                                    </option>
+                                    <option disabled>──────────</option>
+                                    {% if templates %}
+                                        {% for key, val in templates.items() %}
+                                        <option value="{{ key }}" {% if current_template == key %}selected{% endif %}>
+                                            {{ val.nombre }} — {{ val.descripcion }}
+                                        </option>
+                                        {% endfor %}
+                                    {% endif %}
+                                </select>
+                                <div id="template-warning" class="alert alert-warning mt-2 d-none" style="font-size: 0.9rem;">
+                                    <i class="bi bi-exclamation-triangle"></i> 
+                                    <strong>Atención:</strong> Al guardar, el área de texto de abajo se sobrescribirá con el prompt oficial del rol seleccionado.
+                                </div>
+                            </div>
+
+                            <!-- Text Area del Prompt -->
+                            <div class="mb-3">
+                                <label for="system_instruction" class="form-label d-flex justify-content-between">
+                                    <span>Instrucción del Sistema (Prompt)</span>
+                                    <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none" onclick="copyToClipboard('system_instruction')">
+                                        <i class="bi bi-clipboard"></i> Copiar
+                                    </button>
+                                </label>
+                                <textarea class="form-control font-monospace" id="system_instruction" name="system_instruction" 
+                                          rows="8" style="font-size: 0.85rem; background-color: #fafafa;"
+                                          placeholder="Escribe aquí tus instrucciones...">{{ settings.get('system_instruction', '') }}</textarea>
+                                <div class="form-text mt-2">
+                                    <i class="bi bi-lightbulb"></i> 
+                                    Este texto define las reglas estrictas (idioma, tono, formato) que seguirá la IA.
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- ============================================== -->
+                    <!-- NUEVA TARJETA 3: CONTEXTO SQL (AQUÍ ESTÁ EL CAMBIO) -->
+                    <!-- ============================================== -->
+                    <div class="card mb-4 border-warning">
+                        <div class="card-header bg-warning-subtle">
+                            <h5 class="mb-0 text-dark"><i class="bi bi-database-fill-gear me-2"></i> Conexión a Data Lake (SQL)</h5>
+                        </div>
+                        <div class="card-body p-4">
+                            <div class="alert alert-light border shadow-sm mb-3">
+                                <small><i class="bi bi-info-circle-fill text-warning"></i> Configura esto solo si vas a usar la herramienta de Base de Datos con este proyecto.</small>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="sql_context" class="form-label d-flex justify-content-between">
+                                    <span>Query de Ejemplo / Definición de Tablas</span>
+                                    <button type="button" class="btn btn-link btn-sm p-0 text-decoration-none" onclick="copyToClipboard('sql_context')">
+                                        <i class="bi bi-clipboard"></i> Copiar
+                                    </button>
+                                </label>
+                                <textarea class="form-control font-monospace" id="sql_context" name="sql_context" 
+                                          rows="8" style="font-size: 0.85rem; background-color: #fffbf0; border-color: #f0e6cc;"
+                                          placeholder="Ejemplo: La tabla de ventas es 'v_ventas_2024'. Usa la columna 'importe' para sumar...&#10;SELECT marca, SUM(importe) FROM consultas.v_ventas ...">{{ settings.get('sql_context', '') }}</textarea>
+                                <div class="form-text mt-2">
+                                    Proporciona a la IA el nombre exacto de las tablas y un ejemplo de <code>SELECT</code> para que sepa cómo consultar tu Redshift.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- ============================================== -->
+
+
+                    <!-- Botones de Acción -->
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{{ url_for('main.index') }}" class="btn btn-outline-secondary me-md-2">Cancelar</a>
+                        <button type="submit" class="btn btn-primary px-5">
+                            <i class="bi bi-check-lg"></i> Guardar Configuración
+                        </button>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Sincronizar Slider con Input Numérico
+        function syncKValue(val) { document.getElementById('k_value').value = val; }
+        function syncKRange(val) { document.getElementById('k_range').value = val; }
+
+        // Manejar cambio de template
+        function handleTemplateChange() {
+            const select = document.getElementById('template_selected');
+            const warning = document.getElementById('template-warning');
+            const textArea = document.getElementById('system_instruction');
+
+            if (!select || !select.value) return; // Seguridad
+
+            if (select.value !== 'custom') {
+                if(warning) warning.classList.remove('d-none');
+                if(textArea) textArea.style.opacity = '0.7';
+            } else {
+                if(warning) warning.classList.add('d-none');
+                if(textArea) {
+                    textArea.style.opacity = '1';
+                    // No hacemos focus automático para no molestar si solo se carga la página
+                }
+            }
+        }
+
+        // Copiar al portapapeles (Genérico para cualquier ID)
+        function copyToClipboard(elementId) {
+            const text = document.getElementById(elementId);
+            if(text) {
+                text.select();
+                navigator.clipboard.writeText(text.value);
+                // Feedback visual simple
+                const originalColor = text.style.backgroundColor;
+                text.style.backgroundColor = "#d1e7dd"; // Verde suave
+                setTimeout(() => { text.style.backgroundColor = originalColor; }, 300);
+            }
+        }
+
+        // Inicializar estado al cargar
+        document.addEventListener('DOMContentLoaded', () => {
+            handleTemplateChange(); 
+        });
+    </script>
+</body>
+</html>

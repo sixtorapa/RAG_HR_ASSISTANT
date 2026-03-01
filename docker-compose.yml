@@ -1,0 +1,45 @@
+version: "3.9"
+
+services:
+  # ── Flask application ────────────────────────────────────────────────────
+  app:
+    build: .
+    container_name: hr_kb_app
+    ports:
+      - "5001:5001"
+    env_file:
+      - .env                         # never commit this file
+    environment:
+      - FLASK_ENV=development
+      - UP_VECTOR_STORE_PATH=/data/vector_store
+      - UP_DOC_PATH=/data/docs
+      - HR_DB_URI=sqlite:////data/hr_data.db
+    volumes:
+      # Persist vector store, docs and DB across container restarts
+      - hr_data:/data
+      # Hot-reload source during development (remove in prod)
+      - .:/app
+    depends_on:
+      - chromadb
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ── ChromaDB (optional standalone — comment out if using embedded Chroma) ──
+  chromadb:
+    image: chromadb/chroma:latest
+    container_name: hr_kb_chroma
+    ports:
+      - "8000:8000"
+    volumes:
+      - chroma_data:/chroma/chroma
+    restart: unless-stopped
+    environment:
+      - ALLOW_RESET=true             # useful during development
+
+volumes:
+  hr_data:
+  chroma_data:

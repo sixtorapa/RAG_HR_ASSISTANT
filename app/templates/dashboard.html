@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HR Knowledge Base</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+
+  <style>
+    :root{
+      --up-dark:#0E3A5A;
+      --up-mid:#164A72;
+      --up-light:#D8EFFA;
+      --up-sidebar:#0B2F49;
+    }
+    body{ background:#f4f6f8; }
+    .topbar{
+      background: var(--up-mid);
+      color:#fff;
+      height:64px;
+      display:flex;
+      align-items:center;
+      padding:0 18px;
+    }
+    .topbar img{ height:34px; }
+    .layout{
+      display:flex;
+      min-height: calc(100vh - 64px);
+    }
+    .sidebar{
+      width:240px;
+      background: var(--up-sidebar);
+      padding:16px;
+      color:#fff;
+    }
+    .side-btn{
+      width:100%;
+      text-align:left;
+      border:1px solid rgba(255,255,255,.25);
+      background:transparent;
+      color:#fff;
+      padding:10px 12px;
+      border-radius:8px;
+      margin-bottom:10px;
+      font-weight:700;
+    }
+
+    .side-btn.active{
+      background:#fff;
+      color:#0B2F49;
+      border-color:#fff;
+    }
+
+    /* Botón sólido para "Nuevo chat" */
+    .side-btn-solid{
+      background:#fff;
+      color:#0B2F49;
+      border-color:#fff;
+    }
+
+    /* Sección */
+    .sidebar-section-title{
+      font-size: 0.95rem;
+      font-weight: 700;
+      margin: 10px 0 8px;
+      opacity: .95;
+    }
+
+    /* Lista de chats */
+    .chat-list{
+      max-height: 55vh;
+      overflow: auto;
+      padding-right: 6px;
+    }
+
+    /* Item chat (mucho más aire y legible) */
+    .chat-item{
+      display:flex;
+      align-items:center;
+      gap:6px;
+      width:100%;
+      text-decoration:none;
+      color:#fff;
+
+      padding:12px 12px;
+      border-radius:10px;
+
+      border:1px solid rgba(255,255,255,.18);
+      background: rgba(255,255,255,.06);
+
+      margin-bottom:10px;
+      font-size: 0.95rem;
+      font-weight: 600;
+    }
+
+    .chat-item:hover{
+      background: rgba(255,255,255,.12);
+      color:#fff;
+    }
+
+    .chat-item.active{
+      background:#fff;
+      color:#0B2F49;
+      border-color:#fff;
+    }
+
+    .chat-item-text{
+      display:block;
+      overflow:hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .main{
+      flex:1;
+      padding:24px;
+      background: var(--up-light); /* rellena el “hueco” entre sidebar y panel */
+    }
+
+    .panel{
+      background: var(--up-light);
+      border-radius:0;
+      padding:28px 32px;
+      min-height: calc(100vh - 64px - 48px);
+    }
+    .home-title{
+      font-size:26px;
+      font-weight:700;
+      color:#0B2F49;
+      margin-bottom:18px;
+      text-align:center;
+    }
+    .home-list{
+      max-width:760px;
+      margin:0 auto;
+      font-size:18px;
+    }
+    .home-list ul{ margin-top:12px; }
+    .home-list li{ margin:8px 0; }
+    .small-muted{ color:#2b3a44; font-size:14px; }
+
+    /* ====== MINI DASHBOARD (ADMIN) ====== */
+    .dash-wrap{
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    .kpi-card{
+      border:0;
+      border-radius:14px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+      background:#fff;
+    }
+    .kpi-label{
+      color:#6c7a86;
+      font-size: .85rem;
+      font-weight: 600;
+    }
+    .kpi-value{
+      font-size: 1.9rem;
+      font-weight: 800;
+      color:#0B2F49;
+      line-height: 1.1;
+    }
+    .kpi-icon{
+      width:38px;
+      height:38px;
+      border-radius: 10px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background: rgba(22, 74, 114, .08);
+      color: var(--up-mid);
+      font-size: 1.2rem;
+    }
+    .dash-card{
+      border:0;
+      border-radius:14px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+      background:#fff;
+      overflow:hidden;
+    }
+    .dash-card .card-header{
+      background:#fff;
+      border-bottom: 1px solid rgba(0,0,0,.06);
+    }
+    .dash-subtitle{
+      color:#6c7a86;
+      font-size:.85rem;
+    }
+    .badge-soft{
+      background: rgba(22, 74, 114, .08);
+      color: var(--up-mid);
+      border: 1px solid rgba(22, 74, 114, .15);
+      font-weight: 700;
+    }
+    .table-clean th{
+      color:#6c7a86;
+      font-size:.8rem;
+      text-transform: uppercase;
+      letter-spacing: .03em;
+      border-top:0;
+    }
+    .table-clean td{
+      vertical-align: middle;
+    }
+  </style>
+
+  <!-- ✅ Macro Jinja para formatear duración en Xm Ys -->
+  {% macro fmt_duration(sec) -%}
+    {%- if sec is none -%}
+      —
+    {%- else -%}
+      {%- set s = sec|int -%}
+      {%- set m = (s // 60) -%}
+      {%- set r = (s % 60) -%}
+      {%- if m > 0 -%}
+        {{ m }}m {{ r }}s
+      {%- else -%}
+        {{ r }}s
+      {%- endif -%}
+    {%- endif -%}
+  {%- endmacro %}
+
+</head>
+
+<body>
+  <!-- TOP BAR -->
+  <div class="topbar justify-content-between">
+    <div class="d-flex align-items-center gap-3">
+      <img src="{{ url_for('static', filename='img/logo-white.svg') }}" alt="HR Knowledge Base" style="height:36px;width:auto;">
+    </div>
+
+    <!-- Usuario + cerrar sesión -->
+    <div class="d-flex align-items-center gap-3">
+      <div class="text-white small">
+        <i class="bi bi-person-circle me-1"></i>
+        {{ current_user.username }}
+      </div>
+
+      <form method="POST" action="{{ url_for('main.logout') }}" class="m-0">
+        <button type="submit" class="btn btn-outline-light btn-sm">
+          <i class="bi bi-box-arrow-right me-1"></i>
+          Cerrar sesión
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <div class="layout">
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+      <a class="side-btn {{ 'active' if active_tab == 'home' else '' }}"
+        href="{{ url_for('main.index', tab='home', session=session.id) }}">
+        Home
+      </a>
+
+      <a class="side-btn {{ 'active' if active_tab == 'chat' else '' }}"
+        href="{{ url_for('main.index', tab='chat', session=session.id) }}">
+        HR Assistant
+      </a>
+
+      {% if current_user.role == "admin" %}
+        <hr style="border-color: rgba(255,255,255,.25);">
+
+        <a class="side-btn {{ 'active' if active_tab == 'activity' else '' }}"
+          href="{{ url_for('main.index', tab='activity', session=session.id) }}">
+          <i class="bi bi-bar-chart-line me-2"></i>
+          User activity
+        </a>
+      {% endif %}
+
+      {% if active_tab == 'chat' %}
+        <hr style="border-color: rgba(255,255,255,.25);">
+
+        <!-- Nuevo chat -->
+        <form action="{{ url_for('main.create_chat') }}" method="POST" class="mb-2">
+          <button type="submit" class="side-btn side-btn-solid">
+            <i class="bi bi-plus-lg"></i> Nuevo chat
+          </button>
+        </form>
+
+        <div class="sidebar-section-title">Tus chats</div>
+
+        <div class="chat-list">
+          {% for s in sessions %}
+            <a class="chat-item {{ 'active' if session and s.id == session.id else '' }}"
+              href="{{ url_for('main.index', tab='chat', session=s.id) }}">
+              <i class="bi bi-chat-left-text me-2"></i>
+              <span class="chat-item-text">{{ s.name }}</span>
+            </a>
+          {% endfor %}
+        </div>
+
+        <hr style="border-color: rgba(255,255,255,.25);">
+
+        <form method="POST" action="{{ url_for('main.logout') }}" class="m-0">
+          <button type="submit" class="side-btn">
+            <i class="bi bi-box-arrow-right"></i> Salir
+          </button>
+        </form>
+      {% endif %}
+    </div>
+
+    <!-- MAIN -->
+    <div class="main">
+      <div class="panel {{ 'panel-chat' if active_tab == 'chat' else '' }}">
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <div class="mb-3">
+              {% for category, message in messages %}
+                <div class="alert alert-{{ category }} mb-2">{{ message }}</div>
+              {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
+
+        {% if active_tab == 'home' %}
+          <div class="home-title">
+            Hi, I’m your HR Assistant. You can ask me about:
+          </div>
+
+          <div class="home-list">
+            <ul>
+              <li>HR policies, employee handbook and internal procedures</li>
+              <li>Headcount, salaries and department data:
+                <ul>
+                  <li>Headcount by department or location</li>
+                  <li>Average salary by level or role</li>
+                  <li>Attrition rates and tenure</li>
+                </ul>
+              </li>
+              <li>Performance reviews and talent data:
+                <ul>
+                  <li>Top performers by year</li>
+                  <li>Score distributions</li>
+                </ul>
+              </li>
+              <li>Open job postings and recruitment pipeline</li>
+            </ul>
+
+            <div class="mt-4">
+              <div class="fw-bold mb-1">Available models:</div>
+              <ul>
+                <li>GPT-4o: most capable, higher cost</li>
+                <li>GPT-4o-mini: faster and more economical</li>
+              </ul>
+            </div>
+
+            <div class="mt-4 small-muted">
+              Data is retrieved from internal documents (RAG) and structured HR database (SQL). No external data is used.
+            </div>
+          </div>
+
+        {% elif active_tab == 'activity' %}
+          <div class="dash-wrap">
+            <div class="home-title mb-2">User activity</div>
+            <div class="text-center dash-subtitle mb-4">
+              Visión rápida (KPIs + tendencia + ranking). <span class="badge badge-soft ms-1">Últimos 30 días</span>
+            </div>
+
+            {% if not activity_sessions or activity_sessions|length == 0 %}
+              <div class="alert alert-warning">
+                No hay actividad registrada todavía.
+              </div>
+              <div class="small-muted">
+                Nota: se registra actividad al hacer login y se actualiza al preguntar en el chat.
+              </div>
+            {% else %}
+              <!-- KPIs -->
+              <div class="row g-3 mb-3">
+                <div class="col-12 col-md-6 col-xl-3">
+                  <div class="card kpi-card">
+                    <div class="card-body">
+                      <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                          <div class="kpi-label">Active users (30 days)</div>
+                          <div class="kpi-value" id="kpiSessions">—</div>
+                        </div>
+                        <div class="kpi-icon">
+                          <i class="bi bi-box-arrow-in-right"></i>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col-12 col-md-6 col-xl-3">
+                  <div class="card kpi-card">
+                    <div class="card-body">
+                      <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                          <div class="kpi-label">Active users (30 days)</div>
+                          <div class="kpi-value" id="kpiUsers">—</div>
+                        </div>
+                        <div class="kpi-icon">
+                          <i class="bi bi-people"></i>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col-12 col-md-6 col-xl-3">
+                  <div class="card kpi-card">
+                    <div class="card-body">
+                      <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                          <div class="kpi-label">Questions (30 days)</div>
+                          <div class="kpi-value" id="kpiQuestions">—</div>
+                        </div>
+                        <div class="kpi-icon">
+                          <i class="bi bi-chat-dots"></i>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col-12 col-md-6 col-xl-3">
+                  <div class="card kpi-card">
+                    <div class="card-body">
+                      <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                          <div class="kpi-label">Average duration</div>
+                          <div class="kpi-value" id="kpiAvgDuration">—</div>
+                        </div>
+                        <div class="kpi-icon">
+                          <i class="bi bi-stopwatch"></i>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Gráfico + Top usuarios -->
+              <div class="row g-3">
+                <div class="col-12 col-lg-8">
+                  <div class="card dash-card h-100">
+                    <div class="card-header">
+                      <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                          <div class="fw-semibold">Uso por día (sesiones)</div>
+                          <div class="dash-subtitle">Tendencia de actividad</div>
+                        </div>
+                        <span class="badge badge-soft">30 días</span>
+                      </div>
+                    </div>
+                    <div class="card-body">
+                      <canvas id="chartSessionsPerDay" height="120"></canvas>
+                      <div class="dash-subtitle mt-2">
+                        Tip: si ves “días en blanco”, significa 0 sesiones ese día.
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col-12 col-lg-4">
+                  <div class="card dash-card h-100">
+                    <div class="card-header">
+                      <div class="fw-semibold">Top users</div>
+                      <div class="dash-subtitle">Sorted by questions</div>
+                    </div>
+                    <div class="card-body">
+                      <div class="table-responsive">
+                        <table class="table table-sm table-clean align-middle mb-0">
+                          <thead>
+                            <tr>
+                              <th>User</th>
+                              <th class="text-end">Questions</th>
+                              <th class="text-end">Sessions</th>
+                            </tr>
+                          </thead>
+                          <tbody id="topUsersBody">
+                            <tr><td colspan="3" class="text-muted">Sin datos</td></tr>
+                          </tbody>
+                        </table>
+                      </div>
+                      <div class="dash-subtitle mt-2">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Tabla detalle -->
+              <div class="card dash-card mt-3">
+                <div class="card-header">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                      <div class="fw-semibold">Detalle de sesiones</div>
+                      <div class="dash-subtitle">Últimas 200 (auditoría rápida)</div>
+                    </div>
+                    <span class="badge badge-soft">Detalle</span>
+                  </div>
+                </div>
+
+                <div class="card-body">
+                  <div class="table-responsive">
+                    <table class="table table-striped align-middle mb-0">
+                      <thead class="table-light">
+                        <tr>
+                          <th>User</th>
+                          <th>Sign in</th>
+                          <th>Last Activity</th>
+                          <th class="text-end">Questions</th>
+                          <th>Sign out</th>
+                          <th class="text-end">Duration</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {% for ls, u in activity_sessions %}
+                          <tr>
+                            <td><strong>{{ u.username }}</strong></td>
+
+                            <td class="text-muted small">
+                              {{ ls.started_at.strftime("%Y-%m-%d %H:%M:%S") if ls.started_at else "—" }}
+                            </td>
+
+                            <td class="text-muted small">
+                              {{ ls.last_activity_at.strftime("%Y-%m-%d %H:%M:%S") if ls.last_activity_at else "—" }}
+                            </td>
+
+                            <td class="text-end">{{ ls.n_questions or 0 }}</td>
+
+                            <td class="text-muted small">
+                              {{ ls.ended_at.strftime("%Y-%m-%d %H:%M:%S") if ls.ended_at else "—" }}
+                            </td>
+
+                            <td class="text-end">{{ fmt_duration(ls.duration_sec) }}</td>
+                          </tr>
+                        {% endfor %}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <!-- ✅ Botón descarga CSV histórico -->
+                  <div class="mt-3 d-flex justify-content-end">
+                    <a
+                      class="btn btn-sm btn-outline-primary"
+                      href="{{ url_for('main.export_sessions_csv') }}"
+                    >
+                      <i class="bi bi-download me-1"></i>
+                      Descargar CSV histórico
+                    </a>
+                  </div>
+                </div>
+              </div>
+              
+            {% endif %}
+          </div>
+
+        {% else %}
+          <!-- CHAT EMBEBIDO: reutilizamos el front actual del chat (JS llama a /ask/<session_id>) -->
+          {% include 'chat.html' %}
+        {% endif %}
+
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- ✅ JSON inyectado para el dashboard (JS lo parsea) -->
+  <script id="admin-activity-data" type="application/json">
+    {{ (admin_activity or {}) | tojson }}
+  </script>
+
+  <script>
+
+    const dataEl = document.getElementById("admin-activity-data");
+    const adminActivity = JSON.parse((dataEl && dataEl.textContent) ? dataEl.textContent : "{}");
+
+    function formatDuration(sec) {
+      sec = parseInt(sec || 0, 10);
+      if (!sec) return "0s";
+      const m = Math.floor(sec / 60);
+      const s = sec % 60;
+      if (!m) return `${s}s`;
+      return `${m}m ${s}s`;
+    }
+
+    // Solo intentamos pintar el dashboard si estamos en la pestaña activity
+    // y existen los nodos (evita errores en otras tabs).
+    const kpiSessionsEl = document.getElementById("kpiSessions");
+    if (kpiSessionsEl) {
+      const kpis = (adminActivity.kpis || {});
+      document.getElementById("kpiSessions").textContent = (kpis.total_sessions_30d ?? 0);
+      document.getElementById("kpiUsers").textContent = (kpis.active_users_30d ?? 0);
+      document.getElementById("kpiQuestions").textContent = (kpis.total_questions_30d ?? 0);
+      document.getElementById("kpiAvgDuration").textContent = formatDuration(kpis.avg_duration_sec_30d ?? 0);
+
+      // Top users
+      const top = (adminActivity.top_users || []);
+      const topBody = document.getElementById("topUsersBody");
+      if (topBody) {
+        if (!top.length) {
+          topBody.innerHTML = `<tr><td colspan="3" class="text-muted">Sin datos</td></tr>`;
+        } else {
+          topBody.innerHTML = top.map(r => `
+            <tr>
+              <td class="fw-semibold">${r.username}</td>
+              <td class="text-end">${r.questions}</td>
+              <td class="text-end">${r.sessions}</td>
+            </tr>
+          `).join("");
+        }
+      }
+
+      // Chart: sessions per day
+      const series = (adminActivity.series || {});
+      const labels = (series.days || []);
+      const values = (series.sessions_per_day || []);
+
+      const ctx = document.getElementById("chartSessionsPerDay");
+      if (ctx) {
+        // Si no hay puntos, pintamos un gráfico “vacío” con 1 punto 0 para que no se vea roto
+        const safeLabels = labels.length ? labels : ["Sin datos"];
+        const safeValues = values.length ? values : [0];
+
+        const existing = Chart.getChart(ctx);
+        if (existing) existing.destroy();
+        
+        new Chart(ctx, {
+          type: "line",
+          data: {
+            labels: safeLabels,
+            datasets: [{
+              label: "Sesiones",
+              data: safeValues,
+              tension: 0.25,
+              fill: false
+            }]
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: { display: false },
+              tooltip: { enabled: true }
+            },
+            scales: {
+              x: { ticks: { maxRotation: 0, autoSkip: true } },
+              y: { beginAtZero: true, precision: 0 }
+            }
+          }
+        });
+      }
+    }
+  </script>
+</body>
+</html>
