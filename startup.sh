@@ -13,6 +13,9 @@ EOF
 echo ">>> Stamping migrations as current..."
 flask db stamp head
 
+echo ">>> Seeding HR database..."
+python seed_hr_db.py
+
 echo ">>> Creating admin user if not exists..."
 python create_admin.py
 
