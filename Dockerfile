@@ -48,4 +48,8 @@ EXPOSE 8080
 # ── Entrypoint ────────────────────────────────────────────────────────────────
 # gunicorn is already in your requirements
 # --workers 2 · --threads 4 → safe for a 512MB Railway free container
-CMD ["gunicorn", "--bind", "0.0.0.0:8080", "--workers", "2", "--threads", "4", "--timeout", "120", "--access-logfile", "-", "--error-logfile", "-", "run:app"]
+# ── Startup script ───────────────────────────────────────────────────────────
+COPY startup.sh .
+RUN chmod +x startup.sh
+
+CMD ["./startup.sh"]
