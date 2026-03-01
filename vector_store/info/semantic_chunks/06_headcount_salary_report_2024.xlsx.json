@@ -1,0 +1,14 @@
+{
+  "source_file": "06_headcount_salary_report_2024.xlsx",
+  "num_chunks": 1,
+  "chunks": [
+    {
+      "headline": "Informe de Personal y Salarios 2024 por Departamento",
+      "summary": "El informe de personal y salarios de 2024 detalla la cantidad de empleados y salarios promedio por departamento. La ingeniería tiene 18 empleados con un presupuesto de 850,000 EUR, mientras que el departamento de ventas cuenta con 10 empleados y un presupuesto de 620,000 EUR. Este análisis proporciona una visión clara de la distribución de personal y recursos financieros en la empresa.",
+      "text": "[PÁGINA ?]\nArchivo Excel: 06_headcount_salary_report_2024.xlsx\nHoja: Headcount by Department\n\nHeadcount & Salary Report 2024,Unnamed: 1,Unnamed: 2,Unnamed: 3,Unnamed: 4,Unnamed: 5,Unnamed: 6\r\nDepartment,Total Employees,Active,Terminated,Attrition %,Avg Salary (EUR),Dept Budget (EUR)\r\nEngineering,18,17,1,,,850000\r\nHR,7,6,1,,,210000\r\nSales,10,9,1,,,620000\r\nFinance,6,6,0,,,300000\r\nMarketing,6,5,1,,,380000\r\nProduct,5,5,0,,,430000\r\nTOTAL,,,,,,\n\n[PÁGINA ?]\nArchivo Excel: 06_headcount_salary_report_2024.xlsx\nHoja: Salary by Level\n\nSalary Analysis by Level — 2024,Unnamed: 1,Unnamed: 2,Unnamed: 3,Unnamed: 4,Unnamed: 5\r\nLevel,Headcount,Min Salary,Avg Salary,Max Salary,Band (Policy)\r\nJunior,14,29500,33200,37800,\"28,000 – 38,000\"\r\nMid,18,39000,46700,54500,\"38,000 – 55,000\"\r\nSenior,10,56000,67300,79200,\"55,000 – 80,000\"\r\nLead,4,76000,87500,98000,\"75,000 – 100,000\"\r\nManager,6,86000,97800,118000,\"85,000 – 120,000\"\n\n[PÁGINA ?]\nArchivo Excel: 06_headcount_salary_report_2024.xlsx\nHoja: Location Breakdown\n\nHeadcount by Location — Active Employees,Unnamed: 1,Unnamed: 2,Unnamed: 3\r\nLocation,Headcount,% of Total,Avg Salary\r\nMadrid,22,,58400\r\nBarcelona,11,,61200\r\nRemote,10,,55800\r\nLondon,5,,74300\r\nTOTAL,,,",
+      "pages_in_chunk": "",
+      "word_count": 100,
+      "char_count": 1202
+    }
+  ]
+}

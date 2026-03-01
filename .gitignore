@@ -25,7 +25,7 @@ venv/
 # ─────────────────────────────────────────────
 *.db
 instance/
-vector_store/
+# vector_store/
 
 # ─────────────────────────────────────────────
 # 🛠 Archivos de IDE / Editor

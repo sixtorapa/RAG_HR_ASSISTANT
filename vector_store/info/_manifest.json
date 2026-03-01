@@ -1,0 +1,33 @@
+{
+  "version": 1,
+  "files": {
+    "01_employee_handbook.pdf": {
+      "mtime": 1772363382,
+      "size": 5149
+    },
+    "02_performance_review_guide.pdf": {
+      "mtime": 1772363392,
+      "size": 4990
+    },
+    "03_onboarding_guide.pdf": {
+      "mtime": 1772363398,
+      "size": 5199
+    },
+    "04_compensation_and_benefits.pdf": {
+      "mtime": 1772363404,
+      "size": 5001
+    },
+    "05_recruitment_and_hiring_policy.pdf": {
+      "mtime": 1772363412,
+      "size": 5271
+    },
+    "06_headcount_salary_report_2024.xlsx": {
+      "mtime": 1772363829,
+      "size": 7598
+    },
+    "07_performance_dashboard_2024.xlsx": {
+      "mtime": 1772363850,
+      "size": 8149
+    }
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "source_file": "07_performance_dashboard_2024.xlsx",
+  "num_chunks": 1,
+  "chunks": [
+    {
+      "headline": "Resumen de Desempeño por Departamento FY2024",
+      "summary": "El tablero de revisión de desempeño para el año fiscal 2024 muestra que el departamento de ingeniería tiene un promedio de puntuación de 3.8 con 17 empleados revisados. El 18% de los empleados en ventas superaron las expectativas, mientras que el departamento de marketing tuvo un promedio de 3.4. Este análisis permite identificar áreas de mejora y potenciales candidatos para promoción.",
+      "text": "[PÁGINA ?]\nArchivo Excel: 07_performance_dashboard_2024.xlsx\nHoja: Department Summary\n\nPerformance Review Dashboard — FY2024,Unnamed: 1,Unnamed: 2,Unnamed: 3,Unnamed: 4,Unnamed: 5,Unnamed: 6,Unnamed: 7\r\nDepartment,Employees Reviewed,Avg Score,Outstanding,Exceeds Exp.,Meets Exp.,Needs Improvement,% Ready for Promotion\r\nEngineering,17,3.8,3,8,5,1,\r\nHR,6,3.5,1,2,3,0,\r\nSales,9,3.6,1,4,3,1,\r\nFinance,6,3.9,2,2,2,0,\r\nMarketing,5,3.4,0,2,3,0,\r\nProduct,5,4.1,2,2,1,0,\r\nTOTAL / AVG,,,,,,,\n\n[PÁGINA ?]\nArchivo Excel: 07_performance_dashboard_2024.xlsx\nHoja: Score Distribution\n\nScore Distribution — FY2024,Unnamed: 1,Unnamed: 2,Unnamed: 3,Unnamed: 4\r\nRating Label,Score Range,Count,% of Total,vs FY2023\r\nOutstanding,4.5 – 5.0,9,,+2\r\nExceeds Expectations,3.5 – 4.5,20,,+3\r\nMeets Expectations,2.0 – 3.5,17,,-1\r\nNeeds Improvement,1.0 – 2.0,2,,-4\r\nTOTAL,,,,\n\n[PÁGINA ?]\nArchivo Excel: 07_performance_dashboard_2024.xlsx\nHoja: Top Performers\n\nTop 10 Performers — FY2024 (Score ≥ 4.5),Unnamed: 1,Unnamed: 2,Unnamed: 3,Unnamed: 4,Unnamed: 5\r\nRank,Employee,Department,Level,Score,Promotion Eligible\r\n1,Karen Nguyen,Finance,Senior,4.9,Yes\r\n2,Raj Patel,Engineering,Lead,4.8,No (already Lead)\r\n3,Emre Yilmaz,Product,Senior,4.8,Yes\r\n4,Julia Becker,Engineering,Mid,4.7,Yes\r\n5,Nina Larsson,Product,Manager,4.7,No (Manager)\r\n6,Gabriele Ricci,Engineering,Senior,4.6,Yes\r\n7,Diana Müller,Finance,Senior,4.6,No (< 12 months)\r\n8,Yuki Tanaka,HR,Mid,4.6,Yes\r\n9,Alice Johnson,Sales,Senior,4.5,Yes\r\n10,Thomas Berger,Marketing,Mid,4.5,Yes",
+      "pages_in_chunk": "",
+      "word_count": 125,
+      "char_count": 1506
+    }
+  ]
+}
