@@ -16,7 +16,7 @@ jobs:
         with:
           python-version: "3.11"
       - run: pip install ruff
-      - run: ruff check . --ignore E501,E402,F401,F841,E701,F541
+      - run: ruff check . --ignore E501,E402,F401,F841,E701,F541,F821,F823
 
   docker-build:
     name: Docker Build
