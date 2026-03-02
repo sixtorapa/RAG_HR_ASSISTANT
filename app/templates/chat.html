@@ -437,9 +437,8 @@
     <div class="chat-container">
 
         <div class="chat-header d-flex justify-content-between align-items-center">
-
-            <a href="{{ url_for('main.index') }}" class="btn btn-light btn-sm text-secondary">
-                <i class="bi bi-arrow-left"></i> Back
+            <a href="{{ url_for('main.project_overview', project_id=project.id) }}" class="btn btn-light btn-sm text-secondary">
+                <i class="bi bi-arrow-left"></i> Volver
             </a>
 
             <div class="text-center">
@@ -699,8 +698,21 @@
                         body: JSON.stringify({ new_question: newText })
                     });
 
-                    const data = await res.json();
-                    if (!res.ok || !data.success) throw new Error(data.error || 'Error desconocido');
+                    let data = null;
+                    let rawText = "";
+                    try {
+                        rawText = await res.text();
+                        data = rawText ? JSON.parse(rawText) : null;
+                    } catch (e) {
+                        data = null;
+                    }
+                    if (!res.ok || !data || !data.success) {
+                        const msg =
+                            (data && (data.error || data.message)) ||
+                            (rawText ? rawText.slice(0, 300) : "") ||
+                            `HTTP ${res.status} (${res.statusText})`;
+                        throw new Error(msg);
+                    }
 
                     contentDiv.innerHTML = marked.parse(newText);
                     row.classList.remove('editing');
@@ -912,8 +924,21 @@
                     })
                 });
 
-                const data = await response.json();
-                if (!response.ok) throw new Error(data.error || 'Error desconocido');
+                let data = null;
+                let rawText = "";
+                try {
+                    rawText = await response.text();
+                    data = rawText ? JSON.parse(rawText) : null;
+                } catch (e) {
+                    data = null;
+                }
+                if (!response.ok) {
+                    const msg =
+                        (data && (data.error || data.message)) ||
+                        (rawText ? rawText.slice(0, 300) : "") ||
+                        `HTTP ${response.status} (${response.statusText})`;
+                    throw new Error(msg);
+                }
 
                 const lastUserRow = chatBox.querySelector('.message-row.user-row:last-of-type');
                 if (lastUserRow && data.user_message_id) {
