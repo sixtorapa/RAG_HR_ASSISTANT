@@ -508,18 +508,27 @@ def get_conversational_qa_chain(
                 max_docs=int(project_settings.get("two_pass_max_docs", 22)),
             )
 
-    # ==================== Rerank / Compression (si está disponible) ====================
-    if _FLASHRANK_AVAILABLE:
+    # ==================== Rerank / Compression (opt-in) ====================
+    flashrank_enabled = str(os.environ.get("FLASHRANK_ENABLED", "0")).strip().lower() in ("1", "true", "yes")
+
+    if _FLASHRANK_AVAILABLE and flashrank_enabled:
         try:
             top_n = int(project_settings.get("rerank_top_n", 14 if not path_filter else 18))
-            compressor = FlashrankRerank(top_n=top_n)
+            compressor = FlashrankRerank(
+                top_n=top_n,
+                model=os.environ.get("FLASHRANK_MODEL_NAME", "ms-marco-MiniLM-L-12-v2"),
+                cache_dir=os.environ.get("FLASHRANK_CACHE_DIR", "/opt/flashrank"),
+            )
             final_retriever = ContextualCompressionRetriever(
                 base_compressor=compressor,
                 base_retriever=final_retriever,
             )
             print(f"✅ Flashrank activo (top_n={top_n})")
         except Exception as e:
-            print(f"⚠️ Flashrank no disponible: {e}")
+            print(f"⚠️ Flashrank falló, continúo sin rerank: {e}")
+    else:
+        if _FLASHRANK_AVAILABLE and not flashrank_enabled:
+            print("ℹ️ Flashrank instalado pero desactivado (FLASHRANK_ENABLED=0).")
 
     # ==================== Chain ====================
     QA_PROMPT = construir_template_qa(project_settings.get("system_instruction", ""))
