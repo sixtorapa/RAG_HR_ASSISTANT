@@ -111,11 +111,12 @@ ROUTE: <route> — <reason in 8-15 words>
     def _fast_route(self, user_input: str) -> Optional[AIMessage]:
         q = user_input or ""
 
-        # 1) Greetings / thanks => respuesta directa, sin herramientas
+        # IMPORTANTE: content debe empezar por "ROUTE: DIRECT"
+        # para que routes.py lo identifique como respuesta directa sin tools
         if _is_greeting(q):
-            return AIMessage(content="Hi! 👋 How can I help you — docs (policies) or HR data (SQL)?")
+            return AIMessage(content="ROUTE: DIRECT — Greeting detected.\nHi! How can I help you — docs (policies) or HR data (SQL)?")
         if _is_thanks(q):
-            return AIMessage(content="Perfect — tell me what you need and I’ll pull the right source.")
+            return AIMessage(content="ROUTE: DIRECT — Acknowledgement.\nYou're welcome! What else can I help you with?")
 
         return None
 
