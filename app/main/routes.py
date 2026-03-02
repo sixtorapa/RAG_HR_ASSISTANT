@@ -847,7 +847,7 @@ def ask(session_id):
 
             # ✅ Guardarraíl: si el router dice DIRECTO pero no es smalltalk, forzamos DOCS
             raw_content = (getattr(tool_choice, "content", "") or "").strip()
-            is_router_direct = raw_content.upper().startswith("ROUTE: DIRECTO")
+            is_router_direct = raw_content.upper().startswith("ROUTE: DIRECT")
 
             qt2 = (question_text or "").strip().lower()
             is_smalltalk = bool(re.match(r"^(hola|buenas|hey|gracias|ok|vale|perfecto|adios|hasta luego)\b", qt2)) or len(qt2.split()) <= 2

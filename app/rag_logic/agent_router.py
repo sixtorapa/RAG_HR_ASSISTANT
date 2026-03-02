@@ -109,14 +109,31 @@ ROUTE: <route> — <reason in 8-15 words>
         self.router_chain = prompt | self.llm_with_tools
 
     def _fast_route(self, user_input: str) -> Optional[AIMessage]:
-        q = user_input or ""
+        q = (user_input or "").strip()
+        qn = _norm(q)
 
-        # IMPORTANTE: content debe empezar por "ROUTE: DIRECT"
-        # para que routes.py lo identifique como respuesta directa sin tools
+        # 0) vacío / solo símbolos
+        if not qn or re.fullmatch(r"[\W_]+", qn):
+            return AIMessage(content="ROUTE: DIRECT — Empty/low-content message.\nHi! Ask me about HR policies (docs) or HR metrics (SQL).")
+
+        # 1) Saludos / gracias
         if _is_greeting(q):
-            return AIMessage(content="ROUTE: DIRECT — Greeting detected.\nHi! How can I help you — docs (policies) or HR data (SQL)?")
+            return AIMessage(content="ROUTE: DIRECT — Greeting detected.\nHi! How can I help you — HR docs (policies) or HR data (SQL)?")
         if _is_thanks(q):
             return AIMessage(content="ROUTE: DIRECT — Acknowledgement.\nYou're welcome! What else can I help you with?")
+
+        # 2) Meta / ayuda
+        if any(k in qn for k in ["help", "ayuda", "what can you do", "que puedes hacer", "qué puedes hacer", "who are you", "quien eres", "quién eres"]):
+            return AIMessage(
+                content="ROUTE: DIRECT — Meta/help request.\nI can answer HR policy questions from internal docs, and HR metrics (salary, headcount, performance) from the HR database. What do you need?"
+            )
+
+        # 3) Smalltalk corto (evita LLM + tools en mensajes cortos)
+        #    Regla: si <= 4 palabras y NO parece SQL/Excel/docs, responder directo.
+        if len(qn.split()) <= 4 and not _looks_like_sql_intent(q) and not _looks_like_excel_intent(q):
+            return AIMessage(
+                content="ROUTE: DIRECT — Short smalltalk; no tools needed.\nGot it — tell me what you want to check (docs or HR data)."
+            )
 
         return None
 
