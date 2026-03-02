@@ -44,4 +44,4 @@ jobs:
       - name: Deploy
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
-        run: railway up --service hr-kb-assistant
+        run: railway up --service RAG_HR_ASSISTANT
