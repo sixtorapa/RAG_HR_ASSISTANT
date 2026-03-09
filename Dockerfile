@@ -35,13 +35,6 @@ ENV FLASK_ENV=production \
     PYTHONDONTWRITEBYTECODE=1 \
     PORT=8080
 
-# ── FlashRank: modelo ligero + cache fijo para evitar descarga en runtime ─────
-# MiniLM-L-12-v2 es mucho más ligero que MultiBERT (~40MB vs ~100MB)
-ENV FLASHRANK_CACHE_DIR=/opt/flashrank \
-    FLASHRANK_MODEL_NAME=ms-marco-MiniLM-L-12-v2
-
-RUN mkdir -p /opt/flashrank && \
-    python -c "import os; from flashrank import Ranker; Ranker(model_name=os.environ['FLASHRANK_MODEL_NAME'], cache_dir=os.environ['FLASHRANK_CACHE_DIR'])"
 
 EXPOSE 8080
 
