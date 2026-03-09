@@ -682,57 +682,76 @@ def ask(session_id):
                 "bot_message_id": bot_msg.id,
             })
 
-        elif user_mode in ("sql", "ambas") or user_mode is None:
-            # Reglas de negocio solicitadas:
-            # 1) "SQL"   -> solo SQL
-            # 2) "AMBAS" -> SQL primero y luego DOCS para enriquecer
-            # 3) (sin prefijo) -> DOCS directo
+        elif user_mode == "sql":
+            # ==================== OVERRIDE EXPLÍCITO: SQL ====================
             forced_results = []
 
             with get_openai_callback() as cb:
-                if user_mode == "sql":
-                    r_sql = sql_agent.run(cleaned_question)
-                    r_sql["origin"] = sql_tool.name
-                    forced_results.append(r_sql)
+                r_sql = sql_agent.run(cleaned_question)
+                r_sql["origin"] = sql_tool.name
+                forced_results.append(r_sql)
+                project.cost += calculate_cost(selected_model, cb.prompt_tokens, cb.completion_tokens)
 
-                elif user_mode == "ambas":
-                    # 1) SQL primero
-                    r_sql = sql_agent.run(cleaned_question)
-                    r_sql["origin"] = sql_tool.name
-                    forced_results.append(r_sql)
+            final_result = reasoning_agent.run(cleaned_question, forced_results)
 
-                    # 2) DOCS después, enriqueciendo con lo obtenido de SQL
-                    sql_raw = (r_sql.get("sql_raw_output") or r_sql.get("answer") or "").strip()
-                    MAX_SQL_FOR_DOC_ENRICH = 6000
-                    sql_snippet = sql_raw[:MAX_SQL_FOR_DOC_ENRICH]
+            answer_text = final_result.get("answer") or "Error generando respuesta."
+            raw_sources = final_result.get("source_documents", [])
 
-                    enrich_question = (
-                        f"{cleaned_question}\n\n"
-                        "RESULTADO SQL (para enriquecer con documentos internos):\n"
-                        f"{sql_snippet}"
-                    )
+            sources_formatted = []
+            for doc in raw_sources:
+                if hasattr(doc, "metadata") and hasattr(doc, "page_content"):
+                    clean_meta = clean_metadata_for_json(doc.metadata)
+                    sources_formatted.append({"page_content": doc.page_content, "metadata": clean_meta})
+                elif isinstance(doc, dict):
+                    sources_formatted.append(doc)
 
-                    # Memoria relevante
-                    memory_docs = memory_store.recall(cleaned_question, k=5)
+            user_msg = Message(session_id=session.id, user_id=current_user.id, sender="user", content=question_text)
+            bot_msg = Message(session_id=session.id, user_id=current_user.id, sender="bot", content=answer_text, sources=sources_formatted)
+            db.session.add(user_msg)
+            db.session.add(bot_msg)
 
-                    r_doc = doc_agent.run(
-                        enrich_question,
-                        paired_history,
-                        extra_documents=memory_docs
-                    )
-                    r_doc["origin"] = chat_tool.name
-                    forced_results.append(r_doc)
+            if (session.name or "").strip().lower() in ("nuevo chat", "new chat"):
+                session.name = _make_chat_title_from_question(cleaned_question or question_text)
 
-                else:
-                    # (sin prefijo) -> DOCS directo
-                    memory_docs = memory_store.recall(cleaned_question, k=5)
-                    r_doc = doc_agent.run(
-                        cleaned_question,
-                        paired_history,
-                        extra_documents=memory_docs
-                    )
-                    r_doc["origin"] = chat_tool.name
-                    forced_results.append(r_doc)
+            if len(question_text) > 15:
+                memory_store.add_fact(
+                    text=f"Usuario preguntó: {question_text}",
+                    metadata={"type": "user_fact", "session_id": session.id},
+                )
+
+            db.session.commit()
+
+            return jsonify({
+                "success": True,
+                "answer": answer_text,
+                "sources": sources_formatted,
+                "user_message_id": user_msg.id,
+                "bot_message_id": bot_msg.id,
+            })
+
+        elif user_mode == "ambas":
+            # ==================== OVERRIDE EXPLÍCITO: AMBAS (SQL → DOCS) ====================
+            forced_results = []
+
+            with get_openai_callback() as cb:
+                # 1) SQL primero
+                r_sql = sql_agent.run(cleaned_question)
+                r_sql["origin"] = sql_tool.name
+                forced_results.append(r_sql)
+
+                # 2) DOCS enriquecido con resultado SQL
+                sql_raw = (r_sql.get("sql_raw_output") or r_sql.get("answer") or "").strip()
+                sql_snippet = sql_raw[:6000]
+                enrich_question = (
+                    f"{cleaned_question}\n\n"
+                    "RESULTADO SQL (para enriquecer con documentos internos):\n"
+                    f"{sql_snippet}"
+                )
+
+                memory_docs = memory_store.recall(cleaned_question, k=5)
+                r_doc = doc_agent.run(enrich_question, paired_history, extra_documents=memory_docs)
+                r_doc["origin"] = chat_tool.name
+                forced_results.append(r_doc)
 
                 project.cost += calculate_cost(selected_model, cb.prompt_tokens, cb.completion_tokens)
 
@@ -754,18 +773,13 @@ def ask(session_id):
             db.session.add(user_msg)
             db.session.add(bot_msg)
 
-            # ✅ Auto-renombrar si aún es "Nuevo chat"
             if (session.name or "").strip().lower() in ("nuevo chat", "new chat"):
                 session.name = _make_chat_title_from_question(cleaned_question or question_text)
 
-            # ==================== APRENDIZAJE DE MEMORIA ====================
             if len(question_text) > 15:
                 memory_store.add_fact(
                     text=f"Usuario preguntó: {question_text}",
-                    metadata={
-                        "type": "user_fact",
-                        "session_id": session.id,
-                    },
+                    metadata={"type": "user_fact", "session_id": session.id},
                 )
 
             db.session.commit()
@@ -782,83 +796,19 @@ def ask(session_id):
 
 
         # ==================== ROUTER PRINCIPAL ====================
+        # El AgentRouter decide el camino para todo lo que no sea override explícito.
+        # Tiene su propio _fast_route para saludos/smalltalk y heurísticas para SQL/Excel.
         router = AgentRouter(
             model_name=selected_model,
             tools=tools,
             doc_path=project.document_path,
         )
 
-        # ✅ Pre-router determinista: si el usuario pide "documento X", forzamos DOCS
-        qt = (question_text or "").lower()
-
-        looks_like_doc_request = (
-            "documento" in qt or "pdf" in qt or "ppt" in qt or "pptx" in qt or "presentación" in qt
+        tool_choice = router.route(
+            question_text,
+            chat_history_for_router,
+            callbacks=[debug_logger],
         )
-
-        # Heurística simple: última palabra con pinta de "nombre propio" o token raro (Honimunn)
-        # (mejorable, pero ya evita el 80% de cagadas)
-        import re
-        doc_hint = None
-        m = re.search(r"(documento|pdf|pptx?|presentación)\s+([A-Za-z0-9_\-\.]{3,})", question_text, flags=re.IGNORECASE)
-        if m:
-            doc_hint = m.group(2)
-
-        qt = (question_text or "").lower()
-
-        # 1) Detectar intención de resumen (prioridad alta)
-        wants_summary = any(k in qt for k in [
-            "resumen", "resume", "summary", "síntesis", "resumen ejecutivo"
-        ])
-
-        # 2) Intentar sacar hint de doc (si lo hay)
-        #    - si ya tienes doc_hint, úsalo
-        #    - si no, intenta extraer "del documento X"
-        doc_hint_local = doc_hint
-        if not doc_hint_local:
-            m = re.search(r"(?:documento|pdf|ppt|presentación)\s+([a-z0-9_\- ]+)", qt)
-            if m:
-                doc_hint_local = (m.group(1) or "").strip()
-
-        if wants_summary:
-            # ✅ Forzamos RESUMEN (tool específico)
-            class _ForcedChoice:
-                def __init__(self, tool_name: str, doc_name_hint: str):
-                    self.tool_calls = [{"name": tool_name, "args": {"doc_name_hint": doc_name_hint}}]
-                    self.content = ""
-
-            tool_choice = _ForcedChoice(summary_tool.name, (doc_hint_local or "").strip())
-
-        elif looks_like_doc_request or doc_hint_local:
-            # ✅ Forzamos DOCS (chat)
-            class _ForcedChoice:
-                def __init__(self, tool_name: str, question: str):
-                    self.tool_calls = [{"name": tool_name, "args": {"question": question}}]
-                    self.content = ""
-
-            tool_choice = _ForcedChoice(chat_tool.name, question_text)
-
-        else:
-            tool_choice = router.route(
-                question_text,
-                chat_history_for_router,
-                callbacks=[debug_logger],
-            )
-
-
-            # ✅ Guardarraíl: si el router dice DIRECTO pero no es smalltalk, forzamos DOCS
-            raw_content = (getattr(tool_choice, "content", "") or "").strip()
-            is_router_direct = raw_content.upper().startswith("ROUTE: DIRECT")
-
-            qt2 = (question_text or "").strip().lower()
-            is_smalltalk = bool(re.match(r"^(hola|buenas|hey|gracias|ok|vale|perfecto|adios|hasta luego)\b", qt2)) or len(qt2.split()) <= 2
-
-            if is_router_direct and not is_smalltalk:
-                class _ForcedChoice:
-                    def __init__(self, tool_name: str, question: str):
-                        self.tool_calls = [{"name": tool_name, "args": {"question": question}}]
-                        self.content = ""
-
-                tool_choice = _ForcedChoice(chat_tool.name, question_text)
 
 
 
@@ -1547,5 +1497,3 @@ def export_sessions_csv():
         "Content-Disposition": f'attachment; filename="{filename}"'
     }
     return Response(generate(), mimetype="text/csv", headers=headers)
-
-
