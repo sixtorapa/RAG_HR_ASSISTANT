@@ -7,194 +7,198 @@
 
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 
   <style>
-    :root{
-      --up-dark:#0E3A5A;
-      --up-mid:#164A72;
-      --up-light:#D8EFFA;
-      --up-bg:#f4f6f8;
-    }
-    body{
-      background: var(--up-bg);
+    .login-grid {
       min-height: 100vh;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .login-brand {
+      background-color: var(--sidebar-bg);
+      color: white;
+      padding: 4rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+    }
+
+    .login-brand::after {
+      content: "";
+      position: absolute;
+      top: 0; right: 0; bottom: 0; left: 0;
+      background: radial-gradient(circle at top right, rgba(37, 99, 235, 0.15), transparent 50%);
+      pointer-events: none;
+    }
+
+    .brand-copy h1 {
+      font-size: clamp(2.5rem, 4vw, 3.5rem);
+      font-weight: 700;
+      letter-spacing: -.03em;
+      line-height: 1.1;
+      margin: 1.5rem 0 1rem;
+    }
+
+    .brand-copy p {
+      font-size: 1.1rem;
+      color: var(--sidebar-text);
+      max-width: 480px;
+      line-height: 1.6;
+    }
+
+    .brand-metrics {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.5rem;
+      margin-top: 3rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .brand-metric {
+      padding-top: 1rem;
+      border-top: 1px solid rgba(255,255,255,0.1);
+    }
+    
+    .brand-metric small { color: var(--sidebar-text); font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.75rem; }
+    .brand-metric strong { display: block; font-size: 1.25rem; margin: 0.5rem 0 0.25rem; }
+    .brand-metric span { color: var(--sidebar-text); font-size: 0.85rem; }
+
+    .login-panel {
       display: flex;
       align-items: center;
+      justify-content: center;
+      background-color: var(--surface);
+      padding: 2rem;
     }
-    .login-shell{
+
+    .login-card {
       width: 100%;
-      padding: 32px 16px;
+      max-width: 400px;
     }
-    .brand-top{
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      margin-bottom: 16px;
+
+    .logo-wrap img { height: 32px; width: auto; margin-bottom: 2rem; }
+    
+    .login-title { font-size: 1.75rem; font-weight: 700; letter-spacing: -.02em; margin-bottom: 0.5rem; }
+    .login-subtitle { color: var(--text-muted); margin-bottom: 2rem; font-size: 0.95rem; }
+
+    .input-icon {
+      background: var(--bg-app);
+      border-right: 0;
+      color: var(--text-muted);
     }
-    .brand-top img{
-      height: 46px;
-      width: auto;
-    }
-    .login-card{
-      border: 0;
-      border-radius: 16px;
-      box-shadow: 0 10px 30px rgba(0,0,0,.08);
-      overflow: hidden;
-    }
-    .login-header{
-      background: linear-gradient(135deg, var(--up-mid), var(--up-dark));
-      color: #fff;
-      padding: 20px 22px;
-    }
-    .login-header .title{
-      margin: 0;
-      font-weight: 800;
-      font-size: 1.05rem;
-      letter-spacing: .2px;
-    }
-    .login-header .subtitle{
-      margin: 6px 0 0;
-      opacity: .9;
-      font-size: .9rem;
-    }
-    .login-body{
-      padding: 22px;
-      background: #fff;
-    }
-    .form-control{
-      border-radius: 12px;
-      padding: 12px 12px;
-    }
-    .input-group-text{
-      border-radius: 12px 0 0 12px;
-      background: #f8f9fa;
-    }
-    .input-group .btn{
-      border-radius: 0 12px 12px 0;
-    }
-    .btn-up{
-      background: var(--up-mid);
-      border: none;
-      border-radius: 12px;
-      padding: 12px 14px;
-      font-weight: 700;
-    }
-    .btn-up:hover{
-      background: var(--up-dark);
-    }
-    .helper{
-      color:#6c757d;
-      font-size: .85rem;
-      margin-top: 10px;
-      text-align: center;
-    }
-    .alert{
-      border-radius: 12px;
-      padding: 10px 12px;
-      margin-bottom: 14px;
-    }
-    .footer-mini{
-      text-align:center;
-      margin-top: 14px;
-      color:#93a1ad;
-      font-size: .8rem;
+    .input-join { border-left: 0; }
+
+    @media (max-width: 980px) {
+      .login-grid { grid-template-columns: 1fr; }
+      .login-brand { padding: 3rem 2rem; min-height: 50vh; }
     }
   </style>
 </head>
 
 <body>
-  <div class="login-shell">
-    <div class="container" style="max-width: 440px;">
-
-      <!-- Logo corporativo -->
-      <div class="brand-top">
-        <img src="{{ url_for('static', filename='img/logo-color.svg') }}" alt="HR Knowledge Base" style="height:46px;width:auto;">
-      </div>
-
-      <div class="card login-card">
-        <div class="login-header">
-          <p class="title"><i class="bi bi-shield-lock me-2"></i>HR Knowledge Base — Access</p>
-          <p class="subtitle">Enter your credentials to continue</p>
-        </div>
-
-        <div class="login-body">
-
-          <!-- Flash messages -->
-          {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-              {% for category, msg in messages %}
-                <div class="alert alert-{{ category }} mb-2" role="alert">
-                  <i class="bi bi-info-circle me-2"></i>{{ msg }}
-                </div>
-              {% endfor %}
-            {% endif %}
-          {% endwith %}
-
-          <form method="post" autocomplete="off">
-            <div class="mb-3">
-              <label class="form-label fw-semibold">Username</label>
-              <div class="input-group">
-                <span class="input-group-text"><i class="bi bi-person"></i></span>
-                <input class="form-control" name="username" placeholder="Your username" required autofocus>
-              </div>
-            </div>
-
-            <div class="mb-3">
-              <label class="form-label fw-semibold">Password</label>
-              <div class="input-group">
-                <span class="input-group-text"><i class="bi bi-key"></i></span>
-
-                <input
-                  class="form-control"
-                  type="password"
-                  id="password"
-                  name="password"
-                  placeholder="Your password"
-                  required
-                >
-
-                <button
-                  class="btn btn-outline-secondary"
-                  type="button"
-                  id="togglePassword"
-                  aria-label="Mostrar u ocultar contraseña"
-                >
-                  <i class="bi bi-eye"></i>
-                </button>
-              </div>
-            </div>
-
-            <button class="btn btn-up w-100 text-white" type="submit">
-              Sign in <i class="bi bi-arrow-right-circle ms-2"></i>
-            </button>
-
-            <div class="helper">
-              If you don't remember your credentials, contact your administrator.
-            </div>
-          </form>
-
+  <div class="login-grid">
+    <section class="login-brand">
+      <div class="brand-copy">
+        <span class="badge-soft" style="background: rgba(255,255,255,0.1); color: white; border-color: rgba(255,255,255,0.2);">
+          <i class="bi bi-stars"></i> Enterprise AI Workspace
+        </span>
+        <h1>Unified corporate knowledge.</h1>
+        <p>An advanced interface designed to connect documents, structured data, and deliver accurate answers to your team in real time.</p>
+        
+        <div class="brand-metrics">
+          <div class="brand-metric">
+            <small>Knowledge Base</small>
+            <strong>PDF + SQL</strong>
+            <span>Direct RAG integration</span>
+          </div>
+          <div class="brand-metric">
+            <small>Security</small>
+            <strong>SSO Ready</strong>
+            <span>Strict access control</span>
+          </div>
         </div>
       </div>
+    </section>
 
-      <div class="footer-mini">
-        © {{ (now().year if now is defined else "2025") }} HR Knowledge Base
+    <section class="login-panel">
+      <div class="login-card">
+        <div class="logo-wrap">
+          <img src="{{ url_for('static', filename='img/logo-color.svg') }}" alt="HR Knowledge Base">
+        </div>
+
+        <h2 class="login-title">Access the workspace</h2>
+        <p class="login-subtitle">Enter your credentials to continue to the workspace.</p>
+
+        <div class="demo-credentials mb-4 px-3 py-2 rounded-3"
+            style="background: rgba(15, 23, 42, 0.03); border: 1px solid rgba(15, 23, 42, 0.08);">
+          <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+            <div class="d-flex align-items-center text-muted" style="font-size: 0.88rem; font-weight: 500;">
+              <i class="bi bi-info-circle me-2"></i>
+              Demo credentials
+            </div>
+
+            <div class="d-flex align-items-center flex-wrap gap-2" style="font-size: 0.88rem;">
+              <span class="text-muted">User</span>
+              <span class="px-2 py-1 rounded-2" style="background: white; border: 1px solid rgba(15, 23, 42, 0.08); font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; color: #334155;">admin</span>
+
+              <span class="text-muted ms-1">Password</span>
+              <span class="px-2 py-1 rounded-2" style="background: white; border: 1px solid rgba(15, 23, 42, 0.08); font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; color: #334155;">admin1234</span>
+            </div>
+          </div>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, msg in messages %}
+              <div class="alert alert-{{ category }} rounded-2 border-0 shadow-sm mb-4" role="alert" style="font-size: 0.9rem;">
+                <i class="bi bi-info-circle me-2"></i>{{ msg }}
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <form method="post" autocomplete="off">
+          <div class="mb-3">
+            <label class="form-label text-muted-soft" style="font-size: 0.85rem; font-weight: 500;">User</label>
+            <div class="input-group">
+              <span class="input-group-text input-icon"><i class="bi bi-person"></i></span>
+              <input class="form-control input-join" name="username" placeholder="ej. jsmith" required autofocus>
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label text-muted-soft" style="font-size: 0.85rem; font-weight: 500;">Password</label>
+            <div class="input-group">
+              <span class="input-group-text input-icon"><i class="bi bi-key"></i></span>
+              <input id="passwordInput" type="password" class="form-control border-start-0 border-end-0" name="password" placeholder="••••••••" required>
+              <button class="btn border border-start-0 text-muted" type="button" onclick="togglePassword()" style="background: var(--surface);">
+                <i id="toggleIcon" class="bi bi-eye"></i>
+              </button>
+            </div>
+          </div>
+
+          <button class="btn btn-enterprise w-100 mb-4" type="submit">
+            Entrar al proyecto
+          </button>
+        </form>
       </div>
-
-    </div>
+    </section>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
   <script>
-    const togglePassword = document.getElementById("togglePassword");
-    const passwordInput = document.getElementById("password");
-    const icon = togglePassword.querySelector("i");
+    function togglePassword() {
+      const input = document.getElementById('passwordInput');
+      const icon = document.getElementById('toggleIcon');
+      const isPassword = input.type === 'password';
 
-    togglePassword.addEventListener("click", () => {
-      const isPassword = passwordInput.type === "password";
-      passwordInput.type = isPassword ? "text" : "password";
-      icon.className = isPassword ? "bi bi-eye-slash" : "bi bi-eye";
-    });
+      input.type = isPassword ? 'text' : 'password';
+      icon.className = isPassword ? 'bi bi-eye-slash' : 'bi bi-eye';
+    }
   </script>
 </body>
 </html>

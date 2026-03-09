@@ -7,554 +7,340 @@
 
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 
   <style>
-    :root{
-      --up-dark:#0E3A5A;
-      --up-mid:#164A72;
-      --up-light:#D8EFFA;
-      --up-sidebar:#0B2F49;
-    }
-    body{ background:#f4f6f8; }
-    .topbar{
-      background: var(--up-mid);
-      color:#fff;
-      height:64px;
-      display:flex;
-      align-items:center;
-      padding:0 18px;
-    }
-    .topbar img{ height:34px; }
-    .layout{
-      display:flex;
-      min-height: calc(100vh - 64px);
-    }
-    .sidebar{
-      width:240px;
-      background: var(--up-sidebar);
-      padding:16px;
-      color:#fff;
-    }
-    .side-btn{
-      width:100%;
-      text-align:left;
-      border:1px solid rgba(255,255,255,.25);
-      background:transparent;
-      color:#fff;
-      padding:10px 12px;
-      border-radius:8px;
-      margin-bottom:10px;
-      font-weight:700;
+    /* Bloqueo del body para evitar el scroll infinito */
+    body {
+      overflow: hidden; 
     }
 
-    .side-btn.active{
-      background:#fff;
-      color:#0B2F49;
-      border-color:#fff;
+    .topbar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border-light);
+      height: 60px;
+      display: flex;
+      align-items: center;
+      padding: 0 1.5rem;
+      position: relative;
+      z-index: 10;
+    }
+    
+    .layout {
+      display: flex;
+      /* Altura estricta para evitar que la página crezca infinitamente */
+      height: calc(100vh - 60px); 
+      overflow: hidden;
+    }
+    
+    .sidebar {
+      width: 260px;
+      background: var(--sidebar-bg);
+      border-right: 1px solid var(--sidebar-bg);
+      padding: 1.5rem 1rem;
+      color: var(--sidebar-text);
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+    
+    .side-btn {
+      width: 100%;
+      text-align: left;
+      background: transparent;
+      color: var(--sidebar-text);
+      border: none;
+      padding: 0.6rem 1rem;
+      border-radius: var(--radius-sm);
+      margin-bottom: 0.25rem;
+      font-weight: 500;
+      font-size: 0.9rem;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.2s;
     }
 
-    /* Botón sólido para "Nuevo chat" */
-    .side-btn-solid{
-      background:#fff;
-      color:#0B2F49;
-      border-color:#fff;
+    .side-btn:hover { background: var(--sidebar-hover); color: white; }
+    .side-btn.active { background: rgba(37, 99, 235, 0.15); color: #60a5fa; font-weight: 600; }
+    
+    .side-btn-solid {
+      background: white; color: var(--text-main); font-weight: 600;
+      justify-content: center; margin-top: 1rem; margin-bottom: 1.5rem;
     }
+    .side-btn-solid:hover { background: var(--bg-app); color: var(--text-main); }
 
-    /* Sección */
-    .sidebar-section-title{
-      font-size: 0.95rem;
-      font-weight: 700;
-      margin: 10px 0 8px;
-      opacity: .95;
-    }
-
-    /* Lista de chats */
-    .chat-list{
-      max-height: 55vh;
-      overflow: auto;
-      padding-right: 6px;
-    }
-
-    /* Item chat (mucho más aire y legible) */
-    .chat-item{
-      display:flex;
-      align-items:center;
-      gap:6px;
-      width:100%;
-      text-decoration:none;
-      color:#fff;
-
-      padding:12px 12px;
-      border-radius:10px;
-
-      border:1px solid rgba(255,255,255,.18);
-      background: rgba(255,255,255,.06);
-
-      margin-bottom:10px;
-      font-size: 0.95rem;
+    .sidebar-section-title {
+      font-size: 0.75rem;
       font-weight: 600;
-    }
-
-    .chat-item:hover{
-      background: rgba(255,255,255,.12);
-      color:#fff;
-    }
-
-    .chat-item.active{
-      background:#fff;
-      color:#0B2F49;
-      border-color:#fff;
-    }
-
-    .chat-item-text{
-      display:block;
-      overflow:hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .main{
-      flex:1;
-      padding:24px;
-      background: var(--up-light); /* rellena el “hueco” entre sidebar y panel */
-    }
-
-    .panel{
-      background: var(--up-light);
-      border-radius:0;
-      padding:28px 32px;
-      min-height: calc(100vh - 64px - 48px);
-    }
-    .home-title{
-      font-size:26px;
-      font-weight:700;
-      color:#0B2F49;
-      margin-bottom:18px;
-      text-align:center;
-    }
-    .home-list{
-      max-width:760px;
-      margin:0 auto;
-      font-size:18px;
-    }
-    .home-list ul{ margin-top:12px; }
-    .home-list li{ margin:8px 0; }
-    .small-muted{ color:#2b3a44; font-size:14px; }
-
-    /* ====== MINI DASHBOARD (ADMIN) ====== */
-    .dash-wrap{
-      max-width: 1100px;
-      margin: 0 auto;
-    }
-    .kpi-card{
-      border:0;
-      border-radius:14px;
-      box-shadow: 0 6px 18px rgba(0,0,0,0.06);
-      background:#fff;
-    }
-    .kpi-label{
-      color:#6c7a86;
-      font-size: .85rem;
-      font-weight: 600;
-    }
-    .kpi-value{
-      font-size: 1.9rem;
-      font-weight: 800;
-      color:#0B2F49;
-      line-height: 1.1;
-    }
-    .kpi-icon{
-      width:38px;
-      height:38px;
-      border-radius: 10px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      background: rgba(22, 74, 114, .08);
-      color: var(--up-mid);
-      font-size: 1.2rem;
-    }
-    .dash-card{
-      border:0;
-      border-radius:14px;
-      box-shadow: 0 6px 18px rgba(0,0,0,0.06);
-      background:#fff;
-      overflow:hidden;
-    }
-    .dash-card .card-header{
-      background:#fff;
-      border-bottom: 1px solid rgba(0,0,0,.06);
-    }
-    .dash-subtitle{
-      color:#6c7a86;
-      font-size:.85rem;
-    }
-    .badge-soft{
-      background: rgba(22, 74, 114, .08);
-      color: var(--up-mid);
-      border: 1px solid rgba(22, 74, 114, .15);
-      font-weight: 700;
-    }
-    .table-clean th{
-      color:#6c7a86;
-      font-size:.8rem;
       text-transform: uppercase;
-      letter-spacing: .03em;
-      border-top:0;
+      letter-spacing: 0.05em;
+      color: rgba(255,255,255,0.4);
+      margin: 1.5rem 1rem 0.5rem;
     }
-    .table-clean td{
-      vertical-align: middle;
+
+    /* Scroll interno solo para la lista de chats */
+    .chat-list { flex: 1; overflow-y: auto; margin: 0 -0.5rem; padding: 0 0.5rem; }
+    
+    .chat-item {
+      display: flex; align-items: center; gap: 0.5rem;
+      width: 100%; text-decoration: none; color: var(--sidebar-text);
+      padding: 0.6rem 1rem; border-radius: var(--radius-sm);
+      font-size: 0.85rem; font-weight: 500; margin-bottom: 2px;
     }
+    .chat-item:hover { background: var(--sidebar-hover); color: white; }
+    .chat-item.active { background: var(--sidebar-hover); color: white; }
+    .chat-item-text { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    /* Scroll interno solo para el panel principal */
+    .main {
+      flex: 1; 
+      padding: 2rem; 
+      background: var(--bg-app); 
+      overflow-y: auto; 
+      height: 100%;
+    }
+
+    .kpi-card { padding: 1.25rem; }
+    .kpi-icon {
+      width: 40px; height: 40px; border-radius: var(--radius-sm);
+      display: flex; align-items: center; justify-content: center;
+      background: var(--primary-bg); color: var(--primary); font-size: 1.25rem;
+    }
+
+    .table-clean th {
+      color: var(--text-muted); font-size: 0.75rem; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.05em;
+      border-bottom: 1px solid var(--border-light); padding: 1rem;
+    }
+    .table-clean td { padding: 1rem; border-bottom: 1px solid var(--border-light); font-size: 0.9rem; }
   </style>
 
-  <!-- ✅ Macro Jinja para formatear duración en Xm Ys -->
   {% macro fmt_duration(sec) -%}
-    {%- if sec is none -%}
-      —
-    {%- else -%}
-      {%- set s = sec|int -%}
-      {%- set m = (s // 60) -%}
-      {%- set r = (s % 60) -%}
-      {%- if m > 0 -%}
-        {{ m }}m {{ r }}s
-      {%- else -%}
-        {{ r }}s
-      {%- endif -%}
+    {%- if sec is none -%}—{%- else -%}
+      {%- set s = sec|int -%}{%- set m = (s // 60) -%}{%- set r = (s % 60) -%}
+      {%- if m > 0 -%}{{ m }}m {{ r }}s{%- else -%}{{ r }}s{%- endif -%}
     {%- endif -%}
   {%- endmacro %}
-
 </head>
 
 <body>
-  <!-- TOP BAR -->
   <div class="topbar justify-content-between">
     <div class="d-flex align-items-center gap-3">
-      <img src="{{ url_for('static', filename='img/logo-white.svg') }}" alt="HR Knowledge Base" style="height:36px;width:auto;">
+      <img src="{{ url_for('static', filename='img/logo-color.svg') }}" alt="HR Knowledge Base" style="height:28px;">
     </div>
 
-    <!-- Usuario + cerrar sesión -->
     <div class="d-flex align-items-center gap-3">
-      <div class="text-white small">
-        <i class="bi bi-person-circle me-1"></i>
-        {{ current_user.username }}
+      <div class="text-muted fw-medium" style="font-size: 0.9rem;">
+        <i class="bi bi-person-circle me-1"></i> {{ current_user.username }}
       </div>
-
       <form method="POST" action="{{ url_for('main.logout') }}" class="m-0">
-        <button type="submit" class="btn btn-outline-light btn-sm">
-          <i class="bi bi-box-arrow-right me-1"></i>
-          Cerrar sesión
+        <button type="submit" class="btn btn-ghost-enterprise btn-sm border-0 text-muted">
+          Salir
         </button>
       </form>
     </div>
   </div>
 
   <div class="layout">
-    <!-- SIDEBAR -->
     <div class="sidebar">
-      <a class="side-btn {{ 'active' if active_tab == 'home' else '' }}"
-        href="{{ url_for('main.index', tab='home', session=session.id) }}">
-        Home
+      <a class="side-btn {{ 'active' if active_tab == 'home' else '' }}" href="{{ url_for('main.index', tab='home', session=session.id) }}">
+        <i class="bi bi-house"></i> Overview
       </a>
-
-      <a class="side-btn {{ 'active' if active_tab == 'chat' else '' }}"
-        href="{{ url_for('main.index', tab='chat', session=session.id) }}">
-        HR Assistant
+      <a class="side-btn {{ 'active' if active_tab == 'chat' else '' }}" href="{{ url_for('main.index', tab='chat', session=session.id) }}">
+        <i class="bi bi-robot"></i> HR Assistant
       </a>
 
       {% if current_user.role == "admin" %}
-        <hr style="border-color: rgba(255,255,255,.25);">
-
-        <a class="side-btn {{ 'active' if active_tab == 'activity' else '' }}"
-          href="{{ url_for('main.index', tab='activity', session=session.id) }}">
-          <i class="bi bi-bar-chart-line me-2"></i>
-          User activity
+        <a class="side-btn {{ 'active' if active_tab == 'activity' else '' }}" href="{{ url_for('main.index', tab='activity', session=session.id) }}">
+          <i class="bi bi-graph-up"></i> Analytics
         </a>
       {% endif %}
 
       {% if active_tab == 'chat' %}
-        <hr style="border-color: rgba(255,255,255,.25);">
-
-        <!-- Nuevo chat -->
-        <form action="{{ url_for('main.create_chat') }}" method="POST" class="mb-2">
+        <form action="{{ url_for('main.create_chat') }}" method="POST" class="w-100">
           <button type="submit" class="side-btn side-btn-solid">
             <i class="bi bi-plus-lg"></i> Nuevo chat
           </button>
         </form>
 
-        <div class="sidebar-section-title">Tus chats</div>
-
+        <div class="sidebar-section-title">Historial</div>
         <div class="chat-list">
           {% for s in sessions %}
-            <a class="chat-item {{ 'active' if session and s.id == session.id else '' }}"
-              href="{{ url_for('main.index', tab='chat', session=s.id) }}">
-              <i class="bi bi-chat-left-text me-2"></i>
+            <a class="chat-item {{ 'active' if session and s.id == session.id else '' }}" href="{{ url_for('main.index', tab='chat', session=s.id) }}">
+              <i class="bi bi-chat-left text-muted"></i>
               <span class="chat-item-text">{{ s.name }}</span>
             </a>
           {% endfor %}
         </div>
-
-        <hr style="border-color: rgba(255,255,255,.25);">
-
-        <form method="POST" action="{{ url_for('main.logout') }}" class="m-0">
-          <button type="submit" class="side-btn">
-            <i class="bi bi-box-arrow-right"></i> Salir
-          </button>
-        </form>
       {% endif %}
     </div>
 
-    <!-- MAIN -->
     <div class="main">
-      <div class="panel {{ 'panel-chat' if active_tab == 'chat' else '' }}">
+      <div class="container-fluid p-0" style="max-width: 1200px; margin: 0 auto;">
 
         {% with messages = get_flashed_messages(with_categories=true) %}
           {% if messages %}
-            <div class="mb-3">
+            <div class="mb-4">
               {% for category, message in messages %}
-                <div class="alert alert-{{ category }} mb-2">{{ message }}</div>
+                <div class="alert alert-{{ category }} rounded-2 border-0 shadow-sm">{{ message }}</div>
               {% endfor %}
             </div>
           {% endif %}
         {% endwith %}
 
         {% if active_tab == 'home' %}
-          <div class="home-title">
-            Hi, I’m your HR Assistant. You can ask me about:
+          <div class="surface-card p-5 text-center mb-4">
+            <h1 class="hero-title mb-3" style="font-size: 2rem;">HR Assistant Workspace</h1>
+            <p class="text-muted" style="max-width: 600px; margin: 0 auto 2rem; font-size: 1.1rem;">
+              Query employee handbooks, internal policies, headcount data, and performance reviews using an advanced natural language interface.
+            </p>
+            <div class="d-flex justify-content-center gap-3">
+               <a href="{{ url_for('main.index', tab='chat') }}" class="btn btn-primary-custom">Open Assistant</a>
+            </div>
           </div>
 
-          <div class="home-list">
-            <ul>
-              <li>HR policies, employee handbook and internal procedures</li>
-              <li>Headcount, salaries and department data:
-                <ul>
-                  <li>Headcount by department or location</li>
-                  <li>Average salary by level or role</li>
-                  <li>Attrition rates and tenure</li>
+          <div class="row g-4">
+            <div class="col-md-6">
+              <div class="surface-card p-4 h-100">
+                <h3 class="hero-title h5 mb-3"><i class="bi bi-file-earmark-text text-primary me-2"></i> Indexed Documents</h3>
+                <ul class="text-muted ps-3 mb-0" style="line-height: 1.8;">
+                  <li>HR Policies & Employee Handbook</li>
+                  <li>Internal Procedures & Compliance Guidelines</li>
+                  <li>Benefits & Compensation Details</li>
                 </ul>
-              </li>
-              <li>Performance reviews and talent data:
-                <ul>
-                  <li>Top performers by year</li>
-                  <li>Score distributions</li>
-                </ul>
-              </li>
-              <li>Open job postings and recruitment pipeline</li>
-            </ul>
-
-            <div class="mt-4">
-              <div class="fw-bold mb-1">Available models:</div>
-              <ul>
-                <li>GPT-4o: most capable, higher cost</li>
-                <li>GPT-4o-mini: faster and more economical</li>
-              </ul>
+              </div>
             </div>
-
-            <div class="mt-4 small-muted">
-              Data is retrieved from internal documents (RAG) and structured HR database (SQL). No external data is used.
+            <div class="col-md-6">
+              <div class="surface-card p-4 h-100">
+                <h3 class="hero-title h5 mb-3"><i class="bi bi-database text-primary me-2"></i> HR Database (SQL)</h3>
+                <ul class="text-muted ps-3 mb-0" style="line-height: 1.8;">
+                  <li>Headcount by Department & Location</li>
+                  <li>Average Salary Metrics & Bands</li>
+                  <li>Talent Data & Performance Reviews</li>
+                </ul>
+              </div>
             </div>
           </div>
 
         {% elif active_tab == 'activity' %}
-          <div class="dash-wrap">
-            <div class="home-title mb-2">User activity</div>
-            <div class="text-center dash-subtitle mb-4">
-              Visión rápida (KPIs + tendencia + ranking). <span class="badge badge-soft ms-1">Últimos 30 días</span>
+          <div class="d-flex justify-content-between align-items-end mb-4">
+            <div>
+              <h1 class="hero-title h3 mb-1">Analytics Dashboard</h1>
+              <p class="text-muted mb-0">Visión de uso y auditoría de sesiones. <span class="badge-soft ms-2">Últimos 30 días</span></p>
             </div>
-
-            {% if not activity_sessions or activity_sessions|length == 0 %}
-              <div class="alert alert-warning">
-                No hay actividad registrada todavía.
-              </div>
-              <div class="small-muted">
-                Nota: se registra actividad al hacer login y se actualiza al preguntar en el chat.
-              </div>
-            {% else %}
-              <!-- KPIs -->
-              <div class="row g-3 mb-3">
-                <div class="col-12 col-md-6 col-xl-3">
-                  <div class="card kpi-card">
-                    <div class="card-body">
-                      <div class="d-flex justify-content-between align-items-start">
-                        <div>
-                          <div class="kpi-label">Active users (30 days)</div>
-                          <div class="kpi-value" id="kpiSessions">—</div>
-                        </div>
-                        <div class="kpi-icon">
-                          <i class="bi bi-box-arrow-in-right"></i>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="col-12 col-md-6 col-xl-3">
-                  <div class="card kpi-card">
-                    <div class="card-body">
-                      <div class="d-flex justify-content-between align-items-start">
-                        <div>
-                          <div class="kpi-label">Active users (30 days)</div>
-                          <div class="kpi-value" id="kpiUsers">—</div>
-                        </div>
-                        <div class="kpi-icon">
-                          <i class="bi bi-people"></i>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="col-12 col-md-6 col-xl-3">
-                  <div class="card kpi-card">
-                    <div class="card-body">
-                      <div class="d-flex justify-content-between align-items-start">
-                        <div>
-                          <div class="kpi-label">Questions (30 days)</div>
-                          <div class="kpi-value" id="kpiQuestions">—</div>
-                        </div>
-                        <div class="kpi-icon">
-                          <i class="bi bi-chat-dots"></i>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="col-12 col-md-6 col-xl-3">
-                  <div class="card kpi-card">
-                    <div class="card-body">
-                      <div class="d-flex justify-content-between align-items-start">
-                        <div>
-                          <div class="kpi-label">Average duration</div>
-                          <div class="kpi-value" id="kpiAvgDuration">—</div>
-                        </div>
-                        <div class="kpi-icon">
-                          <i class="bi bi-stopwatch"></i>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Gráfico + Top usuarios -->
-              <div class="row g-3">
-                <div class="col-12 col-lg-8">
-                  <div class="card dash-card h-100">
-                    <div class="card-header">
-                      <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                          <div class="fw-semibold">Uso por día (sesiones)</div>
-                          <div class="dash-subtitle">Tendencia de actividad</div>
-                        </div>
-                        <span class="badge badge-soft">30 días</span>
-                      </div>
-                    </div>
-                    <div class="card-body">
-                      <canvas id="chartSessionsPerDay" height="120"></canvas>
-                      <div class="dash-subtitle mt-2">
-                        Tip: si ves “días en blanco”, significa 0 sesiones ese día.
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="col-12 col-lg-4">
-                  <div class="card dash-card h-100">
-                    <div class="card-header">
-                      <div class="fw-semibold">Top users</div>
-                      <div class="dash-subtitle">Sorted by questions</div>
-                    </div>
-                    <div class="card-body">
-                      <div class="table-responsive">
-                        <table class="table table-sm table-clean align-middle mb-0">
-                          <thead>
-                            <tr>
-                              <th>User</th>
-                              <th class="text-end">Questions</th>
-                              <th class="text-end">Sessions</th>
-                            </tr>
-                          </thead>
-                          <tbody id="topUsersBody">
-                            <tr><td colspan="3" class="text-muted">Sin datos</td></tr>
-                          </tbody>
-                        </table>
-                      </div>
-                      <div class="dash-subtitle mt-2">
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Tabla detalle -->
-              <div class="card dash-card mt-3">
-                <div class="card-header">
-                  <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                      <div class="fw-semibold">Detalle de sesiones</div>
-                      <div class="dash-subtitle">Últimas 200 (auditoría rápida)</div>
-                    </div>
-                    <span class="badge badge-soft">Detalle</span>
-                  </div>
-                </div>
-
-                <div class="card-body">
-                  <div class="table-responsive">
-                    <table class="table table-striped align-middle mb-0">
-                      <thead class="table-light">
-                        <tr>
-                          <th>User</th>
-                          <th>Sign in</th>
-                          <th>Last Activity</th>
-                          <th class="text-end">Questions</th>
-                          <th>Sign out</th>
-                          <th class="text-end">Duration</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {% for ls, u in activity_sessions %}
-                          <tr>
-                            <td><strong>{{ u.username }}</strong></td>
-
-                            <td class="text-muted small">
-                              {{ ls.started_at.strftime("%Y-%m-%d %H:%M:%S") if ls.started_at else "—" }}
-                            </td>
-
-                            <td class="text-muted small">
-                              {{ ls.last_activity_at.strftime("%Y-%m-%d %H:%M:%S") if ls.last_activity_at else "—" }}
-                            </td>
-
-                            <td class="text-end">{{ ls.n_questions or 0 }}</td>
-
-                            <td class="text-muted small">
-                              {{ ls.ended_at.strftime("%Y-%m-%d %H:%M:%S") if ls.ended_at else "—" }}
-                            </td>
-
-                            <td class="text-end">{{ fmt_duration(ls.duration_sec) }}</td>
-                          </tr>
-                        {% endfor %}
-                      </tbody>
-                    </table>
-                  </div>
-
-                  <!-- ✅ Botón descarga CSV histórico -->
-                  <div class="mt-3 d-flex justify-content-end">
-                    <a
-                      class="btn btn-sm btn-outline-primary"
-                      href="{{ url_for('main.export_sessions_csv') }}"
-                    >
-                      <i class="bi bi-download me-1"></i>
-                      Descargar CSV histórico
-                    </a>
-                  </div>
-                </div>
-              </div>
-              
-            {% endif %}
+            <a class="btn btn-ghost-enterprise btn-sm" href="{{ url_for('main.export_sessions_csv') }}">
+              <i class="bi bi-download me-2"></i>Exportar CSV
+            </a>
           </div>
 
+          {% if not activity_sessions or activity_sessions|length == 0 %}
+            <div class="surface-card p-4 text-center text-muted">No hay actividad registrada todavía.</div>
+          {% else %}
+            <div class="row g-3 mb-4">
+              <div class="col-12 col-md-6 col-xl-3">
+                <div class="surface-card kpi-card">
+                  <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                      <div class="metric-label mb-1">Sesiones</div>
+                      <div class="metric-value" id="kpiSessions">—</div>
+                    </div>
+                    <div class="kpi-icon"><i class="bi bi-box-arrow-in-right"></i></div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-12 col-md-6 col-xl-3">
+                <div class="surface-card kpi-card">
+                  <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                      <div class="metric-label mb-1">Usuarios Activos</div>
+                      <div class="metric-value" id="kpiUsers">—</div>
+                    </div>
+                    <div class="kpi-icon"><i class="bi bi-people"></i></div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-12 col-md-6 col-xl-3">
+                <div class="surface-card kpi-card">
+                  <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                      <div class="metric-label mb-1">Preguntas (Prompts)</div>
+                      <div class="metric-value" id="kpiQuestions">—</div>
+                    </div>
+                    <div class="kpi-icon"><i class="bi bi-chat-dots"></i></div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-12 col-md-6 col-xl-3">
+                <div class="surface-card kpi-card">
+                  <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                      <div class="metric-label mb-1">Duración Media</div>
+                      <div class="metric-value" id="kpiAvgDuration">—</div>
+                    </div>
+                    <div class="kpi-icon"><i class="bi bi-stopwatch"></i></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="row g-4 mb-4">
+              <div class="col-12 col-lg-8">
+                <div class="surface-card p-4 h-100 d-flex flex-column">
+                  <h3 class="hero-title h6 mb-4">Tendencia de Actividad</h3>
+                  <div style="position: relative; flex: 1; min-height: 250px;">
+                    <canvas id="chartSessionsPerDay"></canvas>
+                  </div>
+                </div>
+              </div>
+              <div class="col-12 col-lg-4">
+                <div class="surface-card p-0 h-100 overflow-hidden">
+                  <div class="p-4 border-bottom" style="border-color: var(--border-light) !important;">
+                    <h3 class="hero-title h6 mb-0">Top Usuarios</h3>
+                  </div>
+                  <table class="table table-clean mb-0 w-100">
+                    <tbody id="topUsersBody">
+                      <tr><td colspan="3" class="text-muted text-center py-4">Sin datos</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <div class="surface-card overflow-hidden">
+              <div class="p-4 border-bottom" style="border-color: var(--border-light) !important;">
+                <h3 class="hero-title h6 mb-0">Registro de Sesiones (Auditoría)</h3>
+              </div>
+              <div class="table-responsive">
+                <table class="table table-clean align-middle mb-0 w-100">
+                  <thead style="background: var(--bg-app);">
+                    <tr>
+                      <th>Usuario</th>
+                      <th>Inicio</th>
+                      <th>Última Actividad</th>
+                      <th class="text-center">Preguntas</th>
+                      <th class="text-end">Duración</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for ls, u in activity_sessions %}
+                      <tr>
+                        <td class="fw-medium text-main">{{ u.username }}</td>
+                        <td class="text-muted">{{ ls.started_at.strftime("%Y-%m-%d %H:%M") if ls.started_at else "—" }}</td>
+                        <td class="text-muted">{{ ls.last_activity_at.strftime("%Y-%m-%d %H:%M") if ls.last_activity_at else "—" }}</td>
+                        <td class="text-center fw-medium">{{ ls.n_questions or 0 }}</td>
+                        <td class="text-end text-muted">{{ fmt_duration(ls.duration_sec) }}</td>
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          {% endif %}
+
         {% else %}
-          <!-- CHAT EMBEBIDO: reutilizamos el front actual del chat (JS llama a /ask/<session_id>) -->
           {% include 'chat.html' %}
         {% endif %}
 
@@ -563,17 +349,12 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
-  <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-  <!-- ✅ JSON inyectado para el dashboard (JS lo parsea) -->
   <script id="admin-activity-data" type="application/json">
     {{ (admin_activity or {}) | tojson }}
   </script>
 
   <script>
-
     const dataEl = document.getElementById("admin-activity-data");
     const adminActivity = JSON.parse((dataEl && dataEl.textContent) ? dataEl.textContent : "{}");
 
@@ -586,8 +367,6 @@
       return `${m}m ${s}s`;
     }
 
-    // Solo intentamos pintar el dashboard si estamos en la pestaña activity
-    // y existen los nodos (evita errores en otras tabs).
     const kpiSessionsEl = document.getElementById("kpiSessions");
     if (kpiSessionsEl) {
       const kpis = (adminActivity.kpis || {});
@@ -596,57 +375,47 @@
       document.getElementById("kpiQuestions").textContent = (kpis.total_questions_30d ?? 0);
       document.getElementById("kpiAvgDuration").textContent = formatDuration(kpis.avg_duration_sec_30d ?? 0);
 
-      // Top users
       const top = (adminActivity.top_users || []);
       const topBody = document.getElementById("topUsersBody");
-      if (topBody) {
-        if (!top.length) {
-          topBody.innerHTML = `<tr><td colspan="3" class="text-muted">Sin datos</td></tr>`;
-        } else {
-          topBody.innerHTML = top.map(r => `
-            <tr>
-              <td class="fw-semibold">${r.username}</td>
-              <td class="text-end">${r.questions}</td>
-              <td class="text-end">${r.sessions}</td>
-            </tr>
-          `).join("");
-        }
+      if (topBody && top.length) {
+        topBody.innerHTML = top.map(r => `
+          <tr>
+            <td class="fw-medium text-main border-bottom-0 py-3">${r.username}</td>
+            <td class="text-end text-muted border-bottom-0 py-3">${r.questions} prompts</td>
+          </tr>
+        `).join("");
       }
 
-      // Chart: sessions per day
       const series = (adminActivity.series || {});
       const labels = (series.days || []);
       const values = (series.sessions_per_day || []);
-
       const ctx = document.getElementById("chartSessionsPerDay");
+      
       if (ctx) {
-        // Si no hay puntos, pintamos un gráfico “vacío” con 1 punto 0 para que no se vea roto
-        const safeLabels = labels.length ? labels : ["Sin datos"];
-        const safeValues = values.length ? values : [0];
-
-        const existing = Chart.getChart(ctx);
-        if (existing) existing.destroy();
-        
         new Chart(ctx, {
           type: "line",
           data: {
-            labels: safeLabels,
+            labels: labels.length ? labels : ["Sin datos"],
             datasets: [{
               label: "Sesiones",
-              data: safeValues,
-              tension: 0.25,
-              fill: false
+              data: values.length ? values : [0],
+              borderColor: "#2563eb",
+              backgroundColor: "rgba(37, 99, 235, 0.1)",
+              tension: 0.3,
+              fill: true,
+              borderWidth: 2,
+              pointBackgroundColor: "#ffffff",
+              pointBorderColor: "#2563eb",
+              pointRadius: 4
             }]
           },
           options: {
             responsive: true,
-            plugins: {
-              legend: { display: false },
-              tooltip: { enabled: true }
-            },
+            maintainAspectRatio: false, // Ahora es seguro usarlo gracias al wrapper relativo
+            plugins: { legend: { display: false } },
             scales: {
-              x: { ticks: { maxRotation: 0, autoSkip: true } },
-              y: { beginAtZero: true, precision: 0 }
+              x: { grid: { display: false } },
+              y: { beginAtZero: true, border: { dash: [4, 4] }, grid: { color: "#e2e8f0" } }
             }
           }
         });
