@@ -1,0 +1,4 @@
+configuration,context_precision,context_recall,faithfulness,answer_relevancy
+Vector only (MMR),0.8581,0.8810,0.8571,0.7626
+BM25 + Vector  [PRODUCTION],0.8606,0.9365,0.8571,0.8119
+BM25 + Vector + Rerank,0.6381,0.8175,0.8651,0.7671
