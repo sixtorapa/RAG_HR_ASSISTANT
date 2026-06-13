@@ -946,30 +946,6 @@ def ask(session_id):
         answer_text = final_result.get("answer") or "Error generando respuesta."
         raw_sources = final_result.get("source_documents", [])
 
-        # UI: Preview SQL si aplica
-        sql_result = next((r for r in executed_results if r.get("origin") == sql_tool.name), None)
-        sql_raw = (sql_result.get("sql_raw_output") or "").strip() if sql_result else ""
-        if sql_raw:
-            lines = [ln for ln in sql_raw.splitlines() if ln.strip()]
-            header = lines[0] if lines else "Resultados:"
-            rows = lines[1:] if len(lines) > 1 else []
-            preview_n = 10
-            preview = "\n".join([header] + rows[:preview_n]).strip()
-
-            answer_text += (
-                "\n\n---\n\n"
-                "### Preview de datos (primeras 10 filas)\n"
-                "```text\n"
-                f"{preview}\n"
-                "```\n\n"
-                "<details>\n"
-                "<summary><b>Ver tabla completa</b></summary>\n\n"
-                "```text\n"
-                f"{sql_raw}\n"
-                "```\n"
-                "</details>\n"
-            )
-
         sources_formatted = []
         for doc in raw_sources:
             if hasattr(doc, "metadata") and hasattr(doc, "page_content"):
