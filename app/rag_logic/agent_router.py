@@ -27,19 +27,43 @@ def _looks_like_sql_intent(q: str) -> bool:
     qn = _norm(q)
     sql_signals = [
         "salary", "sueldo", "salario", "pay", "compensation", "highest paid", "lowest paid",
-        "headcount", "how many employees", "cuantos empleados", "empleados", "departments",
-        "performance score", "rating", "top performers", "attrition", "turnover", "job postings"
+        "headcount", "how many employees", "cuantos empleados", "cuántos empleados", "empleados",
+        "departments", "departamento", "departamentos",
+        "performance score", "rating", "top performers", "attrition", "turnover", "job postings",
+        "cobra", "cobran", "gana", "ganan", "nomina", "nómina", "antiguedad", "antigüedad"
     ]
     return any(k in qn for k in sql_signals)
 
 
+def _looks_like_docs_intent(q: str) -> bool:
+    qn = _norm(q)
+    docs_signals = [
+        "policy", "politica", "política", "procedure", "procedimiento", "handbook",
+        "manual", "onboarding", "benefits", "beneficios", "normativa", "reglamento",
+        "vacaciones", "permiso", "baja", "licencia"
+    ]
+    return any(k in qn for k in docs_signals)
+
+
 def _looks_like_excel_intent(q: str) -> bool:
     qn = _norm(q)
-    excel_signals = ["excel", ".xlsx", "spreadsheet", "sheet", "dashboard", "tabla", "hoja", "celdas"]
-    # también permitir si pide sumas/cálculos y menciona “archivo” típico
+    # Señales fuertes: el usuario habla explícitamente de un fichero Excel/spreadsheet.
+    strong_signals = ["excel", ".xlsx", ".xls", "spreadsheet", "hoja de calculo", "hoja de cálculo"]
+    if any(k in qn for k in strong_signals):
+        return True
+
+    # Señales débiles ("tabla", "hoja", "dashboard", "celdas") son demasiado genéricas:
+    # se usan igual para pedir resultados de SQL o resúmenes de docs. Solo cuentan
+    # si además se menciona explícitamente un archivo, o si piden un cálculo sobre un archivo.
+    weak_signals = ["sheet", "dashboard", "tabla", "hoja", "celdas"]
     calc_signals = ["sum", "suma", "total", "promedio", "average", "median", "percent", "porcentaje"]
     file_signals = ["archivo", "fichero", "file"]
-    return any(k in qn for k in excel_signals) or (any(k in qn for k in calc_signals) and any(k in qn for k in file_signals))
+
+    has_weak = any(k in qn for k in weak_signals)
+    has_calc = any(k in qn for k in calc_signals)
+    has_file = any(k in qn for k in file_signals)
+
+    return (has_weak and has_file) or (has_calc and has_file)
 
 
 class AgentRouter:
@@ -149,13 +173,19 @@ ROUTE: <route> — <reason in 8-15 words>
             return fast
 
         # ✅ Si parece SQL muy claro, forzamos tool_call SIN pasar por LLM
-        # (menos coste, más determinista)
+        # (menos coste, más determinista). Si ADEMÁS parece pedir contexto de
+        # documentos (políticas, procedimientos...), encadenamos SQL → DOCS
+        # (modo híbrido ya soportado en routes.py vía sql_context_doc).
         if _looks_like_sql_intent(user_input):
             class _ForcedChoice:
-                def __init__(self, tool_name: str, query: str):
-                    self.tool_calls = [{"name": tool_name, "args": {"query": query}}]
+                def __init__(self, tool_calls):
+                    self.tool_calls = tool_calls
                     self.content = ""
-            return _ForcedChoice("query_hr_database", user_input)
+
+            calls = [{"name": "query_hr_database", "args": {"query": user_input}}]
+            if _looks_like_docs_intent(user_input):
+                calls.append({"name": "chat_with_documents", "args": {"question": user_input}})
+            return _ForcedChoice(calls)
 
         # ✅ Si parece Excel claro, forzamos Excel; si no, el LLM decide entre DOCS/SUMMARY/WEB
         if _looks_like_excel_intent(user_input):
