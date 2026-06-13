@@ -7,21 +7,50 @@ The rest of the code is identical — SQLAlchemy handles the dialect.
 
 import sqlite3
 import os
+import re
 from typing import Optional
+from urllib.parse import quote
 
 from langchain.tools import BaseTool
 from langchain_openai import ChatOpenAI
 from langchain.prompts import ChatPromptTemplate
+from langchain.schema import AIMessage, HumanMessage, SystemMessage
 from langchain.callbacks.manager import CallbackManagerForToolRun
 from pydantic import BaseModel, Field
 from typing import ClassVar
 from flask import current_app
 
 
+# Intento inicial + reintentos con feedback del error real de SQLite
+MAX_SQL_ATTEMPTS = 3
+
+
 # ── Input schema ─────────────────────────────────────────────────────────────
 
 class HRQueryInput(BaseModel):
     query: str = Field(description="Natural-language question about HR data.")
+
+
+# ── SQL safety: defense-in-depth against LLM-generated SQL ────────────────────
+
+_FORBIDDEN_SQL_KEYWORDS = (
+    "INSERT", "UPDATE", "DELETE", "DROP", "ALTER", "CREATE",
+    "REPLACE", "TRUNCATE", "ATTACH", "DETACH", "PRAGMA", "VACUUM", "REINDEX",
+)
+
+
+def _is_select_only(sql: str) -> bool:
+    """True if `sql` is a single read-only SELECT/CTE statement."""
+    cleaned = sql.strip().rstrip(";").strip()
+    if not cleaned or ";" in cleaned:
+        return False
+
+    first_word = cleaned.split(None, 1)[0].upper()
+    if first_word not in ("SELECT", "WITH"):
+        return False
+
+    upper = cleaned.upper()
+    return not any(re.search(rf"\b{kw}\b", upper) for kw in _FORBIDDEN_SQL_KEYWORDS)
 
 
 # ── Tool ─────────────────────────────────────────────────────────────────────
@@ -85,12 +114,19 @@ USEFUL QUERY PATTERNS:
 """
 
     def _get_connection(self):
-        """Return a SQLite connection using the configured HR_DB_URI."""
+        """Return a READ-ONLY SQLite connection using the configured HR_DB_URI.
+
+        Opening in mode=ro is defense-in-depth: even if the LLM-generated SQL
+        slips past _is_select_only(), SQLite itself will refuse any write.
+        """
         try:
             db_uri = current_app.config.get("HR_DB_URI", "")
             # Strip SQLAlchemy prefix if present
             db_path = db_uri.replace("sqlite:///", "")
-            conn = sqlite3.connect(db_path)
+            if db_path == ":memory:":
+                conn = sqlite3.connect(db_path)
+            else:
+                conn = sqlite3.connect(f"file:{quote(db_path)}?mode=ro", uri=True)
             conn.row_factory = sqlite3.Row
             return conn
         except Exception as e:
@@ -105,8 +141,7 @@ USEFUL QUERY PATTERNS:
 
             llm = ChatOpenAI(model_name=self.model_name, temperature=0)
 
-            sql_prompt = ChatPromptTemplate.from_messages([
-                ("system", f"""You are an expert SQL analyst for HR data.
+            system_prompt = f"""You are an expert SQL analyst for HR data.
 Given the database schema below, write a single valid SQLite SELECT query to answer the user's question.
 Return ONLY the SQL — no explanation, no markdown fences.
 
@@ -117,25 +152,47 @@ Rules:
 - Always filter employees by status='active' unless the question explicitly asks about terminated employees.
 - Round float results to 2 decimal places.
 - Use meaningful column aliases (e.g. AS avg_salary).
-- NEVER use DROP, DELETE, UPDATE, INSERT or any DDL/DML."""),
-                ("user", "{question}"),
-            ])
+- NEVER use DROP, DELETE, UPDATE, INSERT or any DDL/DML."""
 
-            sql_chain = sql_prompt | llm
-            sql_result = sql_chain.invoke({"question": query})
-            generated_sql = sql_result.content.strip().strip("```sql").strip("```").strip()
-
-            print(f"🔍 Generated SQL:\n{generated_sql}")
-
-            # ── 2. Execute the SQL ────────────────────────────────────────────
+            # ── 2. Execute the SQL, with bounded self-correction ──────────────
             conn = self._get_connection()
             if not conn:
                 return "❌ Could not connect to the HR database."
-
             cursor = conn.cursor()
-            cursor.execute(generated_sql)
-            rows = cursor.fetchall()
-            columns = [desc[0] for desc in cursor.description]
+
+            messages = [SystemMessage(content=system_prompt), HumanMessage(content=query)]
+            generated_sql, rows, columns, last_error = "", None, None, None
+
+            for attempt in range(MAX_SQL_ATTEMPTS):
+                generated_sql = llm.invoke(messages).content.strip().strip("```sql").strip("```").strip()
+                print(f"🔍 Generated SQL (attempt {attempt + 1}/{MAX_SQL_ATTEMPTS}):\n{generated_sql}")
+
+                # ── Safety check: only single read-only SELECT/CTE statements ─
+                if not _is_select_only(generated_sql):
+                    return "❌ Generated query rejected: only single read-only SELECT statements are allowed."
+
+                try:
+                    cursor.execute(generated_sql)
+                    rows = cursor.fetchall()
+                    columns = [desc[0] for desc in cursor.description]
+                    last_error = None
+                    break
+                except sqlite3.Error as e:
+                    last_error = str(e)
+                    if attempt == MAX_SQL_ATTEMPTS - 1:
+                        break
+                    # ✅ Self-correction: pasamos el error real de SQLite al LLM para que corrija la query
+                    messages.append(AIMessage(content=generated_sql))
+                    messages.append(HumanMessage(
+                        content=(
+                            f"That query failed with this SQLite error:\n{last_error}\n\n"
+                            "Fix it and return ONLY the corrected SQL."
+                        )
+                    ))
+
+            if last_error is not None:
+                print(f"❌ SQL query failed after {MAX_SQL_ATTEMPTS} attempts: {last_error}")
+                return "I couldn't run a valid query for that question. Try rephrasing it or being more specific."
 
             if not rows:
                 return "No results found for your query."

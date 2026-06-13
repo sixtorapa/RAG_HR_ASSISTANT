@@ -147,9 +147,12 @@ class TestHRDatabaseToolMocked:
     """
 
     def test_tool_returns_error_on_bad_sql(self, app, hr_sqlite_db):
-        """El tool no debe crashear si el LLM genera SQL inválido."""
+        """El tool no debe crashear si el LLM genera SQL contra una tabla inexistente.
+
+        Tras agotar los reintentos de autocorrección, debe devolver un mensaje
+        genérico para el usuario (sin exponer el error crudo de SQLite)."""
         with app.app_context():
-            from app.rag_logic.sql_tool import HRDatabaseTool
+            from app.rag_logic.sql_tool import HRDatabaseTool, MAX_SQL_ATTEMPTS
 
             tool = HRDatabaseTool(model_name="gpt-4o-mini")
 
@@ -166,4 +169,69 @@ class TestHRDatabaseToolMocked:
 
             # Debe retornar un mensaje de error, no lanzar excepción
             assert isinstance(result, str)
-            assert "Error" in result or "error" in result.lower()
+            # Se reintenta MAX_SQL_ATTEMPTS veces antes de rendirse
+            assert mock_llm.invoke.call_count == MAX_SQL_ATTEMPTS
+            # Mensaje genérico para el usuario, no el error crudo de SQLite
+            assert "couldn't run a valid query" in result.lower()
+            assert "tabla_inexistente" not in result
+
+
+class TestHRDatabaseToolSelfCorrection:
+    """
+    Tests del bucle de autocorrección de _run(): si la query generada falla
+    en SQLite, se reintenta pasándole el error real al LLM, hasta
+    MAX_SQL_ATTEMPTS veces en total.
+    """
+
+    def test_self_corrects_after_invalid_column(self, app, hr_sqlite_db):
+        """1er intento referencia una columna inexistente (typo); el LLM
+        recibe el error real de SQLite y el 2º intento usa la columna correcta."""
+        with app.app_context():
+            from app.rag_logic.sql_tool import HRDatabaseTool
+
+            tool = HRDatabaseTool(model_name="gpt-4o-mini")
+
+            mock_llm = MagicMock()
+            mock_llm.invoke.side_effect = [
+                MagicMock(content="SELECT name FROM employees WHERE departament_id = 1"),  # typo
+                MagicMock(content="SELECT name FROM employees WHERE department_id = 999"),  # corregido, sin resultados
+            ]
+
+            conn = sqlite3.connect(hr_sqlite_db)
+            with patch("app.rag_logic.sql_tool.ChatOpenAI", return_value=mock_llm), \
+                 patch.object(tool, "_get_connection", return_value=conn):
+
+                result = tool._run("¿Cuántos empleados hay en el departamento X?")
+
+            # Se reintentó exactamente una vez (2 llamadas al LLM para generar SQL)
+            assert mock_llm.invoke.call_count == 2
+
+            # El 2º prompt debe incluir el error real de SQLite del 1er intento
+            second_call_messages = mock_llm.invoke.call_args_list[1][0][0]
+            joined = " ".join(getattr(m, "content", "") for m in second_call_messages)
+            assert "departament_id" in joined or "no such column" in joined.lower()
+
+            # La query corregida es válida pero no devuelve filas
+            assert result == "No results found for your query."
+
+    def test_gives_up_after_max_attempts(self, app, hr_sqlite_db):
+        """Si el LLM nunca corrige la query, se reintenta MAX_SQL_ATTEMPTS veces
+        y se devuelve un mensaje genérico (sin exponer el error SQL crudo)."""
+        with app.app_context():
+            from app.rag_logic.sql_tool import HRDatabaseTool, MAX_SQL_ATTEMPTS
+
+            tool = HRDatabaseTool(model_name="gpt-4o-mini")
+
+            bad_sql = "SELECT name FROM employees WHERE departament_id = 1"
+            mock_llm = MagicMock()
+            mock_llm.invoke.side_effect = [MagicMock(content=bad_sql) for _ in range(MAX_SQL_ATTEMPTS)]
+
+            conn = sqlite3.connect(hr_sqlite_db)
+            with patch("app.rag_logic.sql_tool.ChatOpenAI", return_value=mock_llm), \
+                 patch.object(tool, "_get_connection", return_value=conn):
+
+                result = tool._run("Pregunta que el LLM nunca resuelve bien")
+
+            assert mock_llm.invoke.call_count == MAX_SQL_ATTEMPTS
+            assert "no such column" not in result.lower()
+            assert "couldn't run a valid query" in result.lower()

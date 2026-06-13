@@ -24,6 +24,24 @@ jobs:
       - run: pip install ruff
       - run: ruff check . --ignore E501,E402,F401,F841,E701,F541,F821,F823
 
+  test:
+    name: Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements-prod.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+      - run: pip install -r requirements-prod.txt --extra-index-url https://download.pytorch.org/whl/cpu
+      - run: pip install pytest
+      - run: pytest
+
   docker-build:
     name: Docker Build
     runs-on: ubuntu-latest
