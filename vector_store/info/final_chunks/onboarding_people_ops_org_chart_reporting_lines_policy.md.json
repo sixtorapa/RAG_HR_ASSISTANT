@@ -1,0 +1,84 @@
+{
+  "source_file": "onboarding_people_ops/org_chart_reporting_lines_policy.md",
+  "num_chunks": 3,
+  "chunks": [
+    {
+      "text": "SOURCE: onboarding_people_ops/org_chart_reporting_lines_policy.md\nTITLE: Política de Estructura Organizativa y Líneas de Reporte\n\n[PÁGINA ?]\n# Org Chart & Reporting Lines Policy\n\n## 1. Source of Truth\n\nThe HRIS system is the single source of truth for reporting lines. The org chart tool displayed internally is generated automatically from HRIS data nightly — it is never edited directly.\n\n## 2. Changing a Reporting Line\n\nReporting line changes (a team moving to a new manager, a reorg) must be submitted by the Department Head via the HRIS change form, with effective date and reason. Changes take effect on the stated date and are reflected in the org chart the following business day.\n\n## 3. Dotted-Line Reporting\n\nSome roles have a \"dotted line\" to a second manager (e.g., a regional specialist supporting two departments). Dotted-line relationships are recorded in HRIS for visibility but only the solid-line manager has formal authority over performance reviews, PIPs, and compensation decisions.\n\n## 4. Span of Control Guidelines\n\nAs a guideline, a single manager should have no more than 8 direct reports to maintain effective 1:1 cadence and review quality. Exceptions above this require Department Head sign-off and a documented plan for how 1:1s and reviews will still be delivered on schedule.\n\n## 5. Interim Managers\n\nWhen a manager is on extended leave, an interim manager can be assigned in HRIS for the duration. Interim managers can run 1:1s and day-to-day decisions but performance review sign-off waits for the substantive manager's return unless the leave spans an entire review cycle.\n\n## 6. Who to Contact\n\nOrg chart discrepancies (wrong manager shown, missing team member) should be reported to People Ops; reorg requests go through the Department Head, not directly to People Ops.",
+      "metadata": {
+        "source": "/home/sparras/trabajo/RAG_HR_ASSISTANT/knowledge_base/onboarding_people_ops/org_chart_reporting_lines_policy.md",
+        "relative_path": "onboarding_people_ops/org_chart_reporting_lines_policy.md",
+        "folder_context": "onboarding_people_ops",
+        "filename": "org_chart_reporting_lines_policy.md",
+        "file_stem": "org_chart_reporting_lines_policy",
+        "pages_in_chunk": "",
+        "chunking": "page_based_hybrid",
+        "word_count": 272,
+        "char_count": 1676,
+        "has_table": false,
+        "semantic_source": "onboarding_people_ops/org_chart_reporting_lines_policy.md",
+        "chunk_id": "1982705b27f3725b",
+        "chunk_type": "macro",
+        "has_children": true,
+        "semantic_headline": "Política de Estructura Organizativa y Líneas de Reporte",
+        "semantic_summary": "La Política de Estructura Organizativa define el sistema HRIS como la fuente única de verdad para las líneas de reporte. Se establecen procedimientos para cambios en las líneas de reporte y se recomienda un máximo de 8 reportes directos por gerente.",
+        "contains_metrics": false,
+        "contains_list": false,
+        "context_where": "onboarding_people_ops/org_chart_reporting_lines_policy.md"
+      }
+    },
+    {
+      "text": "SOURCE: onboarding_people_ops/org_chart_reporting_lines_policy.md\nTITLE: Política de Estructura Organizativa y Líneas de Reporte\n\n[PÁGINA ?]\n# Org Chart & Reporting Lines Policy\n\n## 1. Source of Truth\n\nThe HRIS system is the single source of truth for reporting lines. The org chart tool displayed internally is generated automatically from HRIS data nightly — it is never edited directly.\n\n## 2. Changing a Reporting Line\n\nReporting line changes (a team moving to a new manager, a reorg) must be submitted by the Department Head via the HRIS change form, with effective date and reason. Changes take effect on the stated date and are reflected in the org chart the following business day.\n\n## 3. Dotted-Line Reporting\n\nSome roles have a \"dotted line\" to a second manager (e.g., a regional specialist supporting two departments). Dotted-line relationships are recorded in HRIS for visibility but only the solid-line manager has formal authority over performance reviews, PIPs, and compensation decisions.\n\n## 4. Span of Control Guidelines",
+      "metadata": {
+        "chunk_type": "micro",
+        "parent_chunk_id": "1982705b27f3725b",
+        "parent_pages": "",
+        "chunk_id": "770deefb4f60e08d",
+        "micro_chunk_index": 1,
+        "pages_in_chunk": "",
+        "chunking": "micro_token_split",
+        "semantic_source": "onboarding_people_ops/org_chart_reporting_lines_policy.md",
+        "source": "/home/sparras/trabajo/RAG_HR_ASSISTANT/knowledge_base/onboarding_people_ops/org_chart_reporting_lines_policy.md",
+        "source_file": "",
+        "relative_path": "onboarding_people_ops/org_chart_reporting_lines_policy.md",
+        "filename": "org_chart_reporting_lines_policy.md",
+        "file_stem": "org_chart_reporting_lines_policy",
+        "file_type": "",
+        "folder_context": "onboarding_people_ops",
+        "semantic_headline": "Política de Estructura Organizativa y Líneas de Reporte",
+        "semantic_summary": "La Política de Estructura Organizativa define el sistema HRIS como la fuente única de verdad para las líneas de reporte. Se establecen procedimientos para cambios en las líneas de reporte y se recomienda un máximo de 8 reportes directos por gerente.",
+        "word_count": 148,
+        "char_count": 908,
+        "contains_metrics": false,
+        "contains_list": false,
+        "context_where": "onboarding_people_ops/org_chart_reporting_lines_policy.md"
+      }
+    },
+    {
+      "text": "SOURCE: onboarding_people_ops/org_chart_reporting_lines_policy.md\nTITLE: Política de Estructura Organizativa y Líneas de Reporte\n\n## 4. Span of Control Guidelines\n\nAs a guideline, a single manager should have no more than 8 direct reports to maintain effective 1:1 cadence and review quality. Exceptions above this require Department Head sign-off and a documented plan for how 1:1s and reviews will still be delivered on schedule.\n\n## 5. Interim Managers\n\nWhen a manager is on extended leave, an interim manager can be assigned in HRIS for the duration. Interim managers can run 1:1s and day-to-day decisions but performance review sign-off waits for the substantive manager's return unless the leave spans an entire review cycle.\n\n## 6. Who to Contact\n\nOrg chart discrepancies (wrong manager shown, missing team member) should be reported to People Ops; reorg requests go through the Department Head, not directly to People Ops.",
+      "metadata": {
+        "chunk_type": "micro",
+        "parent_chunk_id": "1982705b27f3725b",
+        "parent_pages": "",
+        "chunk_id": "f2e786d29cf398a0",
+        "micro_chunk_index": 2,
+        "pages_in_chunk": "",
+        "chunking": "micro_token_split",
+        "semantic_source": "onboarding_people_ops/org_chart_reporting_lines_policy.md",
+        "source": "/home/sparras/trabajo/RAG_HR_ASSISTANT/knowledge_base/onboarding_people_ops/org_chart_reporting_lines_policy.md",
+        "source_file": "",
+        "relative_path": "onboarding_people_ops/org_chart_reporting_lines_policy.md",
+        "filename": "org_chart_reporting_lines_policy.md",
+        "file_stem": "org_chart_reporting_lines_policy",
+        "file_type": "",
+        "folder_context": "onboarding_people_ops",
+        "semantic_headline": "Política de Estructura Organizativa y Líneas de Reporte",
+        "semantic_summary": "La Política de Estructura Organizativa define el sistema HRIS como la fuente única de verdad para las líneas de reporte. Se establecen procedimientos para cambios en las líneas de reporte y se recomienda un máximo de 8 reportes directos por gerente.",
+        "word_count": 130,
+        "char_count": 800,
+        "contains_metrics": false,
+        "contains_list": false,
+        "context_where": "onboarding_people_ops/org_chart_reporting_lines_policy.md"
+      }
+    }
+  ]
+}

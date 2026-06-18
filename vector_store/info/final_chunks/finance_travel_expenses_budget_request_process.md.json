@@ -1,0 +1,84 @@
+{
+  "source_file": "finance_travel_expenses/budget_request_process.md",
+  "num_chunks": 3,
+  "chunks": [
+    {
+      "text": "SOURCE: finance_travel_expenses/budget_request_process.md\nTITLE: Proceso de Solicitud de Presupuesto Anual\n\n[PÁGINA ?]\n# Budget Request Process\n\n## 1. Annual Budget Cycle\n\nDepartment budgets (including team L&D, ERG, and discretionary spend) are set annually each November for the following calendar year, aligned with the Salary Review Calendar's budget envelope process.\n\n## 2. Submitting a Department Budget Request\n\nDepartment Heads submit a budget request to Finance in October, covering headcount plan, expected team spend categories (travel, software, L&D, vendor contracts), and growth assumptions. Finance reviews against company-wide targets before approving.\n\n## 3. Mid-Year Adjustments\n\nA department can request a mid-year budget adjustment (typically in June) if circumstances have genuinely changed (e.g., unplanned headcount growth, a new strategic project). This requires written justification and Finance approval — it is not automatic.\n\n## 4. Unbudgeted Spend\n\nAny spend not anticipated in the approved budget (a new vendor, an unplanned hire) needs a specific exception approval from Finance, even if the department's overall budget has room, since budgets are tracked by category, not just total.\n\n## 5. Tracking Spend Against Budget\n\nDepartment Heads can see real-time spend-vs-budget in the Finance dashboard, broken down by category (payroll, travel, software, vendor, L&D). Finance sends a monthly summary flagging any category trending over budget.\n\n## 6. Underspending\n\nUnderspend does not roll over to the following year by default; a Department Head who wants to carry forward a specific underspend (e.g., a delayed hire's budget) must request this explicitly as part of the next annual cycle.\n\n## 7. Capital vs. Operating Expense\n\nEquipment purchases over €5,000 per item may be treated as capital expenditure rather than operating expense, which has different budget and accounting treatment — check with Finance before assuming a large purchase fits within a normal operating budget line.\n\n## 8. Questions\n\nBudget category definitions and approval thresholds questions go to Finance; whether a specific department has room in its current budget is a Department Head question first.",
+      "metadata": {
+        "source": "/home/sparras/trabajo/RAG_HR_ASSISTANT/knowledge_base/finance_travel_expenses/budget_request_process.md",
+        "relative_path": "finance_travel_expenses/budget_request_process.md",
+        "folder_context": "finance_travel_expenses",
+        "filename": "budget_request_process.md",
+        "file_stem": "budget_request_process",
+        "pages_in_chunk": "",
+        "chunking": "page_based_hybrid",
+        "word_count": 311,
+        "char_count": 2104,
+        "has_table": false,
+        "semantic_source": "finance_travel_expenses/budget_request_process.md",
+        "chunk_id": "5f8ee27e77efe0ba",
+        "chunk_type": "macro",
+        "has_children": true,
+        "semantic_headline": "Proceso de Solicitud de Presupuesto Anual",
+        "semantic_summary": "Los presupuestos departamentales se establecen anualmente en noviembre, con solicitudes enviadas en octubre. Se permiten ajustes a mitad de año con justificación. Los gastos no presupuestados requieren aprobación específica de Finanzas, y el seguimiento del gasto se realiza en tiempo real a través de un panel.",
+        "contains_metrics": true,
+        "contains_list": false,
+        "context_where": "finance_travel_expenses/budget_request_process.md"
+      }
+    },
+    {
+      "text": "SOURCE: finance_travel_expenses/budget_request_process.md\nTITLE: Proceso de Solicitud de Presupuesto Anual\n\n[PÁGINA ?]\n# Budget Request Process\n\n## 1. Annual Budget Cycle\n\nDepartment budgets (including team L&D, ERG, and discretionary spend) are set annually each November for the following calendar year, aligned with the Salary Review Calendar's budget envelope process.\n\n## 2. Submitting a Department Budget Request\n\nDepartment Heads submit a budget request to Finance in October, covering headcount plan, expected team spend categories (travel, software, L&D, vendor contracts), and growth assumptions. Finance reviews against company-wide targets before approving.\n\n## 3. Mid-Year Adjustments\n\nA department can request a mid-year budget adjustment (typically in June) if circumstances have genuinely changed (e.g., unplanned headcount growth, a new strategic project). This requires written justification and Finance approval — it is not automatic.\n\n## 4. Unbudgeted Spend\n\nAny spend not anticipated in the approved budget (a new vendor, an unplanned hire) needs a specific exception approval from Finance, even if the department's overall budget has room, since budgets are tracked by category, not just total.\n\n## 5. Tracking Spend Against Budget",
+      "metadata": {
+        "chunk_type": "micro",
+        "parent_chunk_id": "5f8ee27e77efe0ba",
+        "parent_pages": "",
+        "chunk_id": "6375295332e6601f",
+        "micro_chunk_index": 1,
+        "pages_in_chunk": "",
+        "chunking": "micro_token_split",
+        "semantic_source": "finance_travel_expenses/budget_request_process.md",
+        "source": "/home/sparras/trabajo/RAG_HR_ASSISTANT/knowledge_base/finance_travel_expenses/budget_request_process.md",
+        "source_file": "",
+        "relative_path": "finance_travel_expenses/budget_request_process.md",
+        "filename": "budget_request_process.md",
+        "file_stem": "budget_request_process",
+        "file_type": "",
+        "folder_context": "finance_travel_expenses",
+        "semantic_headline": "Proceso de Solicitud de Presupuesto Anual",
+        "semantic_summary": "Los presupuestos departamentales se establecen anualmente en noviembre, con solicitudes enviadas en octubre. Se permiten ajustes a mitad de año con justificación. Los gastos no presupuestados requieren aprobación específica de Finanzas, y el seguimiento del gasto se realiza en tiempo real a través de un panel.",
+        "word_count": 166,
+        "char_count": 1145,
+        "contains_metrics": false,
+        "contains_list": false,
+        "context_where": "finance_travel_expenses/budget_request_process.md"
+      }
+    },
+    {
+      "text": "SOURCE: finance_travel_expenses/budget_request_process.md\nTITLE: Proceso de Solicitud de Presupuesto Anual\n\nAny spend not anticipated in the approved budget (a new vendor, an unplanned hire) needs a specific exception approval from Finance, even if the department's overall budget has room, since budgets are tracked by category, not just total.\n\n## 5. Tracking Spend Against Budget\n\nDepartment Heads can see real-time spend-vs-budget in the Finance dashboard, broken down by category (payroll, travel, software, vendor, L&D). Finance sends a monthly summary flagging any category trending over budget.\n\n## 6. Underspending\n\nUnderspend does not roll over to the following year by default; a Department Head who wants to carry forward a specific underspend (e.g., a delayed hire's budget) must request this explicitly as part of the next annual cycle.\n\n## 7. Capital vs. Operating Expense\n\nEquipment purchases over €5,000 per item may be treated as capital expenditure rather than operating expense, which has different budget and accounting treatment — check with Finance before assuming a large purchase fits within a normal operating budget line.\n\n## 8. Questions\n\nBudget category definitions and approval thresholds questions go to Finance; whether a specific department has room in its current budget is a Department Head question first.",
+      "metadata": {
+        "chunk_type": "micro",
+        "parent_chunk_id": "5f8ee27e77efe0ba",
+        "parent_pages": "",
+        "chunk_id": "11fe87f55a0fce65",
+        "micro_chunk_index": 2,
+        "pages_in_chunk": "",
+        "chunking": "micro_token_split",
+        "semantic_source": "finance_travel_expenses/budget_request_process.md",
+        "source": "/home/sparras/trabajo/RAG_HR_ASSISTANT/knowledge_base/finance_travel_expenses/budget_request_process.md",
+        "source_file": "",
+        "relative_path": "finance_travel_expenses/budget_request_process.md",
+        "filename": "budget_request_process.md",
+        "file_stem": "budget_request_process",
+        "file_type": "",
+        "folder_context": "finance_travel_expenses",
+        "semantic_headline": "Proceso de Solicitud de Presupuesto Anual",
+        "semantic_summary": "Los presupuestos departamentales se establecen anualmente en noviembre, con solicitudes enviadas en octubre. Se permiten ajustes a mitad de año con justificación. Los gastos no presupuestados requieren aprobación específica de Finanzas, y el seguimiento del gasto se realiza en tiempo real a través de un panel.",
+        "word_count": 189,
+        "char_count": 1233,
+        "contains_metrics": true,
+        "contains_list": false,
+        "context_where": "finance_travel_expenses/budget_request_process.md"
+      }
+    }
+  ]
+}

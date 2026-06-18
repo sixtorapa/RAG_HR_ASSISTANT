@@ -1,0 +1,84 @@
+{
+  "source_file": "recruitment_talent/internship_program_guidelines.md",
+  "num_chunks": 3,
+  "chunks": [
+    {
+      "text": "SOURCE: recruitment_talent/internship_program_guidelines.md\nTITLE: Guía del Programa de Pasantías: Estructura y Beneficios\n\n[PÁGINA ?]\n# Internship Program Guidelines\n\n## 1. Program Overview\n\nInternships run twice a year: a **summer cohort** (June–August, 12 weeks) and a **winter cohort** (January–March, 10 weeks). All internships are paid; we do not offer unpaid internships in any country of operation.\n\n## 2. Eligibility\n\nOpen to students currently enrolled in a degree program, or within 6 months of graduation. Each intern is assigned a named mentor (a Senior-level or above employee) and a structured project with a defined deliverable for the cohort.\n\n## 3. Compensation\n\n| Level | Monthly Stipend |\n| --- | --- |\n| Undergraduate | €1,400 |\n| Graduate / Master's | €1,800 |\n\nInterns are not eligible for the bonus or ESOP programs, but do receive the meal allowance and remote-work flexibility on the same terms as full-time employees.\n\n## 4. Conversion to Full-Time\n\nInterns are evaluated at the midpoint and end of their internship using the same scorecard criteria as the standard interview process. Strong performers may receive a full-time offer at the level appropriate to their experience, contingent on headcount availability in their team at the time.\n\n## 5. Mentor Responsibilities\n\nMentors commit to a weekly 1:1 with their intern and a written mid-point and final evaluation. Mentoring an intern counts toward a Senior employee's leadership development goals (see Leadership Development Track).\n\n## 6. Onboarding\n\nInterns follow a condensed version of the standard Onboarding Guide, completed within their first 3 days rather than the standard first week, given the shorter overall tenure.\n\n## 7. Capacity Planning\n\nEach team may host a maximum of 2 interns per cohort without additional approval; hosting more requires Department Head sign-off to ensure mentor capacity isn't overstretched.",
+      "metadata": {
+        "source": "/home/sparras/trabajo/RAG_HR_ASSISTANT/knowledge_base/recruitment_talent/internship_program_guidelines.md",
+        "relative_path": "recruitment_talent/internship_program_guidelines.md",
+        "folder_context": "recruitment_talent",
+        "filename": "internship_program_guidelines.md",
+        "file_stem": "internship_program_guidelines",
+        "pages_in_chunk": "",
+        "chunking": "page_based_hybrid",
+        "word_count": 281,
+        "char_count": 1788,
+        "has_table": false,
+        "semantic_source": "recruitment_talent/internship_program_guidelines.md",
+        "chunk_id": "a07af614ca417e36",
+        "chunk_type": "macro",
+        "has_children": true,
+        "semantic_headline": "Guía del Programa de Pasantías: Estructura y Beneficios",
+        "semantic_summary": "El programa de pasantías se lleva a cabo dos veces al año, con cohortes de verano y invierno. Los pasantes reciben una compensación mensual de €1,400 para estudiantes de pregrado y €1,800 para graduados. Se asigna un mentor a cada pasante, y aquellos con un rendimiento destacado pueden recibir ofertas de trabajo a tiempo completo.",
+        "contains_metrics": true,
+        "contains_list": false,
+        "context_where": "recruitment_talent/internship_program_guidelines.md"
+      }
+    },
+    {
+      "text": "SOURCE: recruitment_talent/internship_program_guidelines.md\nTITLE: Guía del Programa de Pasantías: Estructura y Beneficios\n\n[PÁGINA ?]\n# Internship Program Guidelines\n\n## 1. Program Overview\n\nInternships run twice a year: a **summer cohort** (June–August, 12 weeks) and a **winter cohort** (January–March, 10 weeks). All internships are paid; we do not offer unpaid internships in any country of operation.\n\n## 2. Eligibility\n\nOpen to students currently enrolled in a degree program, or within 6 months of graduation. Each intern is assigned a named mentor (a Senior-level or above employee) and a structured project with a defined deliverable for the cohort.\n\n## 3. Compensation\n\n| Level | Monthly Stipend |\n| --- | --- |\n| Undergraduate | €1,400 |\n| Graduate / Master's | €1,800 |\n\nInterns are not eligible for the bonus or ESOP programs, but do receive the meal allowance and remote-work flexibility on the same terms as full-time employees.\n\n## 4. Conversion to Full-Time",
+      "metadata": {
+        "chunk_type": "micro",
+        "parent_chunk_id": "a07af614ca417e36",
+        "parent_pages": "",
+        "chunk_id": "18fde0a346d4778d",
+        "micro_chunk_index": 1,
+        "pages_in_chunk": "",
+        "chunking": "micro_token_split",
+        "semantic_source": "recruitment_talent/internship_program_guidelines.md",
+        "source": "/home/sparras/trabajo/RAG_HR_ASSISTANT/knowledge_base/recruitment_talent/internship_program_guidelines.md",
+        "source_file": "",
+        "relative_path": "recruitment_talent/internship_program_guidelines.md",
+        "filename": "internship_program_guidelines.md",
+        "file_stem": "internship_program_guidelines",
+        "file_type": "",
+        "folder_context": "recruitment_talent",
+        "semantic_headline": "Guía del Programa de Pasantías: Estructura y Beneficios",
+        "semantic_summary": "El programa de pasantías se lleva a cabo dos veces al año, con cohortes de verano y invierno. Los pasantes reciben una compensación mensual de €1,400 para estudiantes de pregrado y €1,800 para graduados. Se asigna un mentor a cada pasante, y aquellos con un rendimiento destacado pueden recibir ofertas de trabajo a tiempo completo.",
+        "word_count": 141,
+        "char_count": 851,
+        "contains_metrics": true,
+        "contains_list": false,
+        "context_where": "recruitment_talent/internship_program_guidelines.md"
+      }
+    },
+    {
+      "text": "SOURCE: recruitment_talent/internship_program_guidelines.md\nTITLE: Guía del Programa de Pasantías: Estructura y Beneficios\n\nInterns are not eligible for the bonus or ESOP programs, but do receive the meal allowance and remote-work flexibility on the same terms as full-time employees.\n\n## 4. Conversion to Full-Time\n\nInterns are evaluated at the midpoint and end of their internship using the same scorecard criteria as the standard interview process. Strong performers may receive a full-time offer at the level appropriate to their experience, contingent on headcount availability in their team at the time.\n\n## 5. Mentor Responsibilities\n\nMentors commit to a weekly 1:1 with their intern and a written mid-point and final evaluation. Mentoring an intern counts toward a Senior employee's leadership development goals (see Leadership Development Track).\n\n## 6. Onboarding\n\nInterns follow a condensed version of the standard Onboarding Guide, completed within their first 3 days rather than the standard first week, given the shorter overall tenure.\n\n## 7. Capacity Planning\n\nEach team may host a maximum of 2 interns per cohort without additional approval; hosting more requires Department Head sign-off to ensure mentor capacity isn't overstretched.",
+      "metadata": {
+        "chunk_type": "micro",
+        "parent_chunk_id": "a07af614ca417e36",
+        "parent_pages": "",
+        "chunk_id": "1ea1b675a26ce0a2",
+        "micro_chunk_index": 2,
+        "pages_in_chunk": "",
+        "chunking": "micro_token_split",
+        "semantic_source": "recruitment_talent/internship_program_guidelines.md",
+        "source": "/home/sparras/trabajo/RAG_HR_ASSISTANT/knowledge_base/recruitment_talent/internship_program_guidelines.md",
+        "source_file": "",
+        "relative_path": "recruitment_talent/internship_program_guidelines.md",
+        "filename": "internship_program_guidelines.md",
+        "file_stem": "internship_program_guidelines",
+        "file_type": "",
+        "folder_context": "recruitment_talent",
+        "semantic_headline": "Guía del Programa de Pasantías: Estructura y Beneficios",
+        "semantic_summary": "El programa de pasantías se lleva a cabo dos veces al año, con cohortes de verano y invierno. Los pasantes reciben una compensación mensual de €1,400 para estudiantes de pregrado y €1,800 para graduados. Se asigna un mentor a cada pasante, y aquellos con un rendimiento destacado pueden recibir ofertas de trabajo a tiempo completo.",
+        "word_count": 171,
+        "char_count": 1128,
+        "contains_metrics": false,
+        "contains_list": false,
+        "context_where": "recruitment_talent/internship_program_guidelines.md"
+      }
+    }
+  ]
+}

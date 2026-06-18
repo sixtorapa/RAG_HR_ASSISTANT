@@ -1,0 +1,111 @@
+{
+  "source_file": "performance_management/performance_improvement_plan_process.md",
+  "num_chunks": 4,
+  "chunks": [
+    {
+      "text": "SOURCE: performance_management/performance_improvement_plan_process.md\nTITLE: Proceso del Plan de Mejora del Desempeño (PIP)\n\n[PÁGINA ?]\n# Performance Improvement Plan (PIP) Process\n\n## 1. When a PIP Is Used\n\nA PIP is used when an employee's performance falls in the \"Needs Improvement\" range (score 1.0-2.0) on the Annual Performance Review, or when a manager identifies a sustained, specific performance gap outside the review cycle that has already been raised informally without improvement.\n\n## 2. Before Starting a PIP\n\nA PIP should never be the employee's first signal that something is wrong. Managers must document at least one informal conversation and one written follow-up (email or 1:1 notes) about the specific concern before initiating a formal PIP, and must consult with People Ops on the draft plan before it is delivered.\n\n## 3. PIP Structure\n\n| Element | Requirement |\n| --- | --- |\n| Duration | 30, 60, or 90 days depending on severity and role complexity |\n| Specific goals | 2-4 measurable, achievable goals tied to the actual concern |\n| Check-in cadence | Weekly 1:1, with written notes after each |\n| Support offered | Training, mentoring, or workload adjustment, as relevant |\n\n## 4. During the PIP\n\nThe employee remains in their normal role and is paid normally. They are not eligible for that cycle's bonus or a salary increase while on an active PIP (see Bonus & Incentive Plan FAQ). The employee may bring a colleague or People Ops representative to check-in meetings if they choose.\n\n## 5. Outcomes\n\nAt the end of the PIP period, one of three outcomes is documented:\n\n- **Successful completion**: goals met, PIP closed, normal eligibility resumes\n- **Extension**: partial progress, plan extended once for up to half the original duration\n- **Termination**: goals not met, leading to a separation conversation following the Disciplinary Procedure\n\n## 6. Appeals\n\nAn employee who disagrees with the basis for a PIP can request a review by the People Director within 5 business days of the PIP being issued. The PIP remains in effect during the review unless People Ops decides otherwise.\n\n## 7. Confidentiality\n\nPIP status is shared only with the employee, their manager, and People Ops. It is not disclosed to peers and is not referenced in internal mobility applications beyond confirming current eligibility status.",
+      "metadata": {
+        "source": "/home/sparras/trabajo/RAG_HR_ASSISTANT/knowledge_base/performance_management/performance_improvement_plan_process.md",
+        "relative_path": "performance_management/performance_improvement_plan_process.md",
+        "folder_context": "performance_management",
+        "filename": "performance_improvement_plan_process.md",
+        "file_stem": "performance_improvement_plan_process",
+        "pages_in_chunk": "",
+        "chunking": "page_based_hybrid",
+        "word_count": 370,
+        "char_count": 2221,
+        "has_table": false,
+        "semantic_source": "performance_management/performance_improvement_plan_process.md",
+        "chunk_id": "cffd2cd849061ef1",
+        "chunk_type": "macro",
+        "has_children": true,
+        "semantic_headline": "Proceso del Plan de Mejora del Desempeño (PIP)",
+        "semantic_summary": "Un PIP se utiliza cuando el desempeño de un empleado cae en la categoría de 'Necesita Mejora'. Debe haber documentación de conversaciones informales previas antes de iniciar un PIP formal. Al final del período, se documentan tres posibles resultados: finalización exitosa, extensión o terminación.",
+        "contains_metrics": false,
+        "contains_list": true,
+        "context_where": "performance_management/performance_improvement_plan_process.md"
+      }
+    },
+    {
+      "text": "SOURCE: performance_management/performance_improvement_plan_process.md\nTITLE: Proceso del Plan de Mejora del Desempeño (PIP)\n\n[PÁGINA ?]\n# Performance Improvement Plan (PIP) Process\n\n## 1. When a PIP Is Used\n\nA PIP is used when an employee's performance falls in the \"Needs Improvement\" range (score 1.0-2.0) on the Annual Performance Review, or when a manager identifies a sustained, specific performance gap outside the review cycle that has already been raised informally without improvement.\n\n## 2. Before Starting a PIP\n\nA PIP should never be the employee's first signal that something is wrong. Managers must document at least one informal conversation and one written follow-up (email or 1:1 notes) about the specific concern before initiating a formal PIP, and must consult with People Ops on the draft plan before it is delivered.\n\n## 3. PIP Structure",
+      "metadata": {
+        "chunk_type": "micro",
+        "parent_chunk_id": "cffd2cd849061ef1",
+        "parent_pages": "",
+        "chunk_id": "7634fbf3de23f82c",
+        "micro_chunk_index": 1,
+        "pages_in_chunk": "",
+        "chunking": "micro_token_split",
+        "semantic_source": "performance_management/performance_improvement_plan_process.md",
+        "source": "/home/sparras/trabajo/RAG_HR_ASSISTANT/knowledge_base/performance_management/performance_improvement_plan_process.md",
+        "source_file": "",
+        "relative_path": "performance_management/performance_improvement_plan_process.md",
+        "filename": "performance_improvement_plan_process.md",
+        "file_stem": "performance_improvement_plan_process",
+        "file_type": "",
+        "folder_context": "performance_management",
+        "semantic_headline": "Proceso del Plan de Mejora del Desempeño (PIP)",
+        "semantic_summary": "Un PIP se utiliza cuando el desempeño de un empleado cae en la categoría de 'Necesita Mejora'. Debe haber documentación de conversaciones informales previas antes de iniciar un PIP formal. Al final del período, se documentan tres posibles resultados: finalización exitosa, extensión o terminación.",
+        "word_count": 120,
+        "char_count": 734,
+        "contains_metrics": false,
+        "contains_list": false,
+        "context_where": "performance_management/performance_improvement_plan_process.md"
+      }
+    },
+    {
+      "text": "SOURCE: performance_management/performance_improvement_plan_process.md\nTITLE: Proceso del Plan de Mejora del Desempeño (PIP)\n\n## 3. PIP Structure\n\n| Element | Requirement |\n| --- | --- |\n| Duration | 30, 60, or 90 days depending on severity and role complexity |\n| Specific goals | 2-4 measurable, achievable goals tied to the actual concern |\n| Check-in cadence | Weekly 1:1, with written notes after each |\n| Support offered | Training, mentoring, or workload adjustment, as relevant |\n\n## 4. During the PIP\n\nThe employee remains in their normal role and is paid normally. They are not eligible for that cycle's bonus or a salary increase while on an active PIP (see Bonus & Incentive Plan FAQ). The employee may bring a colleague or People Ops representative to check-in meetings if they choose.\n\n## 5. Outcomes\n\nAt the end of the PIP period, one of three outcomes is documented:\n\n- **Successful completion**: goals met, PIP closed, normal eligibility resumes\n- **Extension**: partial progress, plan extended once for up to half the original duration\n- **Termination**: goals not met, leading to a separation conversation following the Disciplinary Procedure\n\n## 6. Appeals",
+      "metadata": {
+        "chunk_type": "micro",
+        "parent_chunk_id": "cffd2cd849061ef1",
+        "parent_pages": "",
+        "chunk_id": "a9dfecaafc84c2c2",
+        "micro_chunk_index": 2,
+        "pages_in_chunk": "",
+        "chunking": "micro_token_split",
+        "semantic_source": "performance_management/performance_improvement_plan_process.md",
+        "source": "/home/sparras/trabajo/RAG_HR_ASSISTANT/knowledge_base/performance_management/performance_improvement_plan_process.md",
+        "source_file": "",
+        "relative_path": "performance_management/performance_improvement_plan_process.md",
+        "filename": "performance_improvement_plan_process.md",
+        "file_stem": "performance_improvement_plan_process",
+        "file_type": "",
+        "folder_context": "performance_management",
+        "semantic_headline": "Proceso del Plan de Mejora del Desempeño (PIP)",
+        "semantic_summary": "Un PIP se utiliza cuando el desempeño de un empleado cae en la categoría de 'Necesita Mejora'. Debe haber documentación de conversaciones informales previas antes de iniciar un PIP formal. Al final del período, se documentan tres posibles resultados: finalización exitosa, extensión o terminación.",
+        "word_count": 179,
+        "char_count": 1050,
+        "contains_metrics": false,
+        "contains_list": true,
+        "context_where": "performance_management/performance_improvement_plan_process.md"
+      }
+    },
+    {
+      "text": "SOURCE: performance_management/performance_improvement_plan_process.md\nTITLE: Proceso del Plan de Mejora del Desempeño (PIP)\n\n## 6. Appeals\n\nAn employee who disagrees with the basis for a PIP can request a review by the People Director within 5 business days of the PIP being issued. The PIP remains in effect during the review unless People Ops decides otherwise.\n\n## 7. Confidentiality\n\nPIP status is shared only with the employee, their manager, and People Ops. It is not disclosed to peers and is not referenced in internal mobility applications beyond confirming current eligibility status.",
+      "metadata": {
+        "chunk_type": "micro",
+        "parent_chunk_id": "cffd2cd849061ef1",
+        "parent_pages": "",
+        "chunk_id": "d3e3a5ea5e29f0c1",
+        "micro_chunk_index": 3,
+        "pages_in_chunk": "",
+        "chunking": "micro_token_split",
+        "semantic_source": "performance_management/performance_improvement_plan_process.md",
+        "source": "/home/sparras/trabajo/RAG_HR_ASSISTANT/knowledge_base/performance_management/performance_improvement_plan_process.md",
+        "source_file": "",
+        "relative_path": "performance_management/performance_improvement_plan_process.md",
+        "filename": "performance_improvement_plan_process.md",
+        "file_stem": "performance_improvement_plan_process",
+        "file_type": "",
+        "folder_context": "performance_management",
+        "semantic_headline": "Proceso del Plan de Mejora del Desempeño (PIP)",
+        "semantic_summary": "Un PIP se utiliza cuando el desempeño de un empleado cae en la categoría de 'Necesita Mejora'. Debe haber documentación de conversaciones informales previas antes de iniciar un PIP formal. Al final del período, se documentan tres posibles resultados: finalización exitosa, extensión o terminación.",
+        "word_count": 78,
+        "char_count": 469,
+        "contains_metrics": false,
+        "contains_list": false,
+        "context_where": "performance_management/performance_improvement_plan_process.md"
+      }
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+# Inclusive Hiring Guidelines
+
+## 1. Job Descriptions
+
+Use the built-in bias checker before publishing any job description (see Hiring Manager Toolkit). Avoid unnecessary requirements that can disproportionately discourage qualified candidates (e.g., requiring a specific degree when equivalent experience would do, or excessive "must-have" lists for a role that's genuinely learnable).
+
+## 2. Where We Source
+
+Talent Acquisition maintains relationships with a deliberately broad set of sourcing channels, including communities and platforms focused on underrepresented groups in the relevant field, in addition to standard channels.
+
+## 3. Diverse Interview Panels
+
+Where feasible, interview panels for Lead-level and above roles include at least one panelist who is not the hiring manager's direct peer group, to bring a different perspective to the evaluation — this is a guideline, not a hard blocker on scheduling.
+
+## 4. Structured Interviews Reduce Bias
+
+The structured scorecards and question banks described in the Interview Process & Scorecards Guide exist specifically to reduce the influence of unconscious bias by keeping evaluation criteria consistent across all candidates for a role.
+
+## 5. What We Don't Track in Decisions
+
+Hiring decisions are never based on protected characteristics. Where legally permitted, we track aggregate, anonymized diversity metrics across the hiring funnel (applied → interviewed → offered → hired) purely to identify where the funnel may be narrowing diversity, not to influence any individual decision.
+
+## 6. Accommodations During the Process
+
+Candidates can request reasonable accommodations for the interview process (e.g., extra time for an assessment, an accessible interview location) by contacting Talent Acquisition — this has no bearing on evaluation and is handled confidentially.
+
+## 7. Returnships and Career Gaps
+
+Career gaps (parental leave, caregiving, health) are not treated as a red flag; interviewers are trained not to probe into the reason for a gap beyond what the candidate chooses to share.
+
+## 8. Reviewing Our Own Process
+
+The DEI Council reviews aggregate hiring funnel diversity data quarterly alongside Talent Acquisition, to identify any stage of the process that may need adjustment.

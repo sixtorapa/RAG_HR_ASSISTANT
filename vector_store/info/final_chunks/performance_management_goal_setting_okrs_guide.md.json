@@ -1,0 +1,111 @@
+{
+  "source_file": "performance_management/goal_setting_okrs_guide.md",
+  "num_chunks": 4,
+  "chunks": [
+    {
+      "text": "SOURCE: performance_management/goal_setting_okrs_guide.md\nTITLE: Guía de Establecimiento de Objetivos y OKRs: Proceso Trimestral\n\n[PÁGINA ?]\n# Goal Setting & OKRs Guide\n\n## 1. Why We Use OKRs\n\nObjectives and Key Results (OKRs) connect individual work to company priorities. Every employee should be able to trace their quarterly goals back to a team or company objective.\n\n## 2. The Quarterly Cycle\n\n| Week | Activity |\n| --- | --- |\n| Week 1 | Company OKRs published by leadership |\n| Week 1-2 | Teams draft team-level OKRs |\n| Week 2 | Individuals draft personal OKRs with their manager |\n| Week 3 | OKRs finalized and logged in the OKR tool |\n| Final week of quarter | Self-scoring + manager review |\n\n## 3. Writing a Good Objective\n\nAn Objective is qualitative and inspirational (\"Make onboarding the best part of joining the company\"), not a number. Key Results are quantitative and verifiable (\"Reduce time-to-productivity from 6 weeks to 4 weeks\").\n\n## 4. Scoring\n\nOKRs are scored 0.0–1.0 at the end of each quarter:\n\n- **0.7–1.0**: on track or achieved — this is the expected healthy range\n- **0.4–0.6**: partial progress, worth a retrospective on what blocked it\n- **0.0–0.3**: significantly missed — should be rare; if it happens often, the OKR was probably set wrong, not necessarily a performance issue\n\nScoring consistently at 1.0 every quarter is a signal that goals were set too conservatively, not a sign of excellent performance.\n\n## 5. OKRs Are Not Performance Reviews\n\nOKR scores are an input to your Annual Performance Review, but not the only one — they measure outcomes of specific goals, not overall role execution, collaboration, or growth. Scoring 0.5 on an ambitious OKR is not penalized the same way a missed core job responsibility would be.\n\n## 6. Changing OKRs Mid-Quarter\n\nOKRs can be adjusted mid-quarter if priorities genuinely change, but this should be the exception, logged with a short note explaining why, and agreed with your manager — not used to retroactively make a struggling OKR look achieved.\n\n## 7. Who to Ask\n\nQuestions about how OKRs roll up to team/company objectives go to your manager. Questions about the OKR tool itself go to People Ops.",
+      "metadata": {
+        "source": "/home/sparras/trabajo/RAG_HR_ASSISTANT/knowledge_base/performance_management/goal_setting_okrs_guide.md",
+        "relative_path": "performance_management/goal_setting_okrs_guide.md",
+        "folder_context": "performance_management",
+        "filename": "goal_setting_okrs_guide.md",
+        "file_stem": "goal_setting_okrs_guide",
+        "pages_in_chunk": "",
+        "chunking": "page_based_hybrid",
+        "word_count": 357,
+        "char_count": 2060,
+        "has_table": false,
+        "semantic_source": "performance_management/goal_setting_okrs_guide.md",
+        "chunk_id": "325e323e2f3f9cdd",
+        "chunk_type": "macro",
+        "has_children": true,
+        "semantic_headline": "Guía de Establecimiento de Objetivos y OKRs: Proceso Trimestral",
+        "semantic_summary": "Los OKRs conectan el trabajo individual con las prioridades de la empresa, con un ciclo trimestral que incluye la publicación de OKRs por parte de la dirección. Los objetivos se califican de 0.0 a 1.0, y un 0.7-1.0 indica que están en camino o logrados. Los OKRs no son evaluaciones de desempeño, sino indicadores de resultados específicos.",
+        "contains_metrics": false,
+        "contains_list": true,
+        "context_where": "performance_management/goal_setting_okrs_guide.md"
+      }
+    },
+    {
+      "text": "SOURCE: performance_management/goal_setting_okrs_guide.md\nTITLE: Guía de Establecimiento de Objetivos y OKRs: Proceso Trimestral\n\n[PÁGINA ?]\n# Goal Setting & OKRs Guide\n\n## 1. Why We Use OKRs\n\nObjectives and Key Results (OKRs) connect individual work to company priorities. Every employee should be able to trace their quarterly goals back to a team or company objective.\n\n## 2. The Quarterly Cycle\n\n| Week | Activity |\n| --- | --- |\n| Week 1 | Company OKRs published by leadership |\n| Week 1-2 | Teams draft team-level OKRs |\n| Week 2 | Individuals draft personal OKRs with their manager |\n| Week 3 | OKRs finalized and logged in the OKR tool |\n| Final week of quarter | Self-scoring + manager review |\n\n## 3. Writing a Good Objective\n\nAn Objective is qualitative and inspirational (\"Make onboarding the best part of joining the company\"), not a number. Key Results are quantitative and verifiable (\"Reduce time-to-productivity from 6 weeks to 4 weeks\").\n\n## 4. Scoring\n\nOKRs are scored 0.0–1.0 at the end of each quarter:",
+      "metadata": {
+        "chunk_type": "micro",
+        "parent_chunk_id": "325e323e2f3f9cdd",
+        "parent_pages": "",
+        "chunk_id": "870940ad94de22ab",
+        "micro_chunk_index": 1,
+        "pages_in_chunk": "",
+        "chunking": "micro_token_split",
+        "semantic_source": "performance_management/goal_setting_okrs_guide.md",
+        "source": "/home/sparras/trabajo/RAG_HR_ASSISTANT/knowledge_base/performance_management/goal_setting_okrs_guide.md",
+        "source_file": "",
+        "relative_path": "performance_management/goal_setting_okrs_guide.md",
+        "filename": "goal_setting_okrs_guide.md",
+        "file_stem": "goal_setting_okrs_guide",
+        "file_type": "",
+        "folder_context": "performance_management",
+        "semantic_headline": "Guía de Establecimiento de Objetivos y OKRs: Proceso Trimestral",
+        "semantic_summary": "Los OKRs conectan el trabajo individual con las prioridades de la empresa, con un ciclo trimestral que incluye la publicación de OKRs por parte de la dirección. Los objetivos se califican de 0.0 a 1.0, y un 0.7-1.0 indica que están en camino o logrados. Los OKRs no son evaluaciones de desempeño, sino indicadores de resultados específicos.",
+        "word_count": 163,
+        "char_count": 893,
+        "contains_metrics": false,
+        "contains_list": false,
+        "context_where": "performance_management/goal_setting_okrs_guide.md"
+      }
+    },
+    {
+      "text": "SOURCE: performance_management/goal_setting_okrs_guide.md\nTITLE: Guía de Establecimiento de Objetivos y OKRs: Proceso Trimestral\n\n## 4. Scoring\n\nOKRs are scored 0.0–1.0 at the end of each quarter:\n\n- **0.7–1.0**: on track or achieved — this is the expected healthy range\n- **0.4–0.6**: partial progress, worth a retrospective on what blocked it\n- **0.0–0.3**: significantly missed — should be rare; if it happens often, the OKR was probably set wrong, not necessarily a performance issue\n\nScoring consistently at 1.0 every quarter is a signal that goals were set too conservatively, not a sign of excellent performance.\n\n## 5. OKRs Are Not Performance Reviews\n\nOKR scores are an input to your Annual Performance Review, but not the only one — they measure outcomes of specific goals, not overall role execution, collaboration, or growth. Scoring 0.5 on an ambitious OKR is not penalized the same way a missed core job responsibility would be.\n\n## 6. Changing OKRs Mid-Quarter",
+      "metadata": {
+        "chunk_type": "micro",
+        "parent_chunk_id": "325e323e2f3f9cdd",
+        "parent_pages": "",
+        "chunk_id": "00bc8f73516746e0",
+        "micro_chunk_index": 2,
+        "pages_in_chunk": "",
+        "chunking": "micro_token_split",
+        "semantic_source": "performance_management/goal_setting_okrs_guide.md",
+        "source": "/home/sparras/trabajo/RAG_HR_ASSISTANT/knowledge_base/performance_management/goal_setting_okrs_guide.md",
+        "source_file": "",
+        "relative_path": "performance_management/goal_setting_okrs_guide.md",
+        "filename": "goal_setting_okrs_guide.md",
+        "file_stem": "goal_setting_okrs_guide",
+        "file_type": "",
+        "folder_context": "performance_management",
+        "semantic_headline": "Guía de Establecimiento de Objetivos y OKRs: Proceso Trimestral",
+        "semantic_summary": "Los OKRs conectan el trabajo individual con las prioridades de la empresa, con un ciclo trimestral que incluye la publicación de OKRs por parte de la dirección. Los objetivos se califican de 0.0 a 1.0, y un 0.7-1.0 indica que están en camino o logrados. Los OKRs no son evaluaciones de desempeño, sino indicadores de resultados específicos.",
+        "word_count": 141,
+        "char_count": 845,
+        "contains_metrics": false,
+        "contains_list": true,
+        "context_where": "performance_management/goal_setting_okrs_guide.md"
+      }
+    },
+    {
+      "text": "SOURCE: performance_management/goal_setting_okrs_guide.md\nTITLE: Guía de Establecimiento de Objetivos y OKRs: Proceso Trimestral\n\n## 6. Changing OKRs Mid-Quarter\n\nOKRs can be adjusted mid-quarter if priorities genuinely change, but this should be the exception, logged with a short note explaining why, and agreed with your manager — not used to retroactively make a struggling OKR look achieved.\n\n## 7. Who to Ask\n\nQuestions about how OKRs roll up to team/company objectives go to your manager. Questions about the OKR tool itself go to People Ops.",
+      "metadata": {
+        "chunk_type": "micro",
+        "parent_chunk_id": "325e323e2f3f9cdd",
+        "parent_pages": "",
+        "chunk_id": "570d70e21983b3cb",
+        "micro_chunk_index": 3,
+        "pages_in_chunk": "",
+        "chunking": "micro_token_split",
+        "semantic_source": "performance_management/goal_setting_okrs_guide.md",
+        "source": "/home/sparras/trabajo/RAG_HR_ASSISTANT/knowledge_base/performance_management/goal_setting_okrs_guide.md",
+        "source_file": "",
+        "relative_path": "performance_management/goal_setting_okrs_guide.md",
+        "filename": "goal_setting_okrs_guide.md",
+        "file_stem": "goal_setting_okrs_guide",
+        "file_type": "",
+        "folder_context": "performance_management",
+        "semantic_headline": "Guía de Establecimiento de Objetivos y OKRs: Proceso Trimestral",
+        "semantic_summary": "Los OKRs conectan el trabajo individual con las prioridades de la empresa, con un ciclo trimestral que incluye la publicación de OKRs por parte de la dirección. Los objetivos se califican de 0.0 a 1.0, y un 0.7-1.0 indica que están en camino o logrados. Los OKRs no son evaluaciones de desempeño, sino indicadores de resultados específicos.",
+        "word_count": 71,
+        "char_count": 419,
+        "contains_metrics": false,
+        "contains_list": false,
+        "context_where": "performance_management/goal_setting_okrs_guide.md"
+      }
+    }
+  ]
+}

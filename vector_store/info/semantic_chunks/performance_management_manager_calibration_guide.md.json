@@ -1,0 +1,14 @@
+{
+  "source_file": "performance_management/manager_calibration_guide.md",
+  "num_chunks": 1,
+  "chunks": [
+    {
+      "headline": "Guía de Calibración para Gerentes: Proceso y Asistencia",
+      "summary": "La calibración de desempeño asegura que las evaluaciones sean consistentes entre gerentes. Se lleva a cabo dos veces al año, después de que los gerentes envían sus puntuaciones preliminares. La distribución esperada de puntuaciones incluye un 10% de 'Sobresaliente' y un 55% de 'Cumple Expectativas'.",
+      "text": "[PÁGINA ?]\n# Manager Calibration Guide\n\n## 1. Why We Calibrate\n\nWithout calibration, the same performance can be scored differently by different managers. Calibration sessions align scores across teams before they are finalized and communicated.\n\n## 2. When Calibration Happens\n\nCalibration runs after individual managers submit draft scores, and before the Salary Review Calendar's \"Compensation committee reviews budget\" step — typically a 2-week window in December and June.\n\n## 3. Who Attends\n\nAll managers within a department, facilitated by the Department Head, with a People Ops partner present to ensure consistency of process (not to override manager judgment on content).\n\n## 4. The Forced Distribution Guideline\n\nWe do not use a strict forced ranking, but as a guideline, the expected distribution across a department is roughly:\n\n| Score Range | Expected Share |\n| --- | --- |\n| Outstanding (4.5-5.0) | ~10% |\n| Exceeds Expectations (3.5-4.5) | ~25% |\n| Meets Expectations (2.0-3.5) | ~55% |\n| Needs Improvement (1.0-2.0) | ~10% |\n\nA department far outside these ranges (in either direction) is asked to provide written justification before scores are finalized.\n\n## 5. How Disagreements Are Resolved\n\nIf managers disagree on a calibration adjustment for someone outside their own team, the Department Head makes the final call. The original manager is always informed of any change before it is communicated to the employee.\n\n## 6. What Calibration Does Not Change\n\nCalibration can adjust a score within reason but cannot be used to retroactively justify a PIP or a promotion decision that wasn't otherwise supported by documented evidence.\n\n## 7. After Calibration\n\nFinal scores feed directly into the Salary Review Calendar and the Promotion & Career Ladder Framework cycles. Managers should not share draft (pre-calibration) scores with employees, since they may still change.",
+      "pages_in_chunk": "",
+      "word_count": 295,
+      "char_count": 1892
+    }
+  ]
+}

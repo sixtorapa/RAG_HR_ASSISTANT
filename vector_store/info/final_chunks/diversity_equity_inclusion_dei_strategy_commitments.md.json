@@ -1,0 +1,84 @@
+{
+  "source_file": "diversity_equity_inclusion/dei_strategy_commitments.md",
+  "num_chunks": 3,
+  "chunks": [
+    {
+      "text": "SOURCE: diversity_equity_inclusion/dei_strategy_commitments.md\nTITLE: Estrategia y Compromisos DEI\n\n[PÁGINA ?]\n# DEI Strategy & Commitments\n\n## 1. Our Commitments\n\n- Achieve and maintain gender balance (40-60% range) at every level by 2027, reviewed annually\n- Run an annual Pay Equity Audit and correct any unexplained gap larger than 3% (see Pay Equity Audit Summary)\n- Maintain Inclusive Hiring practices across all recruiting (see Inclusive Hiring Guidelines)\n- Support at least 3 active Employee Resource Groups (ERGs) with dedicated budget\n\n## 2. Governance\n\nDEI strategy is owned by the People Director and reviewed quarterly by the DEI Council, which includes ERG leads, a People Analytics representative, and one rotating employee seat open to anyone via nomination.\n\n## 3. How Progress Is Measured\n\n| Metric | Reviewed |\n| --- | --- |\n| Gender/level representation | Quarterly |\n| Pay equity gap | Annually (Pay Equity Audit) |\n| Hiring funnel diversity (where legally permitted to track) | Quarterly |\n| ERG participation and budget utilization | Annually |\n\n## 4. Transparency\n\nA summary of DEI metrics is shared company-wide twice a year in an all-hands; the underlying detailed data stays with the DEI Council and People Analytics to protect individual privacy, especially in smaller teams where aggregate numbers could otherwise identify individuals.\n\n## 5. Manager Accountability\n\nManager-level DEI awareness (inclusive hiring, recognizing bias in performance calibration) is included in onboarding for new managers and revisited as part of the Leadership Development Track.\n\n## 6. This Is Not a Quota System\n\nRepresentation targets are aspirational goals tracked at the aggregate level, not quotas applied to individual hiring or promotion decisions — every individual decision is still made strictly on merit per the Promotion & Career Ladder Framework and Inclusive Hiring Guidelines.\n\n## 7. Feedback\n\nEmployees can raise DEI-related feedback or concerns to any ERG lead, the People Director, or anonymously via the Ethics Hotline.",
+      "metadata": {
+        "source": "/home/sparras/trabajo/RAG_HR_ASSISTANT/knowledge_base/diversity_equity_inclusion/dei_strategy_commitments.md",
+        "relative_path": "diversity_equity_inclusion/dei_strategy_commitments.md",
+        "folder_context": "diversity_equity_inclusion",
+        "filename": "dei_strategy_commitments.md",
+        "file_stem": "dei_strategy_commitments",
+        "pages_in_chunk": "",
+        "chunking": "page_based_hybrid",
+        "word_count": 305,
+        "char_count": 1950,
+        "has_table": false,
+        "semantic_source": "diversity_equity_inclusion/dei_strategy_commitments.md",
+        "chunk_id": "9410046a8d0e790e",
+        "chunk_type": "macro",
+        "has_children": true,
+        "semantic_headline": "Estrategia y Compromisos DEI",
+        "semantic_summary": "La estrategia DEI busca lograr un balance de género del 40-60% para 2027 y realizar auditorías anuales de equidad salarial. Se revisa trimestralmente y se mide el progreso en representación de género y diversidad en la contratación. La transparencia se mantiene con informes semestrales a la empresa.",
+        "contains_metrics": true,
+        "contains_list": true,
+        "context_where": "diversity_equity_inclusion/dei_strategy_commitments.md"
+      }
+    },
+    {
+      "text": "SOURCE: diversity_equity_inclusion/dei_strategy_commitments.md\nTITLE: Estrategia y Compromisos DEI\n\n[PÁGINA ?]\n# DEI Strategy & Commitments\n\n## 1. Our Commitments\n\n- Achieve and maintain gender balance (40-60% range) at every level by 2027, reviewed annually\n- Run an annual Pay Equity Audit and correct any unexplained gap larger than 3% (see Pay Equity Audit Summary)\n- Maintain Inclusive Hiring practices across all recruiting (see Inclusive Hiring Guidelines)\n- Support at least 3 active Employee Resource Groups (ERGs) with dedicated budget\n\n## 2. Governance\n\nDEI strategy is owned by the People Director and reviewed quarterly by the DEI Council, which includes ERG leads, a People Analytics representative, and one rotating employee seat open to anyone via nomination.\n\n## 3. How Progress Is Measured\n\n| Metric | Reviewed |\n| --- | --- |\n| Gender/level representation | Quarterly |\n| Pay equity gap | Annually (Pay Equity Audit) |\n| Hiring funnel diversity (where legally permitted to track) | Quarterly |\n| ERG participation and budget utilization | Annually |\n\n## 4. Transparency",
+      "metadata": {
+        "chunk_type": "micro",
+        "parent_chunk_id": "9410046a8d0e790e",
+        "parent_pages": "",
+        "chunk_id": "d3c780be7a3b8574",
+        "micro_chunk_index": 1,
+        "pages_in_chunk": "",
+        "chunking": "micro_token_split",
+        "semantic_source": "diversity_equity_inclusion/dei_strategy_commitments.md",
+        "source": "/home/sparras/trabajo/RAG_HR_ASSISTANT/knowledge_base/diversity_equity_inclusion/dei_strategy_commitments.md",
+        "source_file": "",
+        "relative_path": "diversity_equity_inclusion/dei_strategy_commitments.md",
+        "filename": "dei_strategy_commitments.md",
+        "file_stem": "dei_strategy_commitments",
+        "file_type": "",
+        "folder_context": "diversity_equity_inclusion",
+        "semantic_headline": "Estrategia y Compromisos DEI",
+        "semantic_summary": "La estrategia DEI busca lograr un balance de género del 40-60% para 2027 y realizar auditorías anuales de equidad salarial. Se revisa trimestralmente y se mide el progreso en representación de género y diversidad en la contratación. La transparencia se mantiene con informes semestrales a la empresa.",
+        "word_count": 163,
+        "char_count": 988,
+        "contains_metrics": true,
+        "contains_list": true,
+        "context_where": "diversity_equity_inclusion/dei_strategy_commitments.md"
+      }
+    },
+    {
+      "text": "SOURCE: diversity_equity_inclusion/dei_strategy_commitments.md\nTITLE: Estrategia y Compromisos DEI\n\n## 4. Transparency\n\nA summary of DEI metrics is shared company-wide twice a year in an all-hands; the underlying detailed data stays with the DEI Council and People Analytics to protect individual privacy, especially in smaller teams where aggregate numbers could otherwise identify individuals.\n\n## 5. Manager Accountability\n\nManager-level DEI awareness (inclusive hiring, recognizing bias in performance calibration) is included in onboarding for new managers and revisited as part of the Leadership Development Track.\n\n## 6. This Is Not a Quota System\n\nRepresentation targets are aspirational goals tracked at the aggregate level, not quotas applied to individual hiring or promotion decisions — every individual decision is still made strictly on merit per the Promotion & Career Ladder Framework and Inclusive Hiring Guidelines.\n\n## 7. Feedback\n\nEmployees can raise DEI-related feedback or concerns to any ERG lead, the People Director, or anonymously via the Ethics Hotline.",
+      "metadata": {
+        "chunk_type": "micro",
+        "parent_chunk_id": "9410046a8d0e790e",
+        "parent_pages": "",
+        "chunk_id": "4cda3339d82b0135",
+        "micro_chunk_index": 2,
+        "pages_in_chunk": "",
+        "chunking": "micro_token_split",
+        "semantic_source": "diversity_equity_inclusion/dei_strategy_commitments.md",
+        "source": "/home/sparras/trabajo/RAG_HR_ASSISTANT/knowledge_base/diversity_equity_inclusion/dei_strategy_commitments.md",
+        "source_file": "",
+        "relative_path": "diversity_equity_inclusion/dei_strategy_commitments.md",
+        "filename": "dei_strategy_commitments.md",
+        "file_stem": "dei_strategy_commitments",
+        "file_type": "",
+        "folder_context": "diversity_equity_inclusion",
+        "semantic_headline": "Estrategia y Compromisos DEI",
+        "semantic_summary": "La estrategia DEI busca lograr un balance de género del 40-60% para 2027 y realizar auditorías anuales de equidad salarial. Se revisa trimestralmente y se mide el progreso en representación de género y diversidad en la contratación. La transparencia se mantiene con informes semestrales a la empresa.",
+        "word_count": 145,
+        "char_count": 980,
+        "contains_metrics": false,
+        "contains_list": false,
+        "context_where": "diversity_equity_inclusion/dei_strategy_commitments.md"
+      }
+    }
+  ]
+}

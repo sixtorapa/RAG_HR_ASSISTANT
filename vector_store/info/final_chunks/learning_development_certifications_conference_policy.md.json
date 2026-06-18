@@ -1,0 +1,84 @@
+{
+  "source_file": "learning_development/certifications_conference_policy.md",
+  "num_chunks": 3,
+  "chunks": [
+    {
+      "text": "SOURCE: learning_development/certifications_conference_policy.md\nTITLE: Política de Certificaciones y Asistencia a Conferencias\n\n[PÁGINA ?]\n# Certifications & Conference Attendance Policy\n\n## 1. Certifications\n\nRole-relevant professional certifications (e.g., cloud platform certifications, project management certifications, language certifications relevant to client work) are covered by your individual L&D budget, up to the exam/renewal fee. Study materials and practice exams also count against the same budget.\n\n## 2. Conference Attendance\n\n| Item | Who Pays |\n| --- | --- |\n| Conference ticket | Individual L&D budget (if under €300) or team budget (if larger, with manager approval) |\n| Travel and accommodation | Team budget, via the Travel Policy |\n| Time attending | Counted as working time, not annual leave |\n\n## 3. How Many Conferences Per Year\n\nThere's no hard cap, but as a guideline, one major external conference per year is typically supported without extra justification; a second request in the same year needs a clear connection to a current project or OKR.\n\n## 4. Speaking at Conferences\n\nIf you are invited to speak, the company covers travel and accommodation even if the ticket itself is free or comped, since representing the company externally has its own value (subject to standard Travel Policy limits).\n\n## 5. Sharing What You Learned\n\nFor any conference or certification over €500 in total cost, we ask (not require) a short write-up or 15-minute team share-back, to spread the value of the investment beyond one person.\n\n## 6. Recertification\n\nRecurring certification renewal fees are covered annually under the same rules, as long as the certification remains relevant to your role.\n\n## 7. Booking Process\n\nBook travel and submit the conference ticket purchase through the same process as the Expense Reimbursement Guide, tagging the L&D budget category so it's tracked correctly.",
+      "metadata": {
+        "source": "/home/sparras/trabajo/RAG_HR_ASSISTANT/knowledge_base/learning_development/certifications_conference_policy.md",
+        "relative_path": "learning_development/certifications_conference_policy.md",
+        "folder_context": "learning_development",
+        "filename": "certifications_conference_policy.md",
+        "file_stem": "certifications_conference_policy",
+        "pages_in_chunk": "",
+        "chunking": "page_based_hybrid",
+        "word_count": 284,
+        "char_count": 1785,
+        "has_table": false,
+        "semantic_source": "learning_development/certifications_conference_policy.md",
+        "chunk_id": "c886405e880d97c9",
+        "chunk_type": "macro",
+        "has_children": true,
+        "semantic_headline": "Política de Certificaciones y Asistencia a Conferencias",
+        "semantic_summary": "La política cubre certificaciones profesionales relevantes y asistencia a conferencias, con un presupuesto individual de L&D que permite gastos hasta €1,500 anuales. Los empleados pueden asistir a una conferencia mayor al año sin justificación adicional, y se requiere compartir aprendizajes si el costo total supera los €500.",
+        "contains_metrics": true,
+        "contains_list": false,
+        "context_where": "learning_development/certifications_conference_policy.md"
+      }
+    },
+    {
+      "text": "SOURCE: learning_development/certifications_conference_policy.md\nTITLE: Política de Certificaciones y Asistencia a Conferencias\n\n[PÁGINA ?]\n# Certifications & Conference Attendance Policy\n\n## 1. Certifications\n\nRole-relevant professional certifications (e.g., cloud platform certifications, project management certifications, language certifications relevant to client work) are covered by your individual L&D budget, up to the exam/renewal fee. Study materials and practice exams also count against the same budget.\n\n## 2. Conference Attendance\n\n| Item | Who Pays |\n| --- | --- |\n| Conference ticket | Individual L&D budget (if under €300) or team budget (if larger, with manager approval) |\n| Travel and accommodation | Team budget, via the Travel Policy |\n| Time attending | Counted as working time, not annual leave |\n\n## 3. How Many Conferences Per Year\n\nThere's no hard cap, but as a guideline, one major external conference per year is typically supported without extra justification; a second request in the same year needs a clear connection to a current project or OKR.\n\n## 4. Speaking at Conferences\n\nIf you are invited to speak, the company covers travel and accommodation even if the ticket itself is free or comped, since representing the company externally has its own value (subject to standard Travel Policy limits).",
+      "metadata": {
+        "chunk_type": "micro",
+        "parent_chunk_id": "c886405e880d97c9",
+        "parent_pages": "",
+        "chunk_id": "76a24ab2e1ab0b0e",
+        "micro_chunk_index": 1,
+        "pages_in_chunk": "",
+        "chunking": "micro_token_split",
+        "semantic_source": "learning_development/certifications_conference_policy.md",
+        "source": "/home/sparras/trabajo/RAG_HR_ASSISTANT/knowledge_base/learning_development/certifications_conference_policy.md",
+        "source_file": "",
+        "relative_path": "learning_development/certifications_conference_policy.md",
+        "filename": "certifications_conference_policy.md",
+        "file_stem": "certifications_conference_policy",
+        "file_type": "",
+        "folder_context": "learning_development",
+        "semantic_headline": "Política de Certificaciones y Asistencia a Conferencias",
+        "semantic_summary": "La política cubre certificaciones profesionales relevantes y asistencia a conferencias, con un presupuesto individual de L&D que permite gastos hasta €1,500 anuales. Los empleados pueden asistir a una conferencia mayor al año sin justificación adicional, y se requiere compartir aprendizajes si el costo total supera los €500.",
+        "word_count": 193,
+        "char_count": 1204,
+        "contains_metrics": true,
+        "contains_list": false,
+        "context_where": "learning_development/certifications_conference_policy.md"
+      }
+    },
+    {
+      "text": "SOURCE: learning_development/certifications_conference_policy.md\nTITLE: Política de Certificaciones y Asistencia a Conferencias\n\n## 4. Speaking at Conferences\n\nIf you are invited to speak, the company covers travel and accommodation even if the ticket itself is free or comped, since representing the company externally has its own value (subject to standard Travel Policy limits).\n\n## 5. Sharing What You Learned\n\nFor any conference or certification over €500 in total cost, we ask (not require) a short write-up or 15-minute team share-back, to spread the value of the investment beyond one person.\n\n## 6. Recertification\n\nRecurring certification renewal fees are covered annually under the same rules, as long as the certification remains relevant to your role.\n\n## 7. Booking Process\n\nBook travel and submit the conference ticket purchase through the same process as the Expense Reimbursement Guide, tagging the L&D budget category so it's tracked correctly.",
+      "metadata": {
+        "chunk_type": "micro",
+        "parent_chunk_id": "c886405e880d97c9",
+        "parent_pages": "",
+        "chunk_id": "b2cf55b3f8407a22",
+        "micro_chunk_index": 2,
+        "pages_in_chunk": "",
+        "chunking": "micro_token_split",
+        "semantic_source": "learning_development/certifications_conference_policy.md",
+        "source": "/home/sparras/trabajo/RAG_HR_ASSISTANT/knowledge_base/learning_development/certifications_conference_policy.md",
+        "source_file": "",
+        "relative_path": "learning_development/certifications_conference_policy.md",
+        "filename": "certifications_conference_policy.md",
+        "file_stem": "certifications_conference_policy",
+        "file_type": "",
+        "folder_context": "learning_development",
+        "semantic_headline": "Política de Certificaciones y Asistencia a Conferencias",
+        "semantic_summary": "La política cubre certificaciones profesionales relevantes y asistencia a conferencias, con un presupuesto individual de L&D que permite gastos hasta €1,500 anuales. Los empleados pueden asistir a una conferencia mayor al año sin justificación adicional, y se requiere compartir aprendizajes si el costo total supera los €500.",
+        "word_count": 132,
+        "char_count": 833,
+        "contains_metrics": true,
+        "contains_list": false,
+        "context_where": "learning_development/certifications_conference_policy.md"
+      }
+    }
+  ]
+}

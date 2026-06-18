@@ -1,0 +1,84 @@
+{
+  "source_file": "learning_development/leadership_development_track.md",
+  "num_chunks": 3,
+  "chunks": [
+    {
+      "text": "SOURCE: learning_development/leadership_development_track.md\nTITLE: Ruta de Desarrollo de Liderazgo para Empleados\n\n[PÁGINA ?]\n# Leadership Development Track\n\n## 1. Who This Is For\n\nEmployees at Senior level who have expressed interest in moving toward Lead or Manager roles, nominated by their manager and confirmed by the Department Head. The track runs as an annual 9-month cohort starting in February.\n\n## 2. What the Track Includes\n\n| Component | Frequency |\n| --- | --- |\n| Leadership workshops (cohort-based) | Monthly, half-day |\n| 1:1 executive coaching | Bi-weekly |\n| Stretch project with cross-functional visibility | Once per cohort |\n| Mentoring at least one junior colleague or intern | Ongoing |\n\n## 3. Selection Process\n\nNominations are submitted by managers in December for the following year's cohort. The Promotion Committee reviews nominations alongside recent performance scores and OKR history; selection is not a promise of promotion.\n\n## 4. Cost and Budget\n\nThe track is funded centrally by the L&D team budget, separate from individual L&D budgets, so participation does not reduce your personal €1,500 annual allowance.\n\n## 5. Relationship to Promotions\n\nCompleting the track does not automatically result in a promotion to Lead — promotions still go through the standard Promotion & Career Ladder Framework and Promotion Committee process. The track is preparation, not a guarantee.\n\n## 6. Time Commitment\n\nExpect roughly 4-6 hours per month outside regular workload. Managers are expected to account for this when setting OKRs for cohort participants during the 9 months.\n\n## 7. If You're Not Selected\n\nEmployees not selected receive specific feedback on what would strengthen a future nomination and can reapply in subsequent years; there is no limit on the number of times you can be nominated.",
+      "metadata": {
+        "source": "/home/sparras/trabajo/RAG_HR_ASSISTANT/knowledge_base/learning_development/leadership_development_track.md",
+        "relative_path": "learning_development/leadership_development_track.md",
+        "folder_context": "learning_development",
+        "filename": "leadership_development_track.md",
+        "file_stem": "leadership_development_track",
+        "pages_in_chunk": "",
+        "chunking": "page_based_hybrid",
+        "word_count": 275,
+        "char_count": 1709,
+        "has_table": false,
+        "semantic_source": "learning_development/leadership_development_track.md",
+        "chunk_id": "8fe12a29c62ebf76",
+        "chunk_type": "macro",
+        "has_children": true,
+        "semantic_headline": "Ruta de Desarrollo de Liderazgo para Empleados",
+        "semantic_summary": "El Track de Desarrollo de Liderazgo está diseñado para empleados senior que buscan roles de liderazgo, con un ciclo anual de 9 meses que inicia en febrero. Incluye talleres mensuales, coaching ejecutivo y un proyecto de estiramiento. La participación no garantiza una promoción, ya que las decisiones se basan en un proceso formal de evaluación.",
+        "contains_metrics": true,
+        "contains_list": false,
+        "context_where": "learning_development/leadership_development_track.md"
+      }
+    },
+    {
+      "text": "SOURCE: learning_development/leadership_development_track.md\nTITLE: Ruta de Desarrollo de Liderazgo para Empleados\n\n[PÁGINA ?]\n# Leadership Development Track\n\n## 1. Who This Is For\n\nEmployees at Senior level who have expressed interest in moving toward Lead or Manager roles, nominated by their manager and confirmed by the Department Head. The track runs as an annual 9-month cohort starting in February.\n\n## 2. What the Track Includes\n\n| Component | Frequency |\n| --- | --- |\n| Leadership workshops (cohort-based) | Monthly, half-day |\n| 1:1 executive coaching | Bi-weekly |\n| Stretch project with cross-functional visibility | Once per cohort |\n| Mentoring at least one junior colleague or intern | Ongoing |\n\n## 3. Selection Process\n\nNominations are submitted by managers in December for the following year's cohort. The Promotion Committee reviews nominations alongside recent performance scores and OKR history; selection is not a promise of promotion.\n\n## 4. Cost and Budget\n\nThe track is funded centrally by the L&D team budget, separate from individual L&D budgets, so participation does not reduce your personal €1,500 annual allowance.\n\n## 5. Relationship to Promotions",
+      "metadata": {
+        "chunk_type": "micro",
+        "parent_chunk_id": "8fe12a29c62ebf76",
+        "parent_pages": "",
+        "chunk_id": "20c23308e663730b",
+        "micro_chunk_index": 1,
+        "pages_in_chunk": "",
+        "chunking": "micro_token_split",
+        "semantic_source": "learning_development/leadership_development_track.md",
+        "source": "/home/sparras/trabajo/RAG_HR_ASSISTANT/knowledge_base/learning_development/leadership_development_track.md",
+        "source_file": "",
+        "relative_path": "learning_development/leadership_development_track.md",
+        "filename": "leadership_development_track.md",
+        "file_stem": "leadership_development_track",
+        "file_type": "",
+        "folder_context": "learning_development",
+        "semantic_headline": "Ruta de Desarrollo de Liderazgo para Empleados",
+        "semantic_summary": "El Track de Desarrollo de Liderazgo está diseñado para empleados senior que buscan roles de liderazgo, con un ciclo anual de 9 meses que inicia en febrero. Incluye talleres mensuales, coaching ejecutivo y un proyecto de estiramiento. La participación no garantiza una promoción, ya que las decisiones se basan en un proceso formal de evaluación.",
+        "word_count": 172,
+        "char_count": 1064,
+        "contains_metrics": true,
+        "contains_list": false,
+        "context_where": "learning_development/leadership_development_track.md"
+      }
+    },
+    {
+      "text": "SOURCE: learning_development/leadership_development_track.md\nTITLE: Ruta de Desarrollo de Liderazgo para Empleados\n\n## 4. Cost and Budget\n\nThe track is funded centrally by the L&D team budget, separate from individual L&D budgets, so participation does not reduce your personal €1,500 annual allowance.\n\n## 5. Relationship to Promotions\n\nCompleting the track does not automatically result in a promotion to Lead — promotions still go through the standard Promotion & Career Ladder Framework and Promotion Committee process. The track is preparation, not a guarantee.\n\n## 6. Time Commitment\n\nExpect roughly 4-6 hours per month outside regular workload. Managers are expected to account for this when setting OKRs for cohort participants during the 9 months.\n\n## 7. If You're Not Selected\n\nEmployees not selected receive specific feedback on what would strengthen a future nomination and can reapply in subsequent years; there is no limit on the number of times you can be nominated.",
+      "metadata": {
+        "chunk_type": "micro",
+        "parent_chunk_id": "8fe12a29c62ebf76",
+        "parent_pages": "",
+        "chunk_id": "ffcd271bb4d0f187",
+        "micro_chunk_index": 2,
+        "pages_in_chunk": "",
+        "chunking": "micro_token_split",
+        "semantic_source": "learning_development/leadership_development_track.md",
+        "source": "/home/sparras/trabajo/RAG_HR_ASSISTANT/knowledge_base/learning_development/leadership_development_track.md",
+        "source_file": "",
+        "relative_path": "learning_development/leadership_development_track.md",
+        "filename": "leadership_development_track.md",
+        "file_stem": "leadership_development_track",
+        "file_type": "",
+        "folder_context": "learning_development",
+        "semantic_headline": "Ruta de Desarrollo de Liderazgo para Empleados",
+        "semantic_summary": "El Track de Desarrollo de Liderazgo está diseñado para empleados senior que buscan roles de liderazgo, con un ciclo anual de 9 meses que inicia en febrero. Incluye talleres mensuales, coaching ejecutivo y un proyecto de estiramiento. La participación no garantiza una promoción, ya que las decisiones se basan en un proceso formal de evaluación.",
+        "word_count": 138,
+        "char_count": 865,
+        "contains_metrics": true,
+        "contains_list": false,
+        "context_where": "learning_development/leadership_development_track.md"
+      }
+    }
+  ]
+}

@@ -1,0 +1,111 @@
+{
+  "source_file": "legal_compliance_conduct/workplace_investigations_policy.md",
+  "num_chunks": 4,
+  "chunks": [
+    {
+      "text": "SOURCE: legal_compliance_conduct/workplace_investigations_policy.md\nTITLE: Política de Investigaciones Laborales: Proceso y Confidencialidad\n\n[PÁGINA ?]\n# Workplace Investigations Policy\n\n## 1. When an Investigation Starts\n\nAn investigation is opened when a report is received via the Ethics Hotline, the Anti-Harassment & Anti-Discrimination Policy, the Whistleblower Policy, or directly to People Ops/Legal, and the concern is specific enough to be assessed.\n\n## 2. Who Conducts It\n\nInvestigations are conducted by People Ops or Legal, depending on the nature of the concern (e.g., financial concerns go to Legal/Finance jointly). The investigator is always someone with no direct involvement in the situation or reporting line to those involved.\n\n## 3. Timeline\n\n| Step | Target Timing |\n| --- | --- |\n| Acknowledge report | Within 5 business days |\n| Initial fact-finding | Within 10 business days |\n| Interviews with relevant parties | Within 20 business days |\n| Findings and recommendation | Within 30 business days, where reasonably possible |\n\nComplex cases (multiple parties, external legal involvement) may take longer; the reporter is updated on status even if the investigation isn't complete.\n\n## 4. Confidentiality During an Investigation\n\nDetails are shared only with those who need to know to conduct the investigation fairly. Everyone interviewed is asked to keep the matter confidential to protect the integrity of the process and all parties involved.\n\n## 5. Rights of the Person Being Investigated\n\nThe person under investigation is informed of the general nature of the concern (without necessarily revealing the reporter's identity if anonymity was requested) and has the opportunity to respond before any conclusion is finalized.\n\n## 6. Outcomes\n\nFindings lead to one of: no action (concern not substantiated), informal resolution, or referral to the Disciplinary Procedure. Outcomes are communicated to the reporter at a level of detail appropriate to confidentiality requirements — they are told the investigation concluded and whether action was taken, not necessarily every detail.\n\n## 7. Protection Throughout\n\nBoth the reporter and any witnesses are protected from retaliation throughout and after the investigation, per the Whistleblower Policy and Anti-Harassment Policy.\n\n## 8. External Investigators\n\nFor particularly sensitive or senior-level cases, the company may engage an independent external investigator instead of using internal staff, to ensure impartiality.",
+      "metadata": {
+        "source": "/home/sparras/trabajo/RAG_HR_ASSISTANT/knowledge_base/legal_compliance_conduct/workplace_investigations_policy.md",
+        "relative_path": "legal_compliance_conduct/workplace_investigations_policy.md",
+        "folder_context": "legal_compliance_conduct",
+        "filename": "workplace_investigations_policy.md",
+        "file_stem": "workplace_investigations_policy",
+        "pages_in_chunk": "",
+        "chunking": "page_based_hybrid",
+        "word_count": 357,
+        "char_count": 2359,
+        "has_table": false,
+        "semantic_source": "legal_compliance_conduct/workplace_investigations_policy.md",
+        "chunk_id": "38eeb31459ff3818",
+        "chunk_type": "macro",
+        "has_children": true,
+        "semantic_headline": "Política de Investigaciones Laborales: Proceso y Confidencialidad",
+        "semantic_summary": "La Política de Investigaciones Laborales detalla el proceso de investigación tras un reporte recibido, que debe ser específico. Las investigaciones son realizadas por People Ops o Legal y deben completarse en un plazo de 30 días. Se garantiza la confidencialidad y protección contra represalias para los denunciantes.",
+        "contains_metrics": false,
+        "contains_list": false,
+        "context_where": "legal_compliance_conduct/workplace_investigations_policy.md"
+      }
+    },
+    {
+      "text": "SOURCE: legal_compliance_conduct/workplace_investigations_policy.md\nTITLE: Política de Investigaciones Laborales: Proceso y Confidencialidad\n\n[PÁGINA ?]\n# Workplace Investigations Policy\n\n## 1. When an Investigation Starts\n\nAn investigation is opened when a report is received via the Ethics Hotline, the Anti-Harassment & Anti-Discrimination Policy, the Whistleblower Policy, or directly to People Ops/Legal, and the concern is specific enough to be assessed.\n\n## 2. Who Conducts It\n\nInvestigations are conducted by People Ops or Legal, depending on the nature of the concern (e.g., financial concerns go to Legal/Finance jointly). The investigator is always someone with no direct involvement in the situation or reporting line to those involved.\n\n## 3. Timeline\n\n| Step | Target Timing |\n| --- | --- |\n| Acknowledge report | Within 5 business days |\n| Initial fact-finding | Within 10 business days |\n| Interviews with relevant parties | Within 20 business days |\n| Findings and recommendation | Within 30 business days, where reasonably possible |\n\nComplex cases (multiple parties, external legal involvement) may take longer; the reporter is updated on status even if the investigation isn't complete.\n\n## 4. Confidentiality During an Investigation",
+      "metadata": {
+        "chunk_type": "micro",
+        "parent_chunk_id": "38eeb31459ff3818",
+        "parent_pages": "",
+        "chunk_id": "2ba1aea8363bdb62",
+        "micro_chunk_index": 1,
+        "pages_in_chunk": "",
+        "chunking": "micro_token_split",
+        "semantic_source": "legal_compliance_conduct/workplace_investigations_policy.md",
+        "source": "/home/sparras/trabajo/RAG_HR_ASSISTANT/knowledge_base/legal_compliance_conduct/workplace_investigations_policy.md",
+        "source_file": "",
+        "relative_path": "legal_compliance_conduct/workplace_investigations_policy.md",
+        "filename": "workplace_investigations_policy.md",
+        "file_stem": "workplace_investigations_policy",
+        "file_type": "",
+        "folder_context": "legal_compliance_conduct",
+        "semantic_headline": "Política de Investigaciones Laborales: Proceso y Confidencialidad",
+        "semantic_summary": "La Política de Investigaciones Laborales detalla el proceso de investigación tras un reporte recibido, que debe ser específico. Las investigaciones son realizadas por People Ops o Legal y deben completarse en un plazo de 30 días. Se garantiza la confidencialidad y protección contra represalias para los denunciantes.",
+        "word_count": 176,
+        "char_count": 1111,
+        "contains_metrics": false,
+        "contains_list": false,
+        "context_where": "legal_compliance_conduct/workplace_investigations_policy.md"
+      }
+    },
+    {
+      "text": "SOURCE: legal_compliance_conduct/workplace_investigations_policy.md\nTITLE: Política de Investigaciones Laborales: Proceso y Confidencialidad\n\nComplex cases (multiple parties, external legal involvement) may take longer; the reporter is updated on status even if the investigation isn't complete.\n\n## 4. Confidentiality During an Investigation\n\nDetails are shared only with those who need to know to conduct the investigation fairly. Everyone interviewed is asked to keep the matter confidential to protect the integrity of the process and all parties involved.\n\n## 5. Rights of the Person Being Investigated\n\nThe person under investigation is informed of the general nature of the concern (without necessarily revealing the reporter's identity if anonymity was requested) and has the opportunity to respond before any conclusion is finalized.\n\n## 6. Outcomes\n\nFindings lead to one of: no action (concern not substantiated), informal resolution, or referral to the Disciplinary Procedure. Outcomes are communicated to the reporter at a level of detail appropriate to confidentiality requirements — they are told the investigation concluded and whether action was taken, not necessarily every detail.\n\n## 7. Protection Throughout\n\nBoth the reporter and any witnesses are protected from retaliation throughout and after the investigation, per the Whistleblower Policy and Anti-Harassment Policy.\n\n## 8. External Investigators",
+      "metadata": {
+        "chunk_type": "micro",
+        "parent_chunk_id": "38eeb31459ff3818",
+        "parent_pages": "",
+        "chunk_id": "d578a0e2eac66e47",
+        "micro_chunk_index": 2,
+        "pages_in_chunk": "",
+        "chunking": "micro_token_split",
+        "semantic_source": "legal_compliance_conduct/workplace_investigations_policy.md",
+        "source": "/home/sparras/trabajo/RAG_HR_ASSISTANT/knowledge_base/legal_compliance_conduct/workplace_investigations_policy.md",
+        "source_file": "",
+        "relative_path": "legal_compliance_conduct/workplace_investigations_policy.md",
+        "filename": "workplace_investigations_policy.md",
+        "file_stem": "workplace_investigations_policy",
+        "file_type": "",
+        "folder_context": "legal_compliance_conduct",
+        "semantic_headline": "Política de Investigaciones Laborales: Proceso y Confidencialidad",
+        "semantic_summary": "La Política de Investigaciones Laborales detalla el proceso de investigación tras un reporte recibido, que debe ser específico. Las investigaciones son realizadas por People Ops o Legal y deben completarse en un plazo de 30 días. Se garantiza la confidencialidad y protección contra represalias para los denunciantes.",
+        "word_count": 187,
+        "char_count": 1280,
+        "contains_metrics": false,
+        "contains_list": false,
+        "context_where": "legal_compliance_conduct/workplace_investigations_policy.md"
+      }
+    },
+    {
+      "text": "SOURCE: legal_compliance_conduct/workplace_investigations_policy.md\nTITLE: Política de Investigaciones Laborales: Proceso y Confidencialidad\n\n## 7. Protection Throughout\n\nBoth the reporter and any witnesses are protected from retaliation throughout and after the investigation, per the Whistleblower Policy and Anti-Harassment Policy.\n\n## 8. External Investigators\n\nFor particularly sensitive or senior-level cases, the company may engage an independent external investigator instead of using internal staff, to ensure impartiality.",
+      "metadata": {
+        "chunk_type": "micro",
+        "parent_chunk_id": "38eeb31459ff3818",
+        "parent_pages": "",
+        "chunk_id": "d9b80da44bf47497",
+        "micro_chunk_index": 3,
+        "pages_in_chunk": "",
+        "chunking": "micro_token_split",
+        "semantic_source": "legal_compliance_conduct/workplace_investigations_policy.md",
+        "source": "/home/sparras/trabajo/RAG_HR_ASSISTANT/knowledge_base/legal_compliance_conduct/workplace_investigations_policy.md",
+        "source_file": "",
+        "relative_path": "legal_compliance_conduct/workplace_investigations_policy.md",
+        "filename": "workplace_investigations_policy.md",
+        "file_stem": "workplace_investigations_policy",
+        "file_type": "",
+        "folder_context": "legal_compliance_conduct",
+        "semantic_headline": "Política de Investigaciones Laborales: Proceso y Confidencialidad",
+        "semantic_summary": "La Política de Investigaciones Laborales detalla el proceso de investigación tras un reporte recibido, que debe ser específico. Las investigaciones son realizadas por People Ops o Legal y deben completarse en un plazo de 30 días. Se garantiza la confidencialidad y protección contra represalias para los denunciantes.",
+        "word_count": 52,
+        "char_count": 390,
+        "contains_metrics": false,
+        "contains_list": false,
+        "context_where": "legal_compliance_conduct/workplace_investigations_policy.md"
+      }
+    }
+  ]
+}

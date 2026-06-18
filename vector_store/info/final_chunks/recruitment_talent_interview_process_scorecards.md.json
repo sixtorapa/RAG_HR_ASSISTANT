@@ -1,0 +1,84 @@
+{
+  "source_file": "recruitment_talent/interview_process_scorecards.md",
+  "num_chunks": 3,
+  "chunks": [
+    {
+      "text": "SOURCE: recruitment_talent/interview_process_scorecards.md\nTITLE: Guía del Proceso de Entrevista y Scorecards\n\n[PÁGINA ?]\n# Interview Process & Scorecards Guide\n\n## 1. Standard Interview Stages\n\n| Stage | Owner | Typical Duration |\n| --- | --- | --- |\n| Recruiter screen | Talent Acquisition | 30 minutes |\n| Hiring manager interview | Hiring manager | 45 minutes |\n| Skills assessment | Panel (2-3 people) | 60-90 minutes |\n| Values / culture interview | Cross-functional peer | 45 minutes |\n| Final interview | Department head | 30 minutes |\n\nRoles at Lead level and above add a final \"leadership panel\" stage before an offer is extended.\n\n## 2. Scorecards\n\nEvery interviewer must submit a scorecard in the ATS within 24 hours of the interview, before discussing the candidate with anyone else on the panel. Scorecards use a 4-point scale:\n\n- **4 — Strong yes**: would be disappointed if we don't hire\n- **3 — Yes**: solid hire, no major concerns\n- **2 — No**: would not hire, but not a strong objection\n- **1 — Strong no**: significant concern about role fit or values\n\n## 3. Debrief Meetings\n\nDebriefs happen within 2 business days of the final interview. The hiring manager facilitates; the most junior panelist speaks first to avoid anchoring bias. A candidate needs at least three \"3\" or higher scores, with no \"1,\" to proceed to an offer.\n\n## 4. Structured Questions\n\nEach role has a structured question bank maintained by Talent Acquisition. Interviewers should use at least 80% structured questions per interview to keep evaluation criteria consistent across candidates. Ad hoc questions are allowed but should not replace the structured set.\n\n## 5. Avoiding Bias\n\n- Review the CV only immediately before the interview, not days in advance\n- Do not discuss scores with other panelists before submitting your own\n- Flag and disregard any question about age, marital status, religion, or family planning — these must never factor into a hiring decision\n\n## 6. Candidate Feedback\n\nRejected candidates who reached the skills assessment stage or beyond receive specific, constructive feedback within 5 business days, drafted by the hiring manager and reviewed by Talent Acquisition before sending.\n\nSources: Recruitment and Hiring Policy, Hiring Manager Toolkit.",
+      "metadata": {
+        "source": "/home/sparras/trabajo/RAG_HR_ASSISTANT/knowledge_base/recruitment_talent/interview_process_scorecards.md",
+        "relative_path": "recruitment_talent/interview_process_scorecards.md",
+        "folder_context": "recruitment_talent",
+        "filename": "interview_process_scorecards.md",
+        "file_stem": "interview_process_scorecards",
+        "pages_in_chunk": "",
+        "chunking": "page_based_hybrid",
+        "word_count": 361,
+        "char_count": 2156,
+        "has_table": false,
+        "semantic_source": "recruitment_talent/interview_process_scorecards.md",
+        "chunk_id": "ed4677162b5936c6",
+        "chunk_type": "macro",
+        "has_children": true,
+        "semantic_headline": "Guía del Proceso de Entrevista y Scorecards",
+        "semantic_summary": "Se describen las etapas estándar del proceso de entrevista, que incluyen desde la preselección hasta la entrevista final. Los entrevistadores deben presentar scorecards en un plazo de 24 horas, utilizando una escala de 4 puntos. Se requiere un mínimo de tres puntuaciones de '3' para avanzar a la oferta.",
+        "contains_metrics": true,
+        "contains_list": true,
+        "context_where": "recruitment_talent/interview_process_scorecards.md"
+      }
+    },
+    {
+      "text": "SOURCE: recruitment_talent/interview_process_scorecards.md\nTITLE: Guía del Proceso de Entrevista y Scorecards\n\n[PÁGINA ?]\n# Interview Process & Scorecards Guide\n\n## 1. Standard Interview Stages\n\n| Stage | Owner | Typical Duration |\n| --- | --- | --- |\n| Recruiter screen | Talent Acquisition | 30 minutes |\n| Hiring manager interview | Hiring manager | 45 minutes |\n| Skills assessment | Panel (2-3 people) | 60-90 minutes |\n| Values / culture interview | Cross-functional peer | 45 minutes |\n| Final interview | Department head | 30 minutes |\n\nRoles at Lead level and above add a final \"leadership panel\" stage before an offer is extended.\n\n## 2. Scorecards\n\nEvery interviewer must submit a scorecard in the ATS within 24 hours of the interview, before discussing the candidate with anyone else on the panel. Scorecards use a 4-point scale:\n\n- **4 — Strong yes**: would be disappointed if we don't hire\n- **3 — Yes**: solid hire, no major concerns\n- **2 — No**: would not hire, but not a strong objection\n- **1 — Strong no**: significant concern about role fit or values\n\n## 3. Debrief Meetings",
+      "metadata": {
+        "chunk_type": "micro",
+        "parent_chunk_id": "ed4677162b5936c6",
+        "parent_pages": "",
+        "chunk_id": "4ad9aee2fb82389d",
+        "micro_chunk_index": 1,
+        "pages_in_chunk": "",
+        "chunking": "micro_token_split",
+        "semantic_source": "recruitment_talent/interview_process_scorecards.md",
+        "source": "/home/sparras/trabajo/RAG_HR_ASSISTANT/knowledge_base/recruitment_talent/interview_process_scorecards.md",
+        "source_file": "",
+        "relative_path": "recruitment_talent/interview_process_scorecards.md",
+        "filename": "interview_process_scorecards.md",
+        "file_stem": "interview_process_scorecards",
+        "file_type": "",
+        "folder_context": "recruitment_talent",
+        "semantic_headline": "Guía del Proceso de Entrevista y Scorecards",
+        "semantic_summary": "Se describen las etapas estándar del proceso de entrevista, que incluyen desde la preselección hasta la entrevista final. Los entrevistadores deben presentar scorecards en un plazo de 24 horas, utilizando una escala de 4 puntos. Se requiere un mínimo de tres puntuaciones de '3' para avanzar a la oferta.",
+        "word_count": 181,
+        "char_count": 984,
+        "contains_metrics": false,
+        "contains_list": true,
+        "context_where": "recruitment_talent/interview_process_scorecards.md"
+      }
+    },
+    {
+      "text": "SOURCE: recruitment_talent/interview_process_scorecards.md\nTITLE: Guía del Proceso de Entrevista y Scorecards\n\n## 3. Debrief Meetings\n\nDebriefs happen within 2 business days of the final interview. The hiring manager facilitates; the most junior panelist speaks first to avoid anchoring bias. A candidate needs at least three \"3\" or higher scores, with no \"1,\" to proceed to an offer.\n\n## 4. Structured Questions\n\nEach role has a structured question bank maintained by Talent Acquisition. Interviewers should use at least 80% structured questions per interview to keep evaluation criteria consistent across candidates. Ad hoc questions are allowed but should not replace the structured set.\n\n## 5. Avoiding Bias\n\n- Review the CV only immediately before the interview, not days in advance\n- Do not discuss scores with other panelists before submitting your own\n- Flag and disregard any question about age, marital status, religion, or family planning — these must never factor into a hiring decision\n\n## 6. Candidate Feedback\n\nRejected candidates who reached the skills assessment stage or beyond receive specific, constructive feedback within 5 business days, drafted by the hiring manager and reviewed by Talent Acquisition before sending.\n\nSources: Recruitment and Hiring Policy, Hiring Manager Toolkit.",
+      "metadata": {
+        "chunk_type": "micro",
+        "parent_chunk_id": "ed4677162b5936c6",
+        "parent_pages": "",
+        "chunk_id": "ce487a5596bfe834",
+        "micro_chunk_index": 2,
+        "pages_in_chunk": "",
+        "chunking": "micro_token_split",
+        "semantic_source": "recruitment_talent/interview_process_scorecards.md",
+        "source": "/home/sparras/trabajo/RAG_HR_ASSISTANT/knowledge_base/recruitment_talent/interview_process_scorecards.md",
+        "source_file": "",
+        "relative_path": "recruitment_talent/interview_process_scorecards.md",
+        "filename": "interview_process_scorecards.md",
+        "file_stem": "interview_process_scorecards",
+        "file_type": "",
+        "folder_context": "recruitment_talent",
+        "semantic_headline": "Guía del Proceso de Entrevista y Scorecards",
+        "semantic_summary": "Se describen las etapas estándar del proceso de entrevista, que incluyen desde la preselección hasta la entrevista final. Los entrevistadores deben presentar scorecards en un plazo de 24 horas, utilizando una escala de 4 puntos. Se requiere un mínimo de tres puntuaciones de '3' para avanzar a la oferta.",
+        "word_count": 184,
+        "char_count": 1194,
+        "contains_metrics": true,
+        "contains_list": true,
+        "context_where": "recruitment_talent/interview_process_scorecards.md"
+      }
+    }
+  ]
+}

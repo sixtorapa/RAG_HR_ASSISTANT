@@ -1,0 +1,14 @@
+{
+  "source_file": "recruitment_talent/background_check_policy.md",
+  "num_chunks": 1,
+  "chunks": [
+    {
+      "headline": "Política de Verificación de Antecedentes y Empleo",
+      "summary": "Las verificaciones de antecedentes se realizan solo después de aceptar una oferta verbal. Se revisan aspectos como la identidad y el historial laboral, y se requiere el consentimiento del candidato. Los hallazgos adversos se manejan con la oportunidad de disputa antes de tomar decisiones finales.",
+      "text": "[PÁGINA ?]\n# Background Check & Pre-Employment Policy\n\n## 1. When Checks Happen\n\nBackground checks are run only **after** a verbal offer has been accepted, never before, and are a condition of final employment. The offer letter explicitly states that the position is contingent on a satisfactory result.\n\n## 2. What Is Checked\n\n| Check Type | Applies To |\n| --- | --- |\n| Identity verification | All roles |\n| Right-to-work verification | All roles |\n| Employment history (last 2 employers) | All roles |\n| Education verification | Roles requiring a specific degree |\n| Criminal record check | Finance, Legal, and roles with system admin access |\n| Credit check | Finance roles handling payments only |\n\n## 3. Provider and Consent\n\nChecks are performed by an accredited third-party provider. Candidates must give explicit written consent before any check is initiated; refusal to consent means the offer cannot proceed, since the check is a condition of employment.\n\n## 4. Handling Adverse Findings\n\nIf a check returns an adverse finding, the candidate is given the opportunity to explain or dispute it before any decision is made. The decision to withdraw an offer based on a finding is made jointly by the Hiring Manager, People Director, and Legal — never by a single individual.\n\n## 5. Data Retention\n\nBackground check results are retained for 12 months after the hiring decision, then deleted, in line with the Data Privacy & GDPR Guidelines. Results are never shared outside the hiring team and Legal.\n\n## 6. International Hires\n\nFor candidates outside the company's primary country of operation, checks are adapted to what is legally permissible in that jurisdiction; some check types (e.g., credit checks) are not available or not legal in all countries and are skipped accordingly.\n\n## 7. Re-checks for Internal Moves\n\nInternal employees moving into a role with a higher check requirement (e.g., moving into Finance) undergo the additional check relevant to the new role before the transfer is finalized.",
+      "pages_in_chunk": "",
+      "word_count": 333,
+      "char_count": 2013
+    }
+  ]
+}

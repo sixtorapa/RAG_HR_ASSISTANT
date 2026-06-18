@@ -1,0 +1,111 @@
+{
+  "source_file": "legal_compliance_conduct/conflict_of_interest_policy.md",
+  "num_chunks": 4,
+  "chunks": [
+    {
+      "text": "SOURCE: legal_compliance_conduct/conflict_of_interest_policy.md\nTITLE: Política de Conflicto de Intereses: Reglas y Divulgación\n\n[PÁGINA ?]\n# Conflict of Interest Policy\n\n## 1. What Is a Conflict of Interest\n\nA situation where your personal interests — financial, family, or close personal relationships — could influence, or appear to influence, a decision you make on behalf of the company.\n\n## 2. Common Examples\n\n- Hiring, managing, or being in the approval chain for a close family member or partner\n- Having a financial stake in a vendor or client the company does business with\n- Taking a second job or board seat at a competitor, client, or vendor\n- Being part of a hiring panel for someone you have a personal relationship with (see Employee Referral Program for the related referral-conflict rule)\n\n## 3. Disclosure Requirement\n\nConflicts must be disclosed as soon as you become aware of them, via the Conflict of Interest Disclosure Form, even if you believe the conflict doesn't actually affect your judgment — the point of disclosure is transparency, not an admission of wrongdoing.\n\n## 4. What Happens After Disclosure\n\nLegal and your Department Head review the disclosure and decide on a mitigation: this might mean recusing yourself from a specific decision, changing reporting lines, or in rarer cases, restructuring a team. Most disclosures result in a simple, documented recusal.\n\n## 5. Romantic Relationships at Work\n\nRelationships between colleagues are not prohibited, but a direct reporting relationship between partners is not permitted — one party must be moved to a different reporting line, handled discreetly through People Ops.\n\n## 6. Outside Employment\n\nTaking a second job or significant freelance work is permitted as long as it doesn't compete with the company's business, doesn't use company time or resources, and is disclosed under this policy if it could reasonably create a conflict.\n\n## 7. Annual Confirmation\n\nAll employees confirm or update their conflict of interest disclosures annually, even if nothing has changed, as part of the Code of Conduct acknowledgment cycle.\n\n## 8. Failure to Disclose\n\nFailing to disclose a known conflict is treated more seriously under the Disciplinary Procedure than the conflict itself, since timely disclosure is what allows it to be managed properly.",
+      "metadata": {
+        "source": "/home/sparras/trabajo/RAG_HR_ASSISTANT/knowledge_base/legal_compliance_conduct/conflict_of_interest_policy.md",
+        "relative_path": "legal_compliance_conduct/conflict_of_interest_policy.md",
+        "folder_context": "legal_compliance_conduct",
+        "filename": "conflict_of_interest_policy.md",
+        "file_stem": "conflict_of_interest_policy",
+        "pages_in_chunk": "",
+        "chunking": "page_based_hybrid",
+        "word_count": 353,
+        "char_count": 2199,
+        "has_table": false,
+        "semantic_source": "legal_compliance_conduct/conflict_of_interest_policy.md",
+        "chunk_id": "418ca848a06fcf25",
+        "chunk_type": "macro",
+        "has_children": true,
+        "semantic_headline": "Política de Conflicto de Intereses: Reglas y Divulgación",
+        "semantic_summary": "La política define un conflicto de interés como situaciones donde intereses personales pueden influir en decisiones laborales. Se requiere la divulgación inmediata de conflictos, y las relaciones románticas entre colegas deben manejarse sin reportes directos. La falta de divulgación se considera una violación grave.",
+        "contains_metrics": false,
+        "contains_list": true,
+        "context_where": "legal_compliance_conduct/conflict_of_interest_policy.md"
+      }
+    },
+    {
+      "text": "SOURCE: legal_compliance_conduct/conflict_of_interest_policy.md\nTITLE: Política de Conflicto de Intereses: Reglas y Divulgación\n\n[PÁGINA ?]\n# Conflict of Interest Policy\n\n## 1. What Is a Conflict of Interest\n\nA situation where your personal interests — financial, family, or close personal relationships — could influence, or appear to influence, a decision you make on behalf of the company.\n\n## 2. Common Examples\n\n- Hiring, managing, or being in the approval chain for a close family member or partner\n- Having a financial stake in a vendor or client the company does business with\n- Taking a second job or board seat at a competitor, client, or vendor\n- Being part of a hiring panel for someone you have a personal relationship with (see Employee Referral Program for the related referral-conflict rule)\n\n## 3. Disclosure Requirement\n\nConflicts must be disclosed as soon as you become aware of them, via the Conflict of Interest Disclosure Form, even if you believe the conflict doesn't actually affect your judgment — the point of disclosure is transparency, not an admission of wrongdoing.\n\n## 4. What Happens After Disclosure",
+      "metadata": {
+        "chunk_type": "micro",
+        "parent_chunk_id": "418ca848a06fcf25",
+        "parent_pages": "",
+        "chunk_id": "8be9269aa39438e4",
+        "micro_chunk_index": 1,
+        "pages_in_chunk": "",
+        "chunking": "micro_token_split",
+        "semantic_source": "legal_compliance_conduct/conflict_of_interest_policy.md",
+        "source": "/home/sparras/trabajo/RAG_HR_ASSISTANT/knowledge_base/legal_compliance_conduct/conflict_of_interest_policy.md",
+        "source_file": "",
+        "relative_path": "legal_compliance_conduct/conflict_of_interest_policy.md",
+        "filename": "conflict_of_interest_policy.md",
+        "file_stem": "conflict_of_interest_policy",
+        "file_type": "",
+        "folder_context": "legal_compliance_conduct",
+        "semantic_headline": "Política de Conflicto de Intereses: Reglas y Divulgación",
+        "semantic_summary": "La política define un conflicto de interés como situaciones donde intereses personales pueden influir en decisiones laborales. Se requiere la divulgación inmediata de conflictos, y las relaciones románticas entre colegas deben manejarse sin reportes directos. La falta de divulgación se considera una violación grave.",
+        "word_count": 169,
+        "char_count": 1003,
+        "contains_metrics": false,
+        "contains_list": true,
+        "context_where": "legal_compliance_conduct/conflict_of_interest_policy.md"
+      }
+    },
+    {
+      "text": "SOURCE: legal_compliance_conduct/conflict_of_interest_policy.md\nTITLE: Política de Conflicto de Intereses: Reglas y Divulgación\n\nConflicts must be disclosed as soon as you become aware of them, via the Conflict of Interest Disclosure Form, even if you believe the conflict doesn't actually affect your judgment — the point of disclosure is transparency, not an admission of wrongdoing.\n\n## 4. What Happens After Disclosure\n\nLegal and your Department Head review the disclosure and decide on a mitigation: this might mean recusing yourself from a specific decision, changing reporting lines, or in rarer cases, restructuring a team. Most disclosures result in a simple, documented recusal.\n\n## 5. Romantic Relationships at Work\n\nRelationships between colleagues are not prohibited, but a direct reporting relationship between partners is not permitted — one party must be moved to a different reporting line, handled discreetly through People Ops.\n\n## 6. Outside Employment\n\nTaking a second job or significant freelance work is permitted as long as it doesn't compete with the company's business, doesn't use company time or resources, and is disclosed under this policy if it could reasonably create a conflict.\n\n## 7. Annual Confirmation\n\nAll employees confirm or update their conflict of interest disclosures annually, even if nothing has changed, as part of the Code of Conduct acknowledgment cycle.\n\n## 8. Failure to Disclose",
+      "metadata": {
+        "chunk_type": "micro",
+        "parent_chunk_id": "418ca848a06fcf25",
+        "parent_pages": "",
+        "chunk_id": "ac733570f8a40f4d",
+        "micro_chunk_index": 2,
+        "pages_in_chunk": "",
+        "chunking": "micro_token_split",
+        "semantic_source": "legal_compliance_conduct/conflict_of_interest_policy.md",
+        "source": "/home/sparras/trabajo/RAG_HR_ASSISTANT/knowledge_base/legal_compliance_conduct/conflict_of_interest_policy.md",
+        "source_file": "",
+        "relative_path": "legal_compliance_conduct/conflict_of_interest_policy.md",
+        "filename": "conflict_of_interest_policy.md",
+        "file_stem": "conflict_of_interest_policy",
+        "file_type": "",
+        "folder_context": "legal_compliance_conduct",
+        "semantic_headline": "Política de Conflicto de Intereses: Reglas y Divulgación",
+        "semantic_summary": "La política define un conflicto de interés como situaciones donde intereses personales pueden influir en decisiones laborales. Se requiere la divulgación inmediata de conflictos, y las relaciones románticas entre colegas deben manejarse sin reportes directos. La falta de divulgación se considera una violación grave.",
+        "word_count": 203,
+        "char_count": 1300,
+        "contains_metrics": false,
+        "contains_list": false,
+        "context_where": "legal_compliance_conduct/conflict_of_interest_policy.md"
+      }
+    },
+    {
+      "text": "SOURCE: legal_compliance_conduct/conflict_of_interest_policy.md\nTITLE: Política de Conflicto de Intereses: Reglas y Divulgación\n\n## 7. Annual Confirmation\n\nAll employees confirm or update their conflict of interest disclosures annually, even if nothing has changed, as part of the Code of Conduct acknowledgment cycle.\n\n## 8. Failure to Disclose\n\nFailing to disclose a known conflict is treated more seriously under the Disciplinary Procedure than the conflict itself, since timely disclosure is what allows it to be managed properly.",
+      "metadata": {
+        "chunk_type": "micro",
+        "parent_chunk_id": "418ca848a06fcf25",
+        "parent_pages": "",
+        "chunk_id": "5910a52fcd28984f",
+        "micro_chunk_index": 3,
+        "pages_in_chunk": "",
+        "chunking": "micro_token_split",
+        "semantic_source": "legal_compliance_conduct/conflict_of_interest_policy.md",
+        "source": "/home/sparras/trabajo/RAG_HR_ASSISTANT/knowledge_base/legal_compliance_conduct/conflict_of_interest_policy.md",
+        "source_file": "",
+        "relative_path": "legal_compliance_conduct/conflict_of_interest_policy.md",
+        "filename": "conflict_of_interest_policy.md",
+        "file_stem": "conflict_of_interest_policy",
+        "file_type": "",
+        "folder_context": "legal_compliance_conduct",
+        "semantic_headline": "Política de Conflicto de Intereses: Reglas y Divulgación",
+        "semantic_summary": "La política define un conflicto de interés como situaciones donde intereses personales pueden influir en decisiones laborales. Se requiere la divulgación inmediata de conflictos, y las relaciones románticas entre colegas deben manejarse sin reportes directos. La falta de divulgación se considera una violación grave.",
+        "word_count": 63,
+        "char_count": 405,
+        "contains_metrics": false,
+        "contains_list": false,
+        "context_where": "legal_compliance_conduct/conflict_of_interest_policy.md"
+      }
+    }
+  ]
+}
