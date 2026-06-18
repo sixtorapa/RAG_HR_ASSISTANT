@@ -8,7 +8,7 @@ The rest of the code is identical — SQLAlchemy handles the dialect.
 import sqlite3
 import os
 import re
-from typing import Optional
+from typing import List, Optional
 from urllib.parse import quote
 
 from langchain.tools import BaseTool
@@ -53,6 +53,26 @@ def _is_select_only(sql: str) -> bool:
     return not any(re.search(rf"\b{kw}\b", upper) for kw in _FORBIDDEN_SQL_KEYWORDS)
 
 
+# ── Guardarril de control de acceso por departamento (mismo concepto que en
+# qa_chain.py / excel_tool.py, aplicado a columnas en vez de a documentos) ──
+# Esta BD (hr_data.db) tiene su propio esquema de "departments" (Engineering,
+# Sales...), que NO es el mismo concepto que los departamentos del knowledge_base
+# (compensation_benefits, recruitment_talent...). Lo único que mapeamos aquí es:
+# si el usuario no tiene acceso al departamento RAG "compensation_benefits",
+# tampoco puede consultar columnas de salario/presupuesto vía SQL — son la misma
+# categoría de dato sensible, solo que vive en dos sitios distintos.
+_RESTRICTED_COLUMNS_BY_DEPARTMENT = {
+    "compensation_benefits": ("salary", "budget"),
+}
+
+
+def _touches_restricted_columns(sql: str, blocked_columns: set) -> bool:
+    if not blocked_columns:
+        return False
+    tokens = set(re.findall(r"[a-zA-Z_]+", sql.lower()))
+    return bool(tokens & blocked_columns)
+
+
 # ── Tool ─────────────────────────────────────────────────────────────────────
 
 class HRDatabaseTool(BaseTool):
@@ -66,6 +86,21 @@ class HRDatabaseTool(BaseTool):
 
     model_name: str
     project_settings: dict = {}
+
+    # Guardarril de acceso: None = sin restricción (admin); list (incl. vacía) =
+    # restringido a esos departamentos -> bloquea columnas sensibles asociadas
+    # a los departamentos que NO estén en la lista (ver _RESTRICTED_COLUMNS_BY_DEPARTMENT).
+    allowed_departments: Optional[List[str]] = None
+
+    def _blocked_columns(self) -> set:
+        if self.allowed_departments is None:
+            return set()
+        allowed = {d.strip().lower() for d in self.allowed_departments}
+        blocked: set = set()
+        for dept, columns in _RESTRICTED_COLUMNS_BY_DEPARTMENT.items():
+            if dept not in allowed:
+                blocked.update(columns)
+        return blocked
 
     # ── DB context (sent to the LLM so it can write correct SQL) ─────────────
     DB_SCHEMA_CONTEXT: ClassVar[str] = """
@@ -138,14 +173,25 @@ USEFUL QUERY PATTERNS:
         try:
             # ── 1. Let LLM generate the SQL ──────────────────────────────────
             user_sql_context = self.project_settings.get("sql_context", "") or self.DB_SCHEMA_CONTEXT
+            blocked_columns = self._blocked_columns()
 
             llm = ChatOpenAI(model_name=self.model_name, temperature=0)
+
+            access_note = ""
+            if blocked_columns:
+                access_note = (
+                    f"\nACCESS RESTRICTION: this user does NOT have permission to see "
+                    f"the following columns: {', '.join(sorted(blocked_columns))}. "
+                    f"Do not select, filter, or aggregate by them — if the question "
+                    f"cannot be answered without them, write a query that omits them."
+                )
 
             system_prompt = f"""You are an expert SQL analyst for HR data.
 Given the database schema below, write a single valid SQLite SELECT query to answer the user's question.
 Return ONLY the SQL — no explanation, no markdown fences.
 
 {user_sql_context}
+{access_note}
 
 Rules:
 - Use only the tables and columns listed above.
@@ -170,6 +216,16 @@ Rules:
                 # ── Safety check: only single read-only SELECT/CTE statements ─
                 if not _is_select_only(generated_sql):
                     return "❌ Generated query rejected: only single read-only SELECT statements are allowed."
+
+                # ── Guardarril de acceso: columnas sensibles fuera de scope ────
+                # Determinista, no depende de que el LLM respete la nota del prompt.
+                if _touches_restricted_columns(generated_sql, blocked_columns):
+                    print(f"🚫 SQL guardrail: query bloqueada por columna restringida -> {generated_sql}")
+                    return (
+                        "❌ This question requires data you don't have permission to access "
+                        "(compensation/budget data). Ask your administrator for access if you "
+                        "believe this is a mistake."
+                    )
 
                 try:
                     cursor.execute(generated_sql)

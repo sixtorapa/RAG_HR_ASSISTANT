@@ -602,6 +602,7 @@ def ask(session_id):
         sql_tool = SQLDatabaseTool(
             model_name=selected_model,
             project_settings=project.settings or {},
+            allowed_departments=current_user.get_allowed_departments(),
         )
         excel_tool = ExcelAnalysisTool(
             doc_path=project.document_path,
@@ -1128,6 +1129,7 @@ def edit_and_resubmit(message_id):
         sql_tool = SQLDatabaseTool(
             model_name=model_for_regen,
             project_settings=project.settings or {},
+            allowed_departments=current_user.get_allowed_departments(),
         )
         excel_tool = ExcelAnalysisTool(
             doc_path=project.document_path,
