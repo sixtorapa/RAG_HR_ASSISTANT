@@ -3,7 +3,7 @@
 import os
 import re
 from difflib import SequenceMatcher
-from typing import List, Optional, Dict, Tuple, Any
+from typing import List, Optional, Dict, Tuple, Any, Callable
 
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain_community.vectorstores import Chroma
@@ -12,8 +12,10 @@ from langchain.chains import ConversationalRetrievalChain
 from langchain.schema import Document, BaseRetriever
 
 # Hybrid search
-from langchain_community.retrievers import BM25Retriever
 from langchain.retrievers import EnsembleRetriever, ContextualCompressionRetriever
+
+from .path_utils import norm_path
+from .bm25_index import build_bm25_retriever, load_bm25_index
 
 # Rerank (opcional)
 try:
@@ -29,11 +31,7 @@ from langchain_core.prompts import ChatPromptTemplate
 # ==================== UTILIDADES ====================
 
 def _norm(s: str) -> str:
-    # Normaliza: lower, trim, espacios y separadores de path (Windows -> POSIX)
-    s = (s or "").strip().lower().replace("\\", "/")
-    s = re.sub(r"/+", "/", s)              # colapsa //// -> /
-    s = re.sub(r"\s+", " ", s)             # colapsa espacios
-    return s
+    return norm_path(s)
 
 
 def _stem(filename: str) -> str:
@@ -46,50 +44,57 @@ def _ratio(a: str, b: str) -> float:
     return SequenceMatcher(None, _norm(a), _norm(b)).ratio()
 
 
-# ==================== CLASE FILTRADO (PYTHON) ====================
+# ==================== PREFILTRO NATIVO POR METADATA ====================
 
-class SmartPathRetriever(BaseRetriever):
+def _build_scoped_retriever(
+    vector_store: Chroma,
+    values: List[str],
+    k_base: int,
+    fetch_k: int,
+    max_docs: int,
+    metadata_field: str = "relative_path_norm",
+) -> BaseRetriever:
     """
-    Retriever wrapper que filtra resultados en Python.
+    Prefiltro NATIVO por metadata, en vez de lanzar la búsqueda sobre todo el corpus
+    y descartar resultados en Python después (lo que hacían SmartPathRetriever/
+    MultiPathRetriever). Reutilizable para distintos campos de metadata: por archivo
+    concreto (`relative_path_norm`) o por departamento (`department`).
 
-    Filtro DURO:
-    - Si el filtro parece ruta/archivo (contiene '/' o termina en .pdf/.pptx/.ppt) => match EXACTO
-      contra relative_path / filename / source_file (normalizados).
-    - Si el filtro parece un "stem" (ej. honimunn) => match EXACTO por stem del filename.
+    - Vector leg: Chroma recibe `filter` en el propio search_kwargs -> el MMR search
+      solo considera los chunks que matchean, vía el índice de metadata de Chroma.
+    - BM25 leg: se construye SOLO con los chunks de ese filtro (vector_store.get(where=...)),
+      no con el corpus completo -> rápido independientemente de cuántos documentos haya en total.
     """
-    vector_retriever: BaseRetriever
-    path_filter: str
-    max_docs: int = 18
+    norm_values = [norm_path(v) for v in (values or []) if (v or "").strip()]
+    if not norm_values:
+        return vector_store.as_retriever(
+            search_type="mmr",
+            search_kwargs={"k": max_docs, "fetch_k": fetch_k, "lambda_mult": 0.55},
+        )
 
-    def _get_relevant_documents(self, query: str, *, run_manager=None) -> List[Document]:
-        docs = self.vector_retriever.get_relevant_documents(query)
+    chroma_filter = (
+        {metadata_field: norm_values[0]} if len(norm_values) == 1
+        else {metadata_field: {"$in": norm_values}}
+    )
 
-        filtro_raw = (self.path_filter or "").strip()
-        filtro = _norm(filtro_raw)
+    scoped_vector = vector_store.as_retriever(
+        search_type="mmr",
+        search_kwargs={"k": max_docs, "fetch_k": fetch_k, "lambda_mult": 0.55, "filter": chroma_filter},
+    )
 
-        # Heurística: si parece path/archivo => exact
-        looks_like_path = ("/" in filtro) or bool(re.search(r"\.(pdf|pptx|ppt)$", filtro, flags=re.IGNORECASE))
+    scoped_retriever: BaseRetriever = scoped_vector
+    try:
+        data = vector_store.get(where=chroma_filter, include=["documents", "metadatas"])
+        docs_text = data.get("documents", []) or []
+        bm25 = build_bm25_retriever(docs_text, data.get("metadatas", []) or [])
+        if bm25 is not None:
+            bm25.k = min(max_docs, max(10, len(docs_text)))
+            scoped_retriever = EnsembleRetriever(retrievers=[scoped_vector, bm25], weights=[0.55, 0.45])
+    except Exception as e:
+        print(f"⚠️ BM25 (scoped) desactivado por error: {e}")
 
-        filtered: List[Document] = []
-        for d in docs:
-            meta = d.metadata or {}
-
-            rel = _norm(meta.get("relative_path", ""))
-            fname = _norm(meta.get("filename", ""))
-            src = _norm(meta.get("source_file", meta.get("source", "")))
-
-            if looks_like_path:
-                # 🔒 DURO: solo exact match (evita contaminación)
-                hay_match = (filtro == rel) or (filtro == fname) or (filtro == src)
-            else:
-                # 🔒 DURO: match exacto por stem
-                hay_match = (filtro == _stem(fname)) or (filtro == _stem(src)) or (filtro == _stem(rel))
-
-            if hay_match:
-                filtered.append(d)
-
-        print(f"🔎 SmartPathRetriever(HARD): {len(docs)} -> {len(filtered)} docs | filtro='{self.path_filter}'")
-        return filtered[: self.max_docs]
+    print(f"🔎 ScopedRetriever(NATIVE filter): campo={metadata_field} filtros={norm_values}")
+    return scoped_retriever
 
 
 # ==================== 2-PASS RETRIEVAL (DOC SHORTLIST) ====================
@@ -190,62 +195,17 @@ def _pick_top_docs_from_candidates(
 
 
 
-class MultiPathRetriever(BaseRetriever):
-    """
-    Igual que SmartPathRetriever, pero permite varios path_filters (OR).
-    Filtra DURO por exact match (path/archivo) o por stem (si no parece path).
-    """
-    vector_retriever: BaseRetriever
-    path_filters: List[str]
-    max_docs: int = 22
-
-    def _get_relevant_documents(self, query: str, *, run_manager=None) -> List[Document]:
-        docs = self.vector_retriever.get_relevant_documents(query)
-
-        filtros_raw = [f for f in (self.path_filters or []) if (f or "").strip()]
-        filtros = [_norm(f) for f in filtros_raw]
-
-        # separa filtros "parecen path/archivo" vs "stems"
-        path_like: List[str] = []
-        stem_like: List[str] = []
-        for f_raw, f_norm in zip(filtros_raw, filtros):
-            looks_like_path = ("/" in f_norm) or bool(re.search(r"\.(pdf|pptx|ppt)$", f_norm, flags=re.IGNORECASE))
-            if looks_like_path:
-                path_like.append(f_norm)
-            else:
-                stem_like.append(f_norm)
-
-        filtered: List[Document] = []
-        for d in docs:
-            meta = d.metadata or {}
-            rel = _norm(meta.get("relative_path", ""))
-            fname = _norm(meta.get("filename", ""))
-            src = _norm(meta.get("source_file", meta.get("source", "")))
-
-            ok = False
-
-            # exact path/filename/source
-            if path_like:
-                ok = (rel in path_like) or (fname in path_like) or (src in path_like)
-
-            # stem exact (si no pasó por path_like)
-            if (not ok) and stem_like:
-                ok = (_stem(fname) in stem_like) or (_stem(src) in stem_like) or (_stem(rel) in stem_like)
-
-            if ok:
-                filtered.append(d)
-
-        print(f"🔎 MultiPathRetriever(HARD): {len(docs)} -> {len(filtered)} docs | filtros={filtros_raw}")
-        return filtered[: self.max_docs]
-
-
 class TwoPassDocShortlistRetriever(BaseRetriever):
     """
-    1) Primer pase: base_retriever global (ensemble actual).
-    2) Elegir top docs.
-    3) Segundo pase: volver a recuperar con filtro duro multi-doc.
+    1) Primer pase: base_retriever global (ensemble sin filtrar, para descubrir qué doc(s)
+       son relevantes cuando el usuario no menciona uno explícitamente).
+    2) Elegir top docs por votos/boost.
+    3) Segundo pase: prefiltro NATIVO multi-doc vía scoped_retriever_factory
+       (_build_scoped_retriever), no post-filtrado en Python sobre una segunda
+       búsqueda sin filtrar.
     """
     base_retriever: BaseRetriever
+    scoped_retriever_factory: Callable[[List[str], int], BaseRetriever]
     top_docs: int = 2
     min_votes: int = 2
     first_pass_k: int = 14
@@ -267,12 +227,8 @@ class TwoPassDocShortlistRetriever(BaseRetriever):
 
         print(f"🎯 TwoPass: docs ganadores -> {winners}")
 
-        filtered_retriever = MultiPathRetriever(
-            vector_retriever=self.base_retriever,
-            path_filters=winners,
-            max_docs=self.max_docs,
-        )
-        return filtered_retriever.get_relevant_documents(query)
+        scoped_retriever = self.scoped_retriever_factory(winners, self.max_docs)
+        return scoped_retriever.get_relevant_documents(query)
 
 
 # ==================== PROMPTS ====================
@@ -360,7 +316,10 @@ def _detect_doc_filter(question: str, catalog: Dict[str, str]) -> Optional[str]:
     q = _norm(question)
 
     # 1) Si viene con extensión explícita
-    m = re.search(r"([a-z0-9_\-\. ]+)\.(pdf|pptx|ppt)\b", q, flags=re.IGNORECASE)
+    # Sin espacio en la clase de caracteres: si lo incluyéramos, capturaría toda la
+    # frase anterior al nombre de archivo en vez de solo el nombre (p.ej. "según el
+    # documento X.pdf" -> "documento x.pdf" en lugar de "x.pdf").
+    m = re.search(r"([a-z0-9áéíóúüñ_\-\.]+)\.(pdf|pptx|ppt)\b", q, flags=re.IGNORECASE)
     if m:
         candidate = _norm(m.group(0))
         # match directo
@@ -397,6 +356,99 @@ def _detect_doc_filter(question: str, catalog: Dict[str, str]) -> Optional[str]:
 
     if best_key and best_score >= 0.62:
         return catalog[best_key]
+
+    return None
+
+
+# ==================== CLASIFICADOR DE DEPARTAMENTO ====================
+# Heurística por keywords (rápida, gratis, determinista). Si se quisiera más
+# precisión a costa de latencia/coste, esto se sustituiría por una llamada LLM
+# (clasificación zero-shot contra la lista de departamentos) o por similitud de
+# embeddings contra una descripción corta de cada departamento — el resto del
+# pipeline (filtro nativo por metadata "department") no cambiaría.
+
+_DEPARTMENT_KEYWORDS: Dict[str, List[str]] = {
+    "compensation_benefits": [
+        "salary", "salaries", "pay", "compensation", "bonus", "stock option", "esop",
+        "benefit", "pension", "payroll", "salario", "sueldo", "compensacion", "bono",
+        "pension", "beneficio", "nomina", "banda salarial", "aumento",
+    ],
+    "recruitment_talent": [
+        "hiring", "recruit", "interview", "candidate", "referral", "background check",
+        "internship", "offer letter", "contratacion", "reclutamiento", "entrevista",
+        "candidato", "referido", "becario", "practicas", "oferta de trabajo",
+    ],
+    "performance_management": [
+        "performance review", "okr", "goal setting", "pip", "improvement plan",
+        "promotion", "calibration", "evaluacion de desempeno", "objetivos",
+        "ascenso", "promocion", "calibracion", "revision de desempeno",
+    ],
+    "onboarding_people_ops": [
+        "onboarding", "new hire", "probation", "org chart", "reporting line",
+        "transfer", "mobility", "vacation", "annual leave", "sick leave",
+        "incorporacion", "nuevo empleado", "periodo de prueba", "organigrama",
+        "traslado", "movilidad interna", "vacaciones", "dias libres", "baja medica",
+    ],
+    "learning_development": [
+        "training", "course", "certification", "conference", "mentorship", "mentor",
+        "learning", "lms", "formacion", "curso", "certificacion", "conferencia",
+        "mentoria", "aprendizaje",
+    ],
+    "health_safety_wellbeing": [
+        "health", "safety", "wellness", "ergonomic", "mental health", "therapy",
+        "incident", "evacuation", "salud", "seguridad", "bienestar", "ergonomia",
+        "salud mental", "terapia", "incidente", "evacuacion",
+    ],
+    "legal_compliance_conduct": [
+        "code of conduct", "harassment", "discrimination", "whistleblower", "gdpr",
+        "privacy", "conflict of interest", "disciplinary", "investigation",
+        "acoso", "discriminacion", "privacidad", "conflicto de interes",
+        "disciplinario", "investigacion", "etica",
+    ],
+    "it_workplace_policies": [
+        "remote work", "hybrid", "it security", "password", "vpn", "equipment",
+        "byod", "visitor", "badge", "software license", "trabajo remoto", "hibrido",
+        "seguridad informatica", "contrasena", "equipo", "visitante", "licencia",
+    ],
+    "diversity_equity_inclusion": [
+        "dei", "diversity", "inclusion", "erg", "parental leave", "accessibility",
+        "accommodation", "pay equity", "diversidad", "inclusion", "permiso parental",
+        "accesibilidad", "equidad salarial",
+    ],
+    "finance_travel_expenses": [
+        "travel", "expense", "per diem", "corporate card", "procurement", "vendor",
+        "budget", "viaje", "gasto", "dieta", "tarjeta corporativa", "presupuesto",
+        "proveedor", "reembolso",
+    ],
+}
+
+
+def _detect_department(question: str) -> Optional[str]:
+    """
+    Heurística de clasificación de departamento por keywords.
+    Devuelve None si no hay una señal clara (evita filtrar mal y perder el
+    documento correcto) — en ese caso el caller debe caer al flujo sin filtro.
+    """
+    q = _norm(question)
+    if not q:
+        return None
+
+    scores: Dict[str, int] = {}
+    for dept, keywords in _DEPARTMENT_KEYWORDS.items():
+        score = sum(1 for kw in keywords if kw in q)
+        if score:
+            scores[dept] = score
+
+    if not scores:
+        return None
+
+    ranked = sorted(scores.items(), key=lambda kv: kv[1], reverse=True)
+    top_dept, top_score = ranked[0]
+    second_score = ranked[1][1] if len(ranked) > 1 else 0
+
+    # Solo confiamos si hay una señal clara y sin ambigüedad entre dos departamentos
+    if top_score >= 1 and top_score > second_score:
+        return top_dept
 
     return None
 
@@ -453,8 +505,13 @@ def get_conversational_qa_chain(
 
     path_filter = forced_filter or auto_filter
 
-    # --- Cache key (incluye filtro si existe) ---
-    cache_key = f"{project_id}::{model_name}::{path_filter or 'NO_FILTER'}"
+    # Detección de departamento — solo relevante si no hay path_filter explícito.
+    # Se calcula aquí (no más abajo) para que entre en la cache key: dos preguntas
+    # sin path_filter pero de departamentos distintos NO deben compartir chain/retriever.
+    detected_department = None if path_filter else _detect_department(project_settings.get("last_user_question", ""))
+
+    # --- Cache key (incluye filtro/departamento si existen) ---
+    cache_key = f"{project_id}::{model_name}::{path_filter or ('DEPT:' + detected_department if detected_department else 'NO_FILTER')}"
     if cache_key in chain_cache:
         return chain_cache[cache_key]
 
@@ -462,46 +519,79 @@ def get_conversational_qa_chain(
     k_base = int(project_settings.get("k_base", 28 if not path_filter else 60))
     fetch_k = max(k_base * 4, 80)
 
-    vector_retriever = vector_store.as_retriever(
-        search_type="mmr",
-        search_kwargs={"k": k_base, "fetch_k": fetch_k, "lambda_mult": 0.55},
-    )
-
-    # ==================== BM25 (opcional) ====================
-    ensemble_retriever: BaseRetriever = vector_retriever
-    try:
-        data = vector_store.get(include=["documents", "metadatas"])
-        docs_text = data.get("documents", []) or []
-        docs_meta = data.get("metadatas", []) or []
-        if 0 < len(docs_text) == len(docs_meta):
-            docs_bm25 = [Document(page_content=t, metadata=(m or {})) for t, m in zip(docs_text, docs_meta)]
-            bm25 = BM25Retriever.from_documents(docs_bm25)
-            bm25.k = min(30, max(10, k_base))
-            ensemble_retriever = EnsembleRetriever(
-                retrievers=[vector_retriever, bm25],
-                weights=[0.55, 0.45],
-            )
-            print(f"✅ BM25 activo: {len(docs_bm25)} chunks indexados para BM25")
-    except Exception as e:
-        print(f"⚠️ BM25 desactivado por error: {e}")
-        ensemble_retriever = vector_retriever
-
-    # ==================== Filtro por documento (si aplica) ====================
-    final_retriever: BaseRetriever = ensemble_retriever
+    # Closure que el TwoPassDocShortlistRetriever usa en su 2º pase (prefiltro nativo multi-doc)
+    def _scoped_retriever_factory(values: List[str], max_docs: int) -> BaseRetriever:
+        return _build_scoped_retriever(
+            vector_store=vector_store,
+            values=values,
+            k_base=k_base,
+            fetch_k=fetch_k,
+            max_docs=max_docs,
+            metadata_field="relative_path_norm",
+        )
 
     if path_filter:
-        # Si el usuario menciona doc/ruta, filtro duro a 1 doc
-        final_retriever = SmartPathRetriever(
-            vector_retriever=ensemble_retriever,
-            path_filter=path_filter,
+        # El usuario menciona doc/ruta -> prefiltro NATIVO directo a 1 documento.
+        # No hace falta construir el ensemble del corpus completo para luego descartarlo.
+        final_retriever: BaseRetriever = _build_scoped_retriever(
+            vector_store=vector_store,
+            values=[path_filter],
+            k_base=k_base,
+            fetch_k=fetch_k,
             max_docs=22,
+            metadata_field="relative_path_norm",
         )
     else:
+        # detected_department ya se calculó arriba (antes de la cache key).
+        # Si hay señal clara, prefiltramos nativamente por "department" ANTES de
+        # construir el ensemble, en vez de buscar siempre sobre el corpus completo.
+        # Con baja confianza, no filtramos (más seguro perder velocidad que perder
+        # el documento correcto).
+        if detected_department:
+            print(f"🏷️ Departamento detectado: {detected_department}")
+            ensemble_retriever: BaseRetriever = _build_scoped_retriever(
+                vector_store=vector_store,
+                values=[detected_department],
+                k_base=k_base,
+                fetch_k=fetch_k,
+                max_docs=k_base,
+                metadata_field="department",
+            )
+        else:
+            vector_retriever = vector_store.as_retriever(
+                search_type="mmr",
+                search_kwargs={"k": k_base, "fetch_k": fetch_k, "lambda_mult": 0.55},
+            )
+
+            # ==================== BM25 (índice persistido, no se reconstruye en cada query) ====================
+            ensemble_retriever = vector_retriever
+            try:
+                bm25 = load_bm25_index(vector_store_path)
+                if bm25 is not None:
+                    print("✅ BM25 activo (índice persistido)")
+                else:
+                    # Fallback defensivo: vector store aún no re-indexado con el nuevo flujo persistente.
+                    data = vector_store.get(include=["documents", "metadatas"])
+                    bm25 = build_bm25_retriever(data.get("documents", []) or [], data.get("metadatas", []) or [])
+                    if bm25 is not None:
+                        print("⚠️ BM25 sin índice persistido: construido al vuelo (ejecuta ingest.py para persistirlo)")
+                if bm25 is not None:
+                    bm25.k = min(30, max(10, k_base))
+                    ensemble_retriever = EnsembleRetriever(
+                        retrievers=[vector_retriever, bm25],
+                        weights=[0.55, 0.45],
+                    )
+            except Exception as e:
+                print(f"⚠️ BM25 desactivado por error: {e}")
+                ensemble_retriever = vector_retriever
+
         # ✅ Two-pass retrieval (doc shortlist) para evitar mezclar documentos en preguntas genéricas
+        final_retriever = ensemble_retriever
         two_pass_enabled = bool(project_settings.get("two_pass_enabled", True))
         if two_pass_enabled:
             final_retriever = TwoPassDocShortlistRetriever(
                 base_retriever=ensemble_retriever,
+                scoped_retriever_factory=_scoped_retriever_factory,
                 top_docs=int(project_settings.get("two_pass_top_docs", 2)),
                 min_votes=int(project_settings.get("two_pass_min_votes", 2)),
                 first_pass_k=int(project_settings.get("two_pass_first_pass_k", 14)),

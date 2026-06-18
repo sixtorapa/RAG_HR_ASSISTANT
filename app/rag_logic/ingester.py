@@ -23,6 +23,8 @@ from langchain.docstore.document import Document
 from pydantic import BaseModel, Field
 
 from .custom_loaders import BetterPDFLoader, BetterPowerPointLoader, OcrConfig
+from .path_utils import norm_path
+from .bm25_index import persist_bm25_index
 
 import re
 import hashlib
@@ -1036,6 +1038,35 @@ def process_and_store_documents(data_path: str, vector_store_path: str) -> bool:
         except Exception:
             pass
 
+    def _backfill_relative_path_norm(vs: Chroma) -> int:
+        """Añade relative_path_norm/department a chunks ya indexados que no los tengan (sin re-embeber)."""
+        try:
+            data = vs.get(include=["metadatas"])
+        except Exception:
+            return 0
+        ids = data.get("ids", []) or []
+        metas = data.get("metadatas", []) or []
+        update_ids, update_metas = [], []
+        for _id, m in zip(ids, metas):
+            m = m or {}
+            rel = m.get("relative_path") or m.get("source_file") or m.get("filename") or ""
+            changed = False
+            if not m.get("relative_path_norm") and rel:
+                m["relative_path_norm"] = norm_path(rel)
+                changed = True
+            if not m.get("department") and rel:
+                m["department"] = (os.path.dirname(_safe_norm(rel)) or "general").lower()
+                changed = True
+            if changed:
+                update_ids.append(_id)
+                update_metas.append(m)
+        if update_ids:
+            col = getattr(vs, "_collection", None)
+            if col is not None:
+                col.update(ids=update_ids, metadatas=update_metas)
+                print(f"🩹 Backfill relative_path_norm/department: {len(update_ids)} chunk(s) actualizados.")
+        return len(update_ids)
+
     try:
         print(f"🚀 Ingesta Avanzada (INCREMENTAL) para: {data_path}")
 
@@ -1083,6 +1114,10 @@ def process_and_store_documents(data_path: str, vector_store_path: str) -> bool:
             embedding_function=embeddings,
         )
 
+        # Backfill: chunks indexados antes de introducir relative_path_norm (prefiltro nativo
+        # por metadata). Solo actualiza metadata, no re-embebe nada.
+        _backfill_relative_path_norm(vector_store)
+
         for rel in deleted_files:
             print(f"🗑️ Eliminando del índice: {rel}")
             _delete_by_source_file(vector_store, rel)
@@ -1090,6 +1125,9 @@ def process_and_store_documents(data_path: str, vector_store_path: str) -> bool:
 
         if not changed_files and not deleted_files:
             print("✅ No hay cambios detectados. Índice ya actualizado.")
+            if not os.path.exists(os.path.join(vector_store_path, "_bm25_index.pkl")):
+                print("🔎 Backfill: construyendo índice BM25 persistente (primera vez)...")
+                persist_bm25_index(vector_store, vector_store_path)
             return True
 
         changed_set = set(changed_files)
@@ -1204,6 +1242,9 @@ def process_and_store_documents(data_path: str, vector_store_path: str) -> bool:
             rel = _chunk_source_rel(ch, data_path)
             meta["source_file"] = rel
             meta["relative_path"] = rel
+            meta["relative_path_norm"] = norm_path(rel)  # clave estable para prefiltro nativo en Chroma
+            # department = primer segmento de carpeta (knowledge_base/<department>/archivo.ext)
+            meta["department"] = (os.path.dirname(rel) or "general").lower()
             # ChromaDB no soporta listas — ya son strings desde _merge_pages_into_chunk
             ch.metadata = meta
 
@@ -1240,6 +1281,12 @@ def process_and_store_documents(data_path: str, vector_store_path: str) -> bool:
                 files_dict[rel] = _file_sig(abs_path)
         manifest["files"] = files_dict
         _save_manifest(vector_store_path, manifest)
+
+        print("\n🔎 Reconstruyendo índice BM25 persistente...")
+        if persist_bm25_index(vector_store, vector_store_path):
+            print("✅ Índice BM25 persistido en disco.")
+        else:
+            print("⚠️ No se pudo persistir el índice BM25 (¿vector store vacío?).")
 
         print(f"\n✅ Ingesta INCREMENTAL finalizada en: {vector_store_path}")
         return True

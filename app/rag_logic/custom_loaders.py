@@ -665,6 +665,70 @@ class BetterPDFLoader(BaseLoader):
         except Exception:
             return ""
 
+    @staticmethod
+    def _tables_to_markdown(tables) -> str:
+        parts = []
+        for table in tables:
+            if not table:
+                continue
+            cleaned_table = [
+                [str(cell).replace('\n', ' ').strip() if cell else "" for cell in row]
+                for row in table
+            ]
+            cleaned_table = [row for row in cleaned_table if any(row)]
+            if not cleaned_table:
+                continue
+            md_table = "| " + " | ".join(cleaned_table[0]) + " |\n"
+            md_table += "| " + " | ".join(["---"] * len(cleaned_table[0])) + " |\n"
+            for row in cleaned_table[1:]:
+                md_table += "| " + " | ".join(row) + " |\n"
+            parts.append(md_table)
+        return "\n\n".join(parts)
+
+    def _load_with_pdfplumber(self) -> List[Document]:
+        """
+        Fallback cuando PyMuPDF (fitz) no está disponible o falla.
+        Sin OCR (el render a imagen para tesseract depende de fitz) pero con
+        texto + tablas reales — nunca debe devolver [] salvo que el PDF en sí
+        sea ilegible (corrupto/cifrado).
+        """
+        fname = _safe_basename(self.file_path)
+        try:
+            with pdfplumber.open(self.file_path) as pdf:
+                page_count = len(pdf.pages)
+                if page_count <= 0:
+                    return []
+                documents: List[Document] = []
+                empty_pages = []
+                for pidx, page in enumerate(pdf.pages):
+                    base_text = (page.extract_text() or "").strip()
+                    table_text = ""
+                    if self.ocr_cfg.pdf_extract_tables:
+                        try:
+                            tables = page.extract_tables()
+                            if tables:
+                                table_text = self._tables_to_markdown(tables)
+                        except Exception:
+                            pass
+                    doc_page = self._build_page_document(
+                        pidx, page_count, base_text, "", table_text,
+                        fname, False, {},
+                    )
+                    if doc_page.metadata.get("is_empty_page"):
+                        empty_pages.append(pidx + 1)
+                    documents.append(doc_page)
+
+                print(
+                    f"✅ PDF leído (pdfplumber fallback, sin OCR) | total_pages={page_count} | "
+                    f"pages_with_text={page_count - len(empty_pages)} | empty_pages={len(empty_pages)}"
+                )
+                if empty_pages:
+                    print(f"   📋 Páginas vacías: {empty_pages}")
+                return documents
+        except Exception as e:
+            print(f"❌ pdfplumber también falló en {fname}: {e}")
+            return []
+
     def _build_page_document(self, pidx, page_count, base_text, ocr_text, table_text,
                              fname, any_ocr_used, ocr_map):
         parts = []
@@ -750,31 +814,9 @@ class BetterPDFLoader(BaseLoader):
                                 try:
                                     tables = plumber_pdf.pages[pidx].extract_tables()
                                     if tables:
-                                        parts = []
-                                        for table in tables:
-                                            if not table: continue
-                                            # Limpiar None y saltos de línea dentro de celdas
-                                            cleaned_table = [
-                                                [str(cell).replace('\n', ' ').strip() if cell else "" for cell in row]
-                                                for row in table
-                                            ]
-                                            # Filtrar filas vacías
-                                            cleaned_table = [row for row in cleaned_table if any(row)]
-                                            
-                                            if not cleaned_table: continue
-
-                                            # Formato Markdown Real
-                                            # Header
-                                            md_table = "| " + " | ".join(cleaned_table[0]) + " |\n"
-                                            md_table += "| " + " | ".join(["---"] * len(cleaned_table[0])) + " |\n"
-                                            # Body
-                                            for row in cleaned_table[1:]:
-                                                md_table += "| " + " | ".join(row) + " |\n"
-                                            
-                                            parts.append(md_table)
-                                            
-                                        if parts:
-                                            table_map[pidx] = "\n\n".join(parts)
+                                        md = self._tables_to_markdown(tables)
+                                        if md:
+                                            table_map[pidx] = md
                                 except Exception:
                                     continue
                     except Exception as e:
@@ -802,12 +844,10 @@ class BetterPDFLoader(BaseLoader):
                     print(f"   📋 Páginas vacías: {empty_pages}")
                 return documents
         except Exception as e:
-            print(f"⚠️ PyMuPDF falló en {fname}: {e}")
+            print(f"⚠️ PyMuPDF falló en {fname}: {e} — usando fallback pdfplumber (sin OCR)")
 
-        # ... (Mantener el resto del fallback igual) ...
-        # (He truncado el código de fallback aquí por brevedad, usa el que ya tenías
-        # pero asegúrate de cerrar la clase correctamente si copias y pegas)
-        return []
+        # === NIVEL 2: pdfplumber (sin OCR) — nunca devolver [] solo por falta de fitz ===
+        return self._load_with_pdfplumber()
 
 
 # ============================================================
