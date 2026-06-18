@@ -32,6 +32,7 @@ from app.models import ChatSession, Message, Project, User, LoginSession
 from app.rag_logic.cost_calculator import calculate_cost
 from app.rag_logic.excel_tool import ExcelAnalysisTool
 from app.rag_logic.ingester import process_and_store_documents
+from app.rag_logic.pii_guard import find_sensitive_entities
 from app.rag_logic.prompt_templates import get_all_templates, get_template_prompt
 from app.rag_logic.qa_chain import chain_cache
 from app.rag_logic.sql_tool import SQLDatabaseTool
@@ -560,6 +561,21 @@ def ask(session_id):
     if not question_text:
         return jsonify({"error": "Falta la pregunta."}), 400
 
+    # ==================== GUARDARRIL: INPUT-SIDE DLP ====================
+    # Bloquear ANTES de tocar el LLM y ANTES de persistir el Message — si dejamos
+    # que llegue al LLM o a nuestra propia BD, el dato ya ha salido del perímetro.
+    dlp_findings = find_sensitive_entities(question_text)
+    if dlp_findings:
+        kinds = sorted({f.kind for f in dlp_findings})
+        print(f"🚫 DLP: bloqueada pregunta de user={current_user.id} session={session_id} — detectado: {kinds}")
+        return jsonify({
+            "error": (
+                "Tu mensaje parece contener datos identificativos o financieros "
+                "(IBAN, tarjeta o documento de identidad). Por seguridad, no se procesa "
+                "ni se guarda. Reformula la pregunta sin incluir esos datos."
+            )
+        }), 400
+
     # Observación básica: contar preguntas en la sesión de login
     _bump_login_session_question()
 
@@ -1044,6 +1060,19 @@ def edit_and_resubmit(message_id):
 
     if not new_text or user_message.sender != "user":
         return jsonify({"error": "Inválido"}), 400
+
+    # ==================== GUARDARRIL: INPUT-SIDE DLP ====================
+    dlp_findings = find_sensitive_entities(new_text)
+    if dlp_findings:
+        kinds = sorted({f.kind for f in dlp_findings})
+        print(f"🚫 DLP: bloqueado edit_and_resubmit de user={current_user.id} message={message_id} — detectado: {kinds}")
+        return jsonify({
+            "error": (
+                "Tu mensaje parece contener datos identificativos o financieros "
+                "(IBAN, tarjeta o documento de identidad). Por seguridad, no se procesa "
+                "ni se guarda. Reformula la pregunta sin incluir esos datos."
+            )
+        }), 400
 
     debug_logger = ConsoleLogger()
 
