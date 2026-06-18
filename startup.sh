@@ -11,6 +11,10 @@ echo ">>> Checking database state..."
 # tabla "user" ya existe:
 #   - No existe (BD nueva)      -> create_all() + stamp head (crea todo de una vez)
 #   - Ya existe (BD persistente) -> flask db upgrade (aplica solo lo pendiente de verdad)
+# set +e/-e: este chequeo usa el código de salida (0/1) como señal a propósito
+# (BD existente / BD nueva) — con "set -e" activo, un exit 1 aquí mata el script
+# entero antes de poder leer "$?", aunque no sea un error real.
+set +e
 python - <<'PYEOF'
 import sys
 from app import create_app, db
@@ -20,6 +24,7 @@ with app.app_context():
     sys.exit(0 if inspect(db.engine).has_table("user") else 1)
 PYEOF
 DB_ALREADY_INITIALIZED=$?
+set -e
 
 if [ "$DB_ALREADY_INITIALIZED" -eq 0 ]; then
     echo ">>> Existing database — applying pending migrations..."
