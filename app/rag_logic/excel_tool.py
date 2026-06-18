@@ -6,7 +6,7 @@ from langchain_experimental.agents.agent_toolkits import create_pandas_dataframe
 from langchain_openai import ChatOpenAI
 from langchain.tools import BaseTool
 from pydantic import BaseModel, Field
-from typing import ClassVar
+from typing import ClassVar, List, Optional
 
 class ExcelQueryInput(BaseModel):
     query: str = Field(description="La pregunta sobre cifras, cálculos o datos del Excel.")
@@ -20,16 +20,29 @@ class ExcelAnalysisTool(BaseTool):
     
     doc_path: str
     model_name: str
-    
+
+    # Guardarril de control de acceso por departamento (mismo concepto que en
+    # qa_chain.py): None = sin restricción (admin); list (incl. vacía) = restringido
+    # a esos departamentos = esas subcarpetas de knowledge_base/. Sin esto, este tool
+    # podía leer cualquier .xlsx del proyecto sin pasar por el filtro de RAG.
+    allowed_departments: Optional[List[str]] = None
+
     # CONFIGURACIÓN DE SEGURIDAD
     MAX_WAIT_TIME_SECONDS: ClassVar[int] = 60  # Tiempo máximo de espera antes de abortar
     MAX_ITERATIONS: ClassVar[int] = 5          # Número máximo de pasos de pensamiento del agente
 
 
     def _find_excel_files(self):
-        """Busca todos los .xlsx en la ruta del proyecto"""
+        """Busca todos los .xlsx en la ruta del proyecto, respetando el guardarril de departamento."""
+        allowed_norm = (
+            {d.strip().lower() for d in self.allowed_departments}
+            if self.allowed_departments is not None else None
+        )
         excel_files = []
         for root, dirs, files in os.walk(self.doc_path):
+            department = os.path.basename(root).strip().lower()
+            if allowed_norm is not None and department not in allowed_norm:
+                continue
             for file in files:
                 if file.endswith(".xlsx") and not file.startswith("~$"):
                     excel_files.append(os.path.join(root, file))

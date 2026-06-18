@@ -46,6 +46,16 @@ def _ratio(a: str, b: str) -> float:
 
 # ==================== PREFILTRO NATIVO POR METADATA ====================
 
+def _combine_filters(*filters: Optional[dict]) -> Optional[dict]:
+    """Combina filtros de Chroma con $and. None se ignora."""
+    present = [f for f in filters if f]
+    if not present:
+        return None
+    if len(present) == 1:
+        return present[0]
+    return {"$and": present}
+
+
 def _build_scoped_retriever(
     vector_store: Chroma,
     values: List[str],
@@ -53,6 +63,7 @@ def _build_scoped_retriever(
     fetch_k: int,
     max_docs: int,
     metadata_field: str = "relative_path_norm",
+    security_filter: Optional[dict] = None,
 ) -> BaseRetriever:
     """
     Prefiltro NATIVO por metadata, en vez de lanzar la búsqueda sobre todo el corpus
@@ -60,22 +71,29 @@ def _build_scoped_retriever(
     MultiPathRetriever). Reutilizable para distintos campos de metadata: por archivo
     concreto (`relative_path_norm`) o por departamento (`department`).
 
+    `security_filter` (si se pasa) es un filtro de Chroma que SIEMPRE se combina con
+    AND sobre el filtro funcional — es el guardarril de control de acceso por
+    departamento (ver get_conversational_qa_chain). Nunca se ignora ni se aplica solo
+    "si hay tiempo": un documento fuera del security_filter no puede salir nunca,
+    aunque el filtro funcional (archivo concreto, departamento detectado) lo pidiera.
+
     - Vector leg: Chroma recibe `filter` en el propio search_kwargs -> el MMR search
       solo considera los chunks que matchean, vía el índice de metadata de Chroma.
     - BM25 leg: se construye SOLO con los chunks de ese filtro (vector_store.get(where=...)),
       no con el corpus completo -> rápido independientemente de cuántos documentos haya en total.
     """
     norm_values = [norm_path(v) for v in (values or []) if (v or "").strip()]
-    if not norm_values:
+    functional_filter = (
+        ({metadata_field: norm_values[0]} if len(norm_values) == 1 else {metadata_field: {"$in": norm_values}})
+        if norm_values else None
+    )
+    chroma_filter = _combine_filters(functional_filter, security_filter)
+
+    if not chroma_filter:
         return vector_store.as_retriever(
             search_type="mmr",
             search_kwargs={"k": max_docs, "fetch_k": fetch_k, "lambda_mult": 0.55},
         )
-
-    chroma_filter = (
-        {metadata_field: norm_values[0]} if len(norm_values) == 1
-        else {metadata_field: {"$in": norm_values}}
-    )
 
     scoped_vector = vector_store.as_retriever(
         search_type="mmr",
@@ -93,7 +111,7 @@ def _build_scoped_retriever(
     except Exception as e:
         print(f"⚠️ BM25 (scoped) desactivado por error: {e}")
 
-    print(f"🔎 ScopedRetriever(NATIVE filter): campo={metadata_field} filtros={norm_values}")
+    print(f"🔎 ScopedRetriever(NATIVE filter): {chroma_filter}")
     return scoped_retriever
 
 
@@ -453,6 +471,30 @@ def _detect_department(question: str) -> Optional[str]:
     return None
 
 
+# ==================== GUARDARRIL: CONTROL DE ACCESO POR DEPARTAMENTO ====================
+# A diferencia de _detect_department (heurística, optimización, puede fallar sin
+# consecuencias graves), esto es un control de seguridad: SIEMPRE se aplica con AND
+# sobre cualquier filtro funcional (ver _build_scoped_retriever/_combine_filters),
+# nunca se ignora ni se "mejora" con detección de intención.
+
+def _build_security_filter(allowed_departments: Optional[List[str]]) -> Optional[dict]:
+    """
+    allowed_departments:
+        None -> sin restricción (admin / User.get_allowed_departments()).
+        []   -> sin acceso a ningún departamento (fail closed: el valor por defecto
+                 si un caller olvida pasar este parámetro, ver get_conversational_qa_chain).
+        list -> restringido exactamente a esos departamentos.
+    """
+    if allowed_departments is None:
+        return None
+    norm_allowed = sorted({norm_path(d) for d in allowed_departments if (d or "").strip()})
+    if not norm_allowed:
+        # Valor de department que ningún chunk real puede tener -> 0 resultados,
+        # en vez de depender de cómo Chroma trate un $in vacío.
+        return {"department": "__no_access__"}
+    return {"department": {"$in": norm_allowed}}
+
+
 # ==================== CACHÉ DE CADENAS ====================
 
 chain_cache: Dict[str, ConversationalRetrievalChain] = {}
@@ -476,6 +518,13 @@ def get_conversational_qa_chain(
 
     if project_settings is None:
         project_settings = {}
+
+    # --- Guardarril: control de acceso por departamento (RBAC) ---
+    # Fail closed por defecto: si el caller no pasa "allowed_departments", se asume
+    # sin acceso a ningún departamento, no acceso total. Lo inyecta routes.py desde
+    # current_user.get_allowed_departments() (None para admin = sin restricción).
+    allowed_departments = project_settings.get("allowed_departments", [])
+    security_filter = _build_security_filter(allowed_departments)
 
     # --- LLM ---
     temperature = float(project_settings.get("temperature", 0.0))
@@ -510,8 +559,14 @@ def get_conversational_qa_chain(
     # sin path_filter pero de departamentos distintos NO deben compartir chain/retriever.
     detected_department = None if path_filter else _detect_department(project_settings.get("last_user_question", ""))
 
-    # --- Cache key (incluye filtro/departamento si existen) ---
-    cache_key = f"{project_id}::{model_name}::{path_filter or ('DEPT:' + detected_department if detected_department else 'NO_FILTER')}"
+    # --- Cache key (incluye filtro/departamento Y el alcance de seguridad) ---
+    # Crítico: dos usuarios con distinto allowed_departments NUNCA deben compartir
+    # chain/retriever cacheados, aunque hagan la misma pregunta.
+    security_scope_key = "ADMIN" if allowed_departments is None else ",".join(sorted(allowed_departments)) or "NONE"
+    cache_key = (
+        f"{project_id}::{model_name}::{path_filter or ('DEPT:' + detected_department if detected_department else 'NO_FILTER')}"
+        f"::ACL:{security_scope_key}"
+    )
     if cache_key in chain_cache:
         return chain_cache[cache_key]
 
@@ -519,7 +574,10 @@ def get_conversational_qa_chain(
     k_base = int(project_settings.get("k_base", 28 if not path_filter else 60))
     fetch_k = max(k_base * 4, 80)
 
-    # Closure que el TwoPassDocShortlistRetriever usa en su 2º pase (prefiltro nativo multi-doc)
+    # Closure que el TwoPassDocShortlistRetriever usa en su 2º pase (prefiltro nativo multi-doc).
+    # security_filter va SIEMPRE, aunque el primer pase ya estuviera acotado: defensa en
+    # profundidad, no cuesta nada extra y evita que un futuro cambio en el primer pase
+    # abra un agujero aquí sin que nadie se dé cuenta.
     def _scoped_retriever_factory(values: List[str], max_docs: int) -> BaseRetriever:
         return _build_scoped_retriever(
             vector_store=vector_store,
@@ -528,11 +586,13 @@ def get_conversational_qa_chain(
             fetch_k=fetch_k,
             max_docs=max_docs,
             metadata_field="relative_path_norm",
+            security_filter=security_filter,
         )
 
     if path_filter:
         # El usuario menciona doc/ruta -> prefiltro NATIVO directo a 1 documento.
-        # No hace falta construir el ensemble del corpus completo para luego descartarlo.
+        # security_filter va con AND: si ese documento no está en un departamento
+        # permitido para este usuario, esto devuelve 0 resultados (deny), nunca el doc.
         final_retriever: BaseRetriever = _build_scoped_retriever(
             vector_store=vector_store,
             values=[path_filter],
@@ -540,22 +600,29 @@ def get_conversational_qa_chain(
             fetch_k=fetch_k,
             max_docs=22,
             metadata_field="relative_path_norm",
+            security_filter=security_filter,
         )
     else:
         # detected_department ya se calculó arriba (antes de la cache key).
         # Si hay señal clara, prefiltramos nativamente por "department" ANTES de
         # construir el ensemble, en vez de buscar siempre sobre el corpus completo.
         # Con baja confianza, no filtramos (más seguro perder velocidad que perder
-        # el documento correcto).
-        if detected_department:
-            print(f"🏷️ Departamento detectado: {detected_department}")
+        # el documento correcto) — pero el guardarril de acceso (security_filter) se
+        # aplica igual, detectemos departamento o no: es quien decide qué se puede
+        # ver, la heurística solo decide qué se mira primero para ir más rápido.
+        if detected_department or security_filter:
+            if detected_department:
+                print(f"🏷️ Departamento detectado: {detected_department}")
+            if security_filter:
+                print(f"🔒 Guardarril de acceso activo: {security_filter}")
             ensemble_retriever: BaseRetriever = _build_scoped_retriever(
                 vector_store=vector_store,
-                values=[detected_department],
+                values=[detected_department] if detected_department else [],
                 k_base=k_base,
                 fetch_k=fetch_k,
                 max_docs=k_base,
                 metadata_field="department",
+                security_filter=security_filter,
             )
         else:
             vector_retriever = vector_store.as_retriever(

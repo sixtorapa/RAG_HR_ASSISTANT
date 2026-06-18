@@ -68,6 +68,21 @@ def _generate_password(length: int = 18) -> str:
     return secrets.token_urlsafe(max(12, length))
 
 
+def _departments_from_any(v: Any) -> Optional[list]:
+    """
+    Acepta una lista (del JSON bulk) o un string "dept_a,dept_b" (del CLI).
+    None -> no se especificó nada (no se toca el campo existente del usuario).
+    """
+    if v is None:
+        return None
+    if isinstance(v, list):
+        return [str(d).strip() for d in v if str(d).strip()]
+    s = str(v).strip()
+    if not s:
+        return []
+    return [d.strip() for d in s.split(",") if d.strip()]
+
+
 def upsert_user(
     *,
     username: str,
@@ -76,8 +91,15 @@ def upsert_user(
     is_active: bool,
     email: Optional[str] = None,
     reset_password: bool = False,
+    allowed_departments: Optional[list] = None,
 ) -> Dict[str, Any]:
-    """Create user if missing; update basic fields; optionally reset password."""
+    """Create user if missing; update basic fields; optionally reset password.
+
+    allowed_departments (guardarril de acceso, ver User.get_allowed_departments):
+    None = no tocar el valor existente (o dejarlo vacío si el usuario es nuevo) ->
+    fail closed por defecto para usuarios "user". Para "admin" no aplica (siempre
+    acceso total, independientemente de este campo).
+    """
     username = (username or "").strip()
     if not username:
         raise ValueError("username is required")
@@ -98,6 +120,8 @@ def upsert_user(
     user.is_active = bool(is_active)
     if email:
         user.email = email
+    if allowed_departments is not None:
+        user.allowed_departments = allowed_departments
 
     if created or reset_password:
         if not password:
@@ -105,7 +129,13 @@ def upsert_user(
         user.set_password(password)
 
     db.session.commit()
-    return {"username": username, "created": created, "role": role, "is_active": is_active}
+    return {
+        "username": username,
+        "created": created,
+        "role": role,
+        "is_active": is_active,
+        "allowed_departments": user.allowed_departments,
+    }
 
 
 def _load_users_file(path: str) -> Iterable[Dict[str, Any]]:
@@ -140,6 +170,16 @@ def main(argv: Optional[list] = None) -> int:
         "--generate-password",
         action="store_true",
         help="Generate a random password (printed once)",
+    )
+    parser.add_argument(
+        "--allowed-departments",
+        default=None,
+        help=(
+            "Comma-separated list of department slugs this user can access "
+            "(e.g. 'compensation_benefits,recruitment_talent'). Ignored for role=admin "
+            "(admins always have full access). Omitting this leaves a 'user' with no "
+            "department access at all (fail closed) unless already set."
+        ),
     )
     parser.add_argument(
         "--users-file",
@@ -191,6 +231,7 @@ def main(argv: Optional[list] = None) -> int:
                     is_active=is_active,
                     email=email,
                     reset_password=args.reset_password,
+                    allowed_departments=_departments_from_any(u.get("allowed_departments")),
                 )
                 res["password"] = generated_password  # printed only if generated
                 results.append(res)
@@ -201,7 +242,8 @@ def main(argv: Optional[list] = None) -> int:
                 if r.get("password"):
                     extra = f" | password generado: {r['password']}"
                 print(
-                    f" - {r['username']} | {'CREADO' if r['created'] else 'ACTUALIZADO'} | role={r['role']} | active={r['is_active']}{extra}"
+                    f" - {r['username']} | {'CREADO' if r['created'] else 'ACTUALIZADO'} | role={r['role']} | "
+                    f"active={r['is_active']} | allowed_departments={r.get('allowed_departments')}{extra}"
                 )
             return 0
 
@@ -255,10 +297,12 @@ def main(argv: Optional[list] = None) -> int:
             is_active=is_active,
             email=args.email,
             reset_password=args.reset_password,
+            allowed_departments=_departments_from_any(args.allowed_departments),
         )
 
         print(
-            f"✅ {res['username']} | {'CREADO' if res['created'] else 'ACTUALIZADO'} | role={res['role']} | active={res['is_active']}"
+            f"✅ {res['username']} | {'CREADO' if res['created'] else 'ACTUALIZADO'} | role={res['role']} | "
+            f"active={res['is_active']} | allowed_departments={res.get('allowed_departments')}"
         )
         if generated_password:
             print("🔑 Password generado (guárdalo ahora, no se volverá a mostrar):", generated_password)

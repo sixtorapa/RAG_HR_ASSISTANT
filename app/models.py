@@ -109,6 +109,11 @@ class User(UserMixin, db.Model):
     role = db.Column(db.String(20), default="user")  # user | admin
     is_active = db.Column(db.Boolean, default=True)
 
+    # Control de acceso por departamento (guardarril): lista de slugs de
+    # knowledge_base/<department>/ a los que este usuario tiene acceso.
+    # Semántica resuelta en get_allowed_departments(), no leer este campo directo.
+    allowed_departments = db.Column(db.JSON, nullable=True)
+
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     last_login = db.Column(db.DateTime, nullable=True)
 
@@ -125,6 +130,21 @@ class User(UserMixin, db.Model):
 
     def check_password(self, password: str) -> bool:
         return check_password_hash(self.password_hash, password)
+
+    def get_allowed_departments(self):
+        """
+        Resuelve el alcance de departamentos de este usuario para el prefiltro
+        de seguridad en retrieval (qa_chain._build_scoped_retriever).
+
+        Returns:
+            None  -> sin restricción (solo admin). Ve todos los departamentos.
+            []    -> sin acceso a ningún departamento (fail closed por defecto:
+                     un usuario "user" sin allowed_departments asignado no ve nada).
+            list  -> restringido exactamente a esos departamentos.
+        """
+        if self.role == "admin":
+            return None
+        return list(self.allowed_departments) if self.allowed_departments else []
 
     def __repr__(self):
         return f'<User {self.username}>'

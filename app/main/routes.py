@@ -176,6 +176,19 @@ def _clear_chain_cache_for_project(project_id: str) -> None:
         pass
 
 
+def _settings_with_acl(base_settings, user) -> dict:
+    """
+    Inyecta el guardarril de control de acceso por departamento del usuario actual
+    en los project_settings que se le pasan a ChatWithDocumentTool/SummarizeDocumentTool.
+    Sin esto, qa_chain.get_conversational_qa_chain no sabe a qué tiene acceso el
+    usuario y, por diseño fail-closed, denegaría todo (ver allowed_departments en
+    qa_chain.py).
+    """
+    settings = dict(base_settings or {})
+    settings["allowed_departments"] = user.get_allowed_departments()
+    return settings
+
+
 def _bump_login_session_question() -> None:
     """
     Incrementa n_questions de la sesión de login activa (si existe).
@@ -554,17 +567,21 @@ def ask(session_id):
 
 
     try:
+        # Guardarril de control de acceso por departamento para este usuario.
+        acl_settings = _settings_with_acl(project.settings, current_user)
+
         # Herramientas base
         chat_tool = ChatWithDocumentTool(
             project_id=project.id,
             vector_store_path=project.vector_store_path,
             model_name=selected_model,
-            project_settings=project.settings or {},
+            project_settings=acl_settings,
         )
         summary_tool = SummarizeDocumentTool(
             project_id=project.id,
             vector_store_path=project.vector_store_path,
             model_name=selected_model,
+            project_settings=acl_settings,
         )
         sql_tool = SQLDatabaseTool(
             model_name=selected_model,
@@ -573,6 +590,7 @@ def ask(session_id):
         excel_tool = ExcelAnalysisTool(
             doc_path=project.document_path,
             model_name=selected_model,
+            allowed_departments=current_user.get_allowed_departments(),
         )
 
         tools = [chat_tool, summary_tool, sql_tool, excel_tool]
@@ -1064,16 +1082,19 @@ def edit_and_resubmit(message_id):
                 paired_history.append((prev_msgs[i].content, prev_msgs[i + 1].content))
 
         # 4) Herramientas
+        acl_settings = _settings_with_acl(project.settings, current_user)
+
         chat_tool = ChatWithDocumentTool(
             project_id=project.id,
             vector_store_path=project.vector_store_path,
             model_name=model_for_regen,
-            project_settings=project.settings or {},
+            project_settings=acl_settings,
         )
         summary_tool = SummarizeDocumentTool(
             project_id=project.id,
             vector_store_path=project.vector_store_path,
             model_name=model_for_regen,
+            project_settings=acl_settings,
         )
         sql_tool = SQLDatabaseTool(
             model_name=model_for_regen,
@@ -1082,6 +1103,7 @@ def edit_and_resubmit(message_id):
         excel_tool = ExcelAnalysisTool(
             doc_path=project.document_path,
             model_name=model_for_regen,
+            allowed_departments=current_user.get_allowed_departments(),
         )
 
         tools = [chat_tool, summary_tool, sql_tool, excel_tool]
