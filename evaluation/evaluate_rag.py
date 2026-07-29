@@ -92,7 +92,7 @@ except ImportError:
     print("   Run: pip install 'ragas>=0.2.0,<0.3.0' --prefer-binary\n")
 
 # ── LangChain imports ────────────────────────────────────────────────────────
-from langchain_openai import ChatOpenAI, OpenAIEmbeddings
+from app.rag_logic.llm_factory import get_llm, get_embeddings
 from langchain_community.vectorstores import Chroma
 from langchain.schema import Document
 from langchain_community.retrievers import BM25Retriever
@@ -398,7 +398,7 @@ def build_retriever(vector_store_path: str, config_name: str, k: int = 5):
 
     Returns (retriever, vector_store).
     """
-    embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
+    embeddings = get_embeddings()
     vector_store = Chroma(
         persist_directory=vector_store_path,
         embedding_function=embeddings,
@@ -650,8 +650,8 @@ def run_evaluation(
     print("═" * 68 + "\n")
 
     # Shared clients — reused across configs and passed explicitly to RAGAS
-    llm        = ChatOpenAI(model_name="gpt-4o-mini", temperature=0.0)
-    embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
+    llm        = get_llm("gpt-4o-mini", 0.0)
+    embeddings = get_embeddings()
 
     all_results: dict[str, Any] = {
         "evaluation_date":         datetime.now().isoformat(),

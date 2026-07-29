@@ -5,7 +5,7 @@ import re
 from difflib import SequenceMatcher
 from typing import List, Optional, Dict, Tuple, Any, Callable
 
-from langchain_openai import ChatOpenAI, OpenAIEmbeddings
+from .llm_factory import get_llm, get_embeddings
 from langchain_community.vectorstores import Chroma
 from langchain.prompts import PromptTemplate
 from langchain.chains import ConversationalRetrievalChain
@@ -528,11 +528,11 @@ def get_conversational_qa_chain(
 
     # --- LLM ---
     temperature = float(project_settings.get("temperature", 0.0))
-    llm = ChatOpenAI(model_name=model_name, temperature=temperature)
+    llm = get_llm(model_name, temperature)
 
     # --- Embeddings / Vector Store ---
     embedding_model = os.environ.get("UP_EMBEDDING_MODEL", "text-embedding-3-small")
-    embeddings = OpenAIEmbeddings(model=embedding_model)
+    embeddings = get_embeddings(embedding_model)
     vector_store = Chroma(
         persist_directory=vector_store_path,
         embedding_function=embeddings,

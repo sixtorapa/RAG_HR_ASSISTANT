@@ -11,7 +11,7 @@ import concurrent.futures
 from typing import List, Optional
 
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain_openai import OpenAIEmbeddings, ChatOpenAI
+from .llm_factory import get_llm, get_embeddings
 from langchain_community.vectorstores import Chroma
 from langchain_community.document_loaders import (
     TextLoader,
@@ -755,7 +755,7 @@ def enrich_chunks_with_llm(
         return chunks
 
     model_name = llm_model_name or _default_semantic_llm_model()
-    llm = ChatOpenAI(model_name=model_name, temperature=temperature)
+    llm = get_llm(model_name, temperature)
     structured_llm = llm.with_structured_output(ChunkEnrichmentList)
 
     system_prompt = (
@@ -1108,7 +1108,7 @@ def process_and_store_documents(data_path: str, vector_store_path: str) -> bool:
             if (prev or {}).get("mtime") != sig["mtime"] or (prev or {}).get("size") != sig["size"]:
                 changed_files.append(rel)
 
-        embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
+        embeddings = get_embeddings()
         vector_store = Chroma(
             persist_directory=vector_store_path,
             embedding_function=embeddings,

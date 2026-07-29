@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any, Dict, List, Tuple, Union, Optional
 
-from langchain_openai import ChatOpenAI
+from .llm_factory import get_llm
 from langchain.schema import SystemMessage, HumanMessage
 
 from .tools import ChatWithDocumentTool, SummarizeDocumentTool
@@ -88,7 +88,7 @@ class DocumentQAAgent:
         
 
         cb_manager = CallbackManager(self.callbacks) if self.callbacks else None
-        self.llm = ChatOpenAI(model=model_name, temperature=temperature, callback_manager=cb_manager)
+        self.llm = get_llm(model_name, temperature, callback_manager=cb_manager)
 
 
     def run(
@@ -163,7 +163,7 @@ class SummaryAgent:
         self.tool = tool
         self.name = tool.name
         self.callbacks = callbacks or []
-        self.llm = ChatOpenAI(model_name=model_name, temperature=temperature, callbacks=self.callbacks)
+        self.llm = get_llm(model_name, temperature, callbacks=self.callbacks)
 
     def run(self) -> AgentResult:
         raw = self.tool.run({}, callbacks=self.callbacks)
@@ -221,7 +221,7 @@ class SQLAgent:
         self.tool = tool
         self.name = tool.name
         self.callbacks = callbacks or []
-        self.llm = ChatOpenAI(model_name=model_name, temperature=temperature, callbacks=self.callbacks)
+        self.llm = get_llm(model_name, temperature, callbacks=self.callbacks)
 
     def run(self, query: str) -> AgentResult:
         raw = self.tool.run({"query": query}, callbacks=self.callbacks)
@@ -299,7 +299,7 @@ class ExcelAgent:
         self.tool = tool
         self.name = tool.name
         self.callbacks = callbacks or []
-        self.llm = ChatOpenAI(model_name=model_name, temperature=temperature, callbacks=self.callbacks)
+        self.llm = get_llm(model_name, temperature, callbacks=self.callbacks)
 
     def run(self, query: str, file_name_hint: str = "") -> AgentResult:
         raw = self.tool.run(
@@ -355,7 +355,7 @@ class WebSearchAgent:
         self.tool = tool
         self.name = tool.name
         self.callbacks = callbacks or []
-        self.llm = ChatOpenAI(model_name=model_name, temperature=temperature, callbacks=self.callbacks)
+        self.llm = get_llm(model_name, temperature, callbacks=self.callbacks)
 
     def run(self, query: str) -> AgentResult:
         raw = self.tool.run({"query": query}, callbacks=self.callbacks)

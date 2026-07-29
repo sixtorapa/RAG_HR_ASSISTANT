@@ -3,7 +3,7 @@ import os
 import pandas as pd
 import concurrent.futures
 from langchain_experimental.agents.agent_toolkits import create_pandas_dataframe_agent
-from langchain_openai import ChatOpenAI
+from .llm_factory import get_llm
 from langchain.tools import BaseTool
 from pydantic import BaseModel, Field
 from typing import ClassVar, List, Optional
@@ -100,7 +100,7 @@ class ExcelAnalysisTool(BaseTool):
             print(f"📊 Excel Agent: Analizando '{os.path.basename(target_file)}' (Cols: {len(df.columns)}, Rows: {len(df)})")
 
             # Crear Agente Pandas con LÍMITES
-            llm = ChatOpenAI(model_name=self.model_name, temperature=0)
+            llm = get_llm(self.model_name, 0)
             
             agent = create_pandas_dataframe_agent(
                 llm, 

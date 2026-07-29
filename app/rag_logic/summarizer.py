@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import List, Optional, Dict, Any
 
-from langchain_openai import ChatOpenAI, OpenAIEmbeddings
+from .llm_factory import get_llm, get_embeddings
 from langchain.chains.summarize import load_summarize_chain
 from langchain_community.vectorstores import Chroma
 from langchain.prompts import PromptTemplate
@@ -160,7 +160,7 @@ def resumir_documentos_proyecto(
     try:
         print(f"Starting summary for: {vector_store_path}")
 
-        embeddings    = OpenAIEmbeddings(model="text-embedding-3-small")
+        embeddings    = get_embeddings()
         vector_store  = Chroma(persist_directory=vector_store_path, embedding_function=embeddings)
         docs: List[Any] = []
 
@@ -200,7 +200,7 @@ def resumir_documentos_proyecto(
         if not docs:
             return {"texto_salida": "No documents found to summarise.", "documentos_fuente": []}
 
-        llm = ChatOpenAI(model_name=nombre_modelo, temperature=TEMPERATURE)
+        llm = get_llm(nombre_modelo, TEMPERATURE)
 
         # If a project description is provided, use a contextualised map prompt
         if descripcion_proyecto:

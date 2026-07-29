@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any, Dict, List, Optional
 
-from langchain_openai import ChatOpenAI
+from .llm_factory import get_llm
 from langchain.schema import SystemMessage, HumanMessage
 
 AgentResult = Dict[str, Any]
@@ -55,7 +55,7 @@ class ReasoningAgent:
         callbacks: Optional[list] = None,
     ) -> None:
         self.callbacks = callbacks or []
-        self.llm = ChatOpenAI(model_name=model_name, temperature=temperature, callbacks=self.callbacks)
+        self.llm = get_llm(model_name, temperature, callbacks=self.callbacks)
         self.extra_style = extra_style
 
     def run(self, user_question: str, agent_results: List[AgentResult]) -> AgentResult:
