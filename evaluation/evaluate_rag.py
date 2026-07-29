@@ -92,6 +92,9 @@ except ImportError:
     print("   Run: pip install 'ragas>=0.2.0,<0.3.0' --prefer-binary\n")
 
 # ── LangChain imports ────────────────────────────────────────────────────────
+from langchain_core.embeddings import Embeddings
+from langchain_core.language_models import BaseChatModel
+
 from app.rag_logic.llm_factory import get_llm, get_embeddings
 from langchain_community.vectorstores import Chroma
 from langchain.schema import Document
@@ -474,7 +477,7 @@ Answer:"""
 def generate_answer_and_contexts(
     question: str,
     retriever,
-    llm: ChatOpenAI,
+    llm: BaseChatModel,
     k: int = 5,
 ) -> tuple[str, list[str]]:
     """
@@ -513,7 +516,7 @@ def generate_answer_and_contexts(
 # RAGAS EVALUATION
 # ═══════════════════════════════════════════════════════════════════════════
 
-def build_ragas_metrics(llm: ChatOpenAI, embeddings: OpenAIEmbeddings) -> list:
+def build_ragas_metrics(llm: BaseChatModel, embeddings: Embeddings) -> list:
     """
     Instantiate RAGAS 0.2.x metrics with explicit LLM and embeddings wrappers.
 
@@ -532,8 +535,8 @@ def build_ragas_metrics(llm: ChatOpenAI, embeddings: OpenAIEmbeddings) -> list:
 
 def run_ragas_evaluation(
     eval_data: list[dict],
-    llm: ChatOpenAI,
-    embeddings: OpenAIEmbeddings,
+    llm: BaseChatModel,
+    embeddings: Embeddings,
 ) -> dict[str, float | None]:
     """
     Score a set of QA results using RAGAS 0.2.x.
