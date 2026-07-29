@@ -1,0 +1,51 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# HR Knowledge Base Assistant — imagen para AWS Lambda
+#
+# Aparte del Dockerfile principal a propósito: ese lo usa Railway y no se toca.
+# Aquí cambian tres cosas respecto a aquél:
+#   1. Imagen base de AWS: trae el Runtime Interface Client, que es lo que
+#      convierte un contenedor normal en algo que Lambda sabe invocar.
+#   2. El comando no es gunicorn: es el nombre del handler.
+#   3. El vector store viaja dentro y en solo lectura (en Lambda solo /tmp
+#      es escribible).
+#
+# Contenedor y no zip: el paquete zip de Lambda tope a 250 MB descomprimido y
+# chromadb con sus dependencias no cabe. Una imagen llega a 10 GB.
+# ─────────────────────────────────────────────────────────────────────────────
+
+FROM public.ecr.aws/lambda/python:3.12
+
+# ── Dependencias de sistema ──────────────────────────────────────────────────
+# file-libs = libmagic, que necesita python-magic para detectar tipos de fichero
+# libgomp   = OpenMP, que usa onnxruntime (dependencia de chromadb)
+RUN dnf install -y file-libs libgomp && dnf clean all
+
+# ── Dependencias de Python ───────────────────────────────────────────────────
+# LAMBDA_TASK_ROOT es /var/task, la carpeta donde Lambda busca el código.
+COPY requirements-prod.txt ${LAMBDA_TASK_ROOT}/
+RUN pip install --no-cache-dir -r ${LAMBDA_TASK_ROOT}/requirements-prod.txt
+
+# ── Código de la aplicación ──────────────────────────────────────────────────
+COPY app/          ${LAMBDA_TASK_ROOT}/app/
+COPY evaluation/   ${LAMBDA_TASK_ROOT}/evaluation/
+COPY vector_store/ ${LAMBDA_TASK_ROOT}/vector_store/
+COPY config.py observability.py lambda_handler.py ${LAMBDA_TASK_ROOT}/
+# BD analítica de RRHH: datos de referencia de solo lectura (sql_tool solo
+# permite SELECT/WITH), así que va dentro de la imagen. La transaccional
+# —usuarios, sesiones, mensajes— vive en RDS porque necesita escribir.
+COPY hr_data.db ${LAMBDA_TASK_ROOT}/
+
+# ── Entorno ──────────────────────────────────────────────────────────────────
+# El vector store se lee desde la imagen: es de solo lectura y no se reingesta
+# en Lambda. persist_bm25_index() escribe en disco y por tanto NO puede
+# ejecutarse aquí; load_bm25_index() solo lee y sí puede.
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    UP_VECTOR_STORE_PATH=/var/task/vector_store/info \
+    HR_DB_URI=sqlite:////var/task/hr_data.db \
+    LLM_PROVIDER=bedrock \
+    HOME=/tmp
+
+# ── Handler ──────────────────────────────────────────────────────────────────
+# "fichero.función": lambda_handler.py, variable `handler`.
+CMD ["lambda_handler.handler"]

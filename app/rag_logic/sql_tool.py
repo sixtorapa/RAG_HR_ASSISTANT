@@ -12,7 +12,7 @@ from typing import List, Optional
 from urllib.parse import quote
 
 from langchain.tools import BaseTool
-from langchain_openai import ChatOpenAI
+from .llm_factory import get_llm
 from langchain.prompts import ChatPromptTemplate
 from langchain.schema import AIMessage, HumanMessage, SystemMessage
 from langchain.callbacks.manager import CallbackManagerForToolRun
@@ -175,7 +175,7 @@ USEFUL QUERY PATTERNS:
             user_sql_context = self.project_settings.get("sql_context", "") or self.DB_SCHEMA_CONTEXT
             blocked_columns = self._blocked_columns()
 
-            llm = ChatOpenAI(model_name=self.model_name, temperature=0)
+            llm = get_llm(self.model_name, 0)
 
             access_note = ""
             if blocked_columns:

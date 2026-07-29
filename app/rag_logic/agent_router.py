@@ -3,7 +3,7 @@
 import re
 from typing import List, Optional, Any, Dict
 
-from langchain_openai import ChatOpenAI
+from .llm_factory import get_llm
 from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain.tools import BaseTool
 from langchain.schema import AIMessage
@@ -84,7 +84,7 @@ class AgentRouter:
         self.doc_path = doc_path
         self.temperature = temperature
 
-        llm = ChatOpenAI(model_name=self.model_name, temperature=self.temperature)
+        llm = get_llm(self.model_name, self.temperature)
         self.llm_with_tools = llm.bind_tools(self.tools)
 
         # Importante: limitar “excel” a casos con señales claras.

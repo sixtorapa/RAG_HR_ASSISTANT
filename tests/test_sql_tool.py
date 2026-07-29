@@ -162,7 +162,7 @@ class TestHRDatabaseToolMocked:
             )
 
             conn = sqlite3.connect(hr_sqlite_db)
-            with patch("app.rag_logic.sql_tool.ChatOpenAI", return_value=mock_llm), \
+            with patch("app.rag_logic.sql_tool.get_llm", return_value=mock_llm), \
                  patch.object(tool, "_get_connection", return_value=conn):
 
                 result = tool._run("Pregunta que genera SQL inválido")
@@ -198,7 +198,7 @@ class TestHRDatabaseToolSelfCorrection:
             ]
 
             conn = sqlite3.connect(hr_sqlite_db)
-            with patch("app.rag_logic.sql_tool.ChatOpenAI", return_value=mock_llm), \
+            with patch("app.rag_logic.sql_tool.get_llm", return_value=mock_llm), \
                  patch.object(tool, "_get_connection", return_value=conn):
 
                 result = tool._run("¿Cuántos empleados hay en el departamento X?")
@@ -227,7 +227,7 @@ class TestHRDatabaseToolSelfCorrection:
             mock_llm.invoke.side_effect = [MagicMock(content=bad_sql) for _ in range(MAX_SQL_ATTEMPTS)]
 
             conn = sqlite3.connect(hr_sqlite_db)
-            with patch("app.rag_logic.sql_tool.ChatOpenAI", return_value=mock_llm), \
+            with patch("app.rag_logic.sql_tool.get_llm", return_value=mock_llm), \
                  patch.object(tool, "_get_connection", return_value=conn):
 
                 result = tool._run("Pregunta que el LLM nunca resuelve bien")

@@ -1,12 +1,12 @@
 from langchain_community.vectorstores import Chroma
-from langchain_openai import OpenAIEmbeddings
+from .llm_factory import get_embeddings
 from langchain.schema import Document
 
 class ChatMemoryStore:
     def __init__(self, persist_path: str):
         self.db = Chroma(
             persist_directory=persist_path,
-            embedding_function=OpenAIEmbeddings(model="text-embedding-3-small")
+            embedding_function=get_embeddings()
         )
 
     def add_fact(self, text: str, metadata: dict):

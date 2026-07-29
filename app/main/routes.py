@@ -217,6 +217,25 @@ def _bump_login_session_question() -> None:
 
 
 
+# ==================== HEALTH CHECK ====================
+
+@bp.route("/health")
+def health():
+    """
+    Liveness probe. SIN @login_required a propósito: un healthcheck de Docker,
+    de un balanceador o de Lambda no puede iniciar sesión.
+
+    Deliberadamente barato: solo confirma que el proceso está vivo y sirviendo.
+    NO comprueba la base de datos ni el vector store. Un healthcheck que
+    depende de servicios externos convierte una caída momentánea de la BD en
+    un reinicio del contenedor, y eso empeora el incidente en vez de arreglarlo.
+    """
+    return {
+        "status": "ok",
+        "llm_provider": os.environ.get("LLM_PROVIDER", "openai"),
+    }, 200
+
+
 # ==================== HOME (SINGLE APP) ====================
 
 @bp.route("/")
@@ -560,6 +579,38 @@ def ask(session_id):
 
     if not question_text:
         return jsonify({"error": "Falta la pregunta."}), 400
+
+    # ==================== GUARDARRIL: CUOTA DIARIA DE COSTE ====================
+    # Tope de preguntas al día para toda la instalación. Existe porque la demo
+    # pública va contra Bedrock, que es pago por uso SIN tope automático: las
+    # alarmas de presupuesto de AWS avisan, no cortan. OpenAI sí es prepago y se
+    # frena solo, así que el despliegue de Railway no necesita esto.
+    #
+    # Se activa solo si DAILY_QUESTION_LIMIT está definida y es > 0 → sin la
+    # variable, el comportamiento es idéntico al de antes.
+    #
+    # El contador vive en la BASE DE DATOS, no en memoria del proceso, y esa es
+    # la decisión que importa: en Lambda cada contenedor tiene su propia memoria,
+    # así que un contador en RAM daría "4 por contenedor" y N contenedores en
+    # paralelo lo multiplicarían. Postgres es lo único compartido entre ellos.
+    _limite = int(os.environ.get("DAILY_QUESTION_LIMIT", "0") or 0)
+    if _limite > 0:
+        _hoy = datetime.utcnow().date()
+        _usadas = Message.query.filter(
+            Message.sender == "user",
+            Message.timestamp >= datetime.combine(_hoy, datetime.min.time()),
+        ).count()
+        if _usadas >= _limite:
+            print(f"🚫 CUOTA: {_usadas}/{_limite} preguntas usadas hoy — bloqueada user={current_user.id}")
+            return jsonify({
+                "error": (
+                    f"Esta demo tiene un límite de {_limite} preguntas al día para "
+                    f"controlar el coste de inferencia, y ya se han consumido. "
+                    f"Vuelve a intentarlo mañana."
+                ),
+                "quota_used": _usadas,
+                "quota_limit": _limite,
+            }), 429
 
     # ==================== GUARDARRIL: INPUT-SIDE DLP ====================
     # Bloquear ANTES de tocar el LLM y ANTES de persistir el Message — si dejamos
