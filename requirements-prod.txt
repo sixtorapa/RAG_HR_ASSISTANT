@@ -79,7 +79,11 @@ jsonpointer==3.0.0
 jsonschema==4.25.1
 jsonschema-specifications==2025.9.1
 kubernetes==34.1.0
+boto3==1.43.58
 langchain==0.3.27
+langchain-aws==0.2.35   # PINEADO <1.0 a propósito: langchain-aws 1.x sube
+                        # langchain-core a 1.x, que elimina langchain_core.memory
+                        # y rompe qa_chain.py (ConversationalRetrievalChain).
 langchain-community==0.3.31
 langchain-core==0.3.79
 langchain-experimental==0.3.4

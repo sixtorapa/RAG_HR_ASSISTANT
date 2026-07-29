@@ -1,12 +1,12 @@
-version: "3.9"
-
 services:
   # ── Flask application ────────────────────────────────────────────────────
   app:
     build: .
     container_name: hr_kb_app
     ports:
-      - "5001:5001"
+      # 8080, no 5001: el Dockerfile fija PORT=8080 y gunicorn escucha ahí.
+      # El compose no exportaba PORT, así que publicar 5001 no servía a nadie.
+      - "8080:8080"
     env_file:
       - .env                         # never commit this file
     environment:
@@ -19,27 +19,28 @@ services:
       - hr_data:/data
       # Hot-reload source during development (remove in prod)
       - .:/app
-    depends_on:
-      - chromadb
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5001/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
       interval: 30s
       timeout: 10s
       retries: 3
 
-  # ── ChromaDB (optional standalone — comment out if using embedded Chroma) ──
-  chromadb:
-    image: chromadb/chroma:latest
-    container_name: hr_kb_chroma
-    ports:
-      - "8000:8000"
-    volumes:
-      - chroma_data:/chroma/chroma
-    restart: unless-stopped
-    environment:
-      - ALLOW_RESET=true             # useful during development
+  # ── ChromaDB standalone — DESACTIVADO ────────────────────────────────────
+  # La app usa Chroma EMBEBIDO: `Chroma(persist_directory=...)` en qa_chain.py,
+  # ingester.py y summarizer.py. No hay ningún cliente HTTP contra un servidor.
+  # Este servicio levantaba un contenedor con el que no hablaba nadie.
+  #
+  # chromadb:
+  #   image: chromadb/chroma:latest
+  #   container_name: hr_kb_chroma
+  #   ports:
+  #     - "8000:8000"
+  #   volumes:
+  #     - chroma_data:/chroma/chroma
+  #   restart: unless-stopped
+  #   environment:
+  #     - ALLOW_RESET=true
 
 volumes:
   hr_data:
-  chroma_data:

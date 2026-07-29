@@ -217,6 +217,25 @@ def _bump_login_session_question() -> None:
 
 
 
+# ==================== HEALTH CHECK ====================
+
+@bp.route("/health")
+def health():
+    """
+    Liveness probe. SIN @login_required a propósito: un healthcheck de Docker,
+    de un balanceador o de Lambda no puede iniciar sesión.
+
+    Deliberadamente barato: solo confirma que el proceso está vivo y sirviendo.
+    NO comprueba la base de datos ni el vector store. Un healthcheck que
+    depende de servicios externos convierte una caída momentánea de la BD en
+    un reinicio del contenedor, y eso empeora el incidente en vez de arreglarlo.
+    """
+    return {
+        "status": "ok",
+        "llm_provider": os.environ.get("LLM_PROVIDER", "openai"),
+    }, 200
+
+
 # ==================== HOME (SINGLE APP) ====================
 
 @bp.route("/")
