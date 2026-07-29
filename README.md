@@ -249,8 +249,21 @@ cost decision, not only a quality one.
 │       └── cost_calculator.py  # Per-query cost from token usage
 │
 ├── evaluation/evaluate_rag.py  # RAGAS suite, golden dataset, 3 configurations
+├── infra/                      # how the AWS side was built, in order
 └── tests/                      # 61 tests, OpenAI mocked
 ```
+
+### infra/
+
+The seven scripts that created the AWS deployment, numbered in the order they were
+run: the IAM execution role, the ECR repository and image push, the Lambda function,
+the API Gateway endpoint, the RDS instance, and the schema initialisation.
+
+They are honest about what they are: **imperative scripts, not infrastructure as
+code**. There is no state file, no plan, and nothing detects drift. Turning them into
+Terraform is mechanical — every resource and parameter is already written down — and
+has not been done. `infra/README.md` says so explicitly, along with the security
+trade-off behind keeping the Lambda outside the VPC and the teardown commands.
 
 ---
 

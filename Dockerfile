@@ -1,7 +1,8 @@
 # ─────────────────────────────────────────────────────────────────────────────
 # HR Knowledge Base Assistant — Dockerfile
 # Target: Railway / any Linux container host
-# Python 3.11 slim · CPU-only torch · No Tesseract
+# Python 3.12 slim · sin torch · sin Tesseract
+# (la imagen de Lambda es otra: ver Dockerfile.lambda)
 # ─────────────────────────────────────────────────────────────────────────────
 
 # 3.12 y no 3.11: langchain-aws exige numpy<2 solo en Python <3.12, lo que
