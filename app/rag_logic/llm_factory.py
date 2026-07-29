@@ -36,8 +36,23 @@ def _provider() -> str:
 
     El defecto 'openai' no es casual — si alguien despliega sin definir la
     variable, el sistema se comporta exactamente como antes de esta migración.
+
+    Se normaliza con tolerancia porque una variable de entorno puede llegar de
+    muchos sitios (.env, panel de Railway, consola de Lambda, export en shell) y
+    cada uno la trata distinto: ' Bedrock ', "BEDROCK", 'bedrock'.
+    Las comillas se quitan por el mismo motivo por el que evaluate_rag.py ya
+    saneaba OPENAI_API_KEY: llegan pegadas más a menudo de lo que parece.
+
+    Lo que NO se hace: aceptar alias tipo 'aws' o 'amazon'. El valor válido debe
+    poder leerse en este fichero; un valor no reconocido cae a OpenAI y AVISA,
+    que es preferible a una lista de sinónimos que nadie mantiene.
     """
-    return os.environ.get("LLM_PROVIDER", "openai").strip().lower()
+    # Normalizar PRIMERO y aplicar el defecto DESPUÉS: si se hace al revés, un
+    # valor de solo espacios ('   ') no cae al defecto —es truthy— y acaba
+    # resolviendo a cadena vacía.
+    valor = (os.environ.get("LLM_PROVIDER") or "").strip()
+    valor = valor.strip('"').strip("'").strip().lower()
+    return valor or "openai"
 
 
 def _to_bedrock_id(model_name: str) -> str:
