@@ -30,6 +30,10 @@ COPY app/          ${LAMBDA_TASK_ROOT}/app/
 COPY evaluation/   ${LAMBDA_TASK_ROOT}/evaluation/
 COPY vector_store/ ${LAMBDA_TASK_ROOT}/vector_store/
 COPY config.py observability.py lambda_handler.py ${LAMBDA_TASK_ROOT}/
+# BD analítica de RRHH: datos de referencia de solo lectura (sql_tool solo
+# permite SELECT/WITH), así que va dentro de la imagen. La transaccional
+# —usuarios, sesiones, mensajes— vive en RDS porque necesita escribir.
+COPY hr_data.db ${LAMBDA_TASK_ROOT}/
 
 # ── Entorno ──────────────────────────────────────────────────────────────────
 # El vector store se lee desde la imagen: es de solo lectura y no se reingesta
@@ -37,7 +41,8 @@ COPY config.py observability.py lambda_handler.py ${LAMBDA_TASK_ROOT}/
 # ejecutarse aquí; load_bm25_index() solo lee y sí puede.
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
-    UP_VECTOR_STORE_PATH=/var/task/vector_store \
+    UP_VECTOR_STORE_PATH=/var/task/vector_store/info \
+    HR_DB_URI=sqlite:////var/task/hr_data.db \
     LLM_PROVIDER=bedrock \
     HOME=/tmp
 

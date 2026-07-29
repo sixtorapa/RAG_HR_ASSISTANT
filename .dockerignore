@@ -1,5 +1,10 @@
 .env
 *.db
+# ...excepto la BD analítica de RRHH: son datos de referencia de solo lectura
+# (sql_tool solo admite SELECT/WITH), así que viaja horneada en la imagen igual
+# que el vector store. La BD transaccional —usuarios, sesiones, mensajes— vive
+# en RDS, que es la que sí necesita escritura.
+!hr_data.db
 __pycache__/
 *.pyc
 *.pyo
