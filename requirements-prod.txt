@@ -10,6 +10,7 @@
 # ─────────────────────────────────────────────────────────────────────────────
 
 aiofiles==25.1.0
+apig-wsgi==2.20.0        # adaptador API Gateway -> WSGI (Flask). Mangum NO: es ASGI.
 aiohappyeyeballs==2.6.1
 aiohttp==3.13.2
 aiosignal==1.4.0
