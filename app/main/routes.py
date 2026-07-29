@@ -1113,6 +1113,18 @@ def edit_and_resubmit(message_id):
     if not new_text or user_message.sender != "user":
         return jsonify({"error": "Inválido"}), 400
 
+    # Memoria conversacional. Faltaba: más abajo se usaba `memory_store` en tres
+    # sitios sin haberlo construido nunca en esta función (sí en ask()), así que
+    # la vía documental de este endpoint reventaba con NameError. Lo destapó
+    # reactivar la regla F821 de ruff, que estaba silenciada.
+    memory_store = ChatMemoryStore(
+        persist_path=os.path.join(
+            current_app.instance_path,
+            "chat_memory",
+            str(current_user.id)
+        )
+    )
+
     # ==================== GUARDARRIL: INPUT-SIDE DLP ====================
     dlp_findings = find_sensitive_entities(new_text)
     if dlp_findings:

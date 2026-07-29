@@ -21,8 +21,12 @@ jobs:
           key: ${{ runner.os }}-pip-${{ hashFiles('requirements-prod.txt') }}
           restore-keys: |
             ${{ runner.os }}-pip-
-      - run: pip install ruff
-      - run: ruff check . --ignore E501,E402,F401,F841,E701,F541
+      - run: pip install ruff==0.16.0
+      # --select explicito: sin el, cada version de ruff amplia sus reglas por
+      # defecto y el lint se rompe sin que nadie haya tocado el codigo.
+      # F821 (nombre indefinido) y F823 (uso antes de asignar) NO se ignoran:
+      # no son estilo, son crashes.
+      - run: ruff check . --select E,F --ignore E501,E402,F401,F841,E701,F541
 
   test:
     name: Tests
