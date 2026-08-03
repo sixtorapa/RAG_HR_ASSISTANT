@@ -56,6 +56,34 @@ def _combine_filters(*filters: Optional[dict]) -> Optional[dict]:
     return {"$and": present}
 
 
+# ==================== FILTRO DE GRANULARIDAD (macro vs micro) ====================
+# La ingesta indexa DOS tamaños del mismo texto en la misma colección: macro
+# (páginas agrupadas, ~350 palabras) y micro (250 tokens, con parent_chunk_id).
+# Medido el 3-ago-2026 sobre el índice real: **153 de los 154 micro son subcadena
+# literal de su macro**. Es decir, el mismo contenido compite consigo mismo en
+# cada búsqueda, y cuando gana dos veces, el LLM recibe el mismo texto duplicado.
+# En cuatro preguntas del golden set, el 21% de los caracteres recuperados eran
+# repeticiones — y hasta el 56% en las que caen sobre un solo documento.
+#
+# El diseño parent-child dice "busca por el hijo, que es preciso, y cita por el
+# padre, que tiene el contexto". Buscar por los dos es justo lo que ese diseño
+# no dice. Este filtro aplica la mitad que sí se puede aplicar hoy.
+#
+# Se controla por variable de entorno para poder medirlo y revertirlo sin tocar
+# código, igual que FLASHRANK_ENABLED:
+#   RETRIEVAL_CHUNK_TYPE=micro  (por defecto) — solo hijos
+#   RETRIEVAL_CHUNK_TYPE=macro                — solo padres
+#   RETRIEVAL_CHUNK_TYPE=all                  — comportamiento anterior
+def _chunk_type_filter() -> Optional[dict]:
+    valor = (os.environ.get("RETRIEVAL_CHUNK_TYPE") or "micro").strip().lower()
+    if valor in ("all", "any", ""):
+        return None
+    if valor not in ("micro", "macro"):
+        print(f"⚠️ RETRIEVAL_CHUNK_TYPE='{valor}' no reconocido; usando 'micro'.")
+        valor = "micro"
+    return {"chunk_type": valor}
+
+
 def _build_scoped_retriever(
     vector_store: Chroma,
     values: List[str],
@@ -87,7 +115,7 @@ def _build_scoped_retriever(
         ({metadata_field: norm_values[0]} if len(norm_values) == 1 else {metadata_field: {"$in": norm_values}})
         if norm_values else None
     )
-    chroma_filter = _combine_filters(functional_filter, security_filter)
+    chroma_filter = _combine_filters(functional_filter, security_filter, _chunk_type_filter())
 
     if not chroma_filter:
         return vector_store.as_retriever(
@@ -563,9 +591,13 @@ def get_conversational_qa_chain(
     # Crítico: dos usuarios con distinto allowed_departments NUNCA deben compartir
     # chain/retriever cacheados, aunque hagan la misma pregunta.
     security_scope_key = "ADMIN" if allowed_departments is None else ",".join(sorted(allowed_departments)) or "NONE"
+    # La granularidad entra en la clave por el mismo motivo que la ACL: dos
+    # configuraciones distintas no pueden compartir retriever cacheado, o al
+    # cambiar la variable seguirías sirviendo la cadena vieja hasta reiniciar.
+    grano = (_chunk_type_filter() or {}).get("chunk_type", "all")
     cache_key = (
         f"{project_id}::{model_name}::{path_filter or ('DEPT:' + detected_department if detected_department else 'NO_FILTER')}"
-        f"::ACL:{security_scope_key}"
+        f"::ACL:{security_scope_key}::GRANO:{grano}"
     )
     if cache_key in chain_cache:
         return chain_cache[cache_key]
@@ -610,7 +642,12 @@ def get_conversational_qa_chain(
         # el documento correcto) — pero el guardarril de acceso (security_filter) se
         # aplica igual, detectemos departamento o no: es quien decide qué se puede
         # ver, la heurística solo decide qué se mira primero para ir más rápido.
-        if detected_department or security_filter:
+        # El filtro de granularidad obliga a pasar por el retriever con prefiltro
+        # nativo: la pata BM25 persistida se construyó con macro Y micro, así que
+        # filtrar solo la pata vectorial dejaría entrar los macro por la otra
+        # puerta. _build_scoped_retriever reconstruye BM25 con el subconjunto ya
+        # filtrado (son ~150 chunks: milisegundos).
+        if detected_department or security_filter or _chunk_type_filter():
             if detected_department:
                 print(f"🏷️ Departamento detectado: {detected_department}")
             if security_filter:

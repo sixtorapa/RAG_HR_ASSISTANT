@@ -81,7 +81,7 @@ class TestExtractUserMode:
     @pytest.fixture(autouse=True)
     def import_fn(self, app):
         with app.app_context():
-            from app.main.routes import _extract_user_mode
+            from app.main.pipeline import _extract_user_mode
             self.fn = _extract_user_mode
 
     def test_sql_prefix_colon(self):
@@ -131,7 +131,7 @@ class TestMakeChatTitle:
     @pytest.fixture(autouse=True)
     def import_fn(self, app):
         with app.app_context():
-            from app.main.routes import _make_chat_title_from_question
+            from app.main.pipeline import _make_chat_title_from_question
             self.fn = _make_chat_title_from_question
 
     def test_short_question_kept_as_is(self):
