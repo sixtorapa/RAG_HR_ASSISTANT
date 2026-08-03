@@ -42,3 +42,8 @@ instance/
 # 🐳 Docker
 # ─────────────────────────────────────────────
 *.log
+# Índice vectorial: artefacto de build, no fuente. Se regenera con `ingest.py`
+# y son 13 MB de binarios que ensucian cada diff.
+# La imagen de Lambda SÍ lo necesita horneado dentro: se construye en el build,
+# no se saca del repo (ver Dockerfile.lambda).
+vector_store/

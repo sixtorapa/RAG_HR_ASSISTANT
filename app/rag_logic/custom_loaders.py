@@ -542,6 +542,7 @@
 import io
 import logging
 import os
+import re
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Tuple
 
@@ -729,17 +730,62 @@ class BetterPDFLoader(BaseLoader):
             print(f"❌ pdfplumber también falló en {fname}: {e}")
             return []
 
+    @staticmethod
+    def _strip_table_lines(base_text: str, table_text: str) -> str:
+        """
+        Quita del texto plano las líneas que la tabla ya recoge en markdown.
+
+        El extractor de texto (fitz/pdfplumber) devuelve la tabla como palabras
+        sueltas, y pdfplumber la devuelve otra vez como markdown. Sin esto, la
+        misma fila viaja DOS veces en el mismo chunk:
+
+            | 4.5 - 5.0 | Outstanding | Top 10%. Exceptional impact... |
+            4.5 - 5.0 Outstanding Top 10%. Exceptional impact...
+
+        Medido el 3-ago-2026 antes de este arreglo: 11 de los 14 chunks con
+        tabla repetían celdas, y el 56% de las líneas largas del índice entero
+        eran repeticiones. Se paga en tokens de prompt en CADA consulta y
+        distorsiona las frecuencias de BM25.
+
+        Criterio deliberadamente conservador: solo se borra una línea si su
+        forma normalizada coincide EXACTAMENTE con una fila completa de la tabla
+        o con una celda de cierta longitud. Ante la duda, se conserva: perder
+        contenido real es mucho peor que dejar una repetición.
+        """
+        if not (base_text or "").strip() or not (table_text or "").strip():
+            return base_text
+
+        def norm(s: str) -> str:
+            return re.sub(r"\s+", " ", s or "").strip().lower()
+
+        prohibidas = set()
+        for linea in table_text.splitlines():
+            if not linea.strip().startswith("|"):
+                continue
+            celdas = [c.strip() for c in linea.strip().strip("|").split("|")]
+            if all(set(c) <= set("- ") for c in celdas):      # fila separadora
+                continue
+            fila = norm(" ".join(c for c in celdas if c))
+            if fila:
+                prohibidas.add(fila)
+            for c in celdas:
+                if len(c) >= 12:      # celdas cortas ("25", "Sí") pueden ser texto legítimo
+                    prohibidas.add(norm(c))
+
+        conservadas = [ln for ln in base_text.splitlines() if norm(ln) not in prohibidas]
+        return "\n".join(conservadas).strip()
+
     def _build_page_document(self, pidx, page_count, base_text, ocr_text, table_text,
                              fname, any_ocr_used, ocr_map):
         parts = []
-        
+
         # 1. Prioridad a la tabla si existe (aporta estructura)
         if (table_text or "").strip():
             parts.append(f"--- DATOS TABULARES (Pág {pidx + 1}) ---\n{table_text.strip()}\n-----------------------------")
 
-        # 2. Texto base
+        # 2. Texto base, ya sin las líneas que la tabla acaba de recoger
+        base_text = self._strip_table_lines(base_text, table_text)
         if (base_text or "").strip():
-            # Limpieza básica para evitar duplicidad si la tabla ya capturó parte
             parts.append(base_text.strip())
 
         # 3. OCR si fue necesario

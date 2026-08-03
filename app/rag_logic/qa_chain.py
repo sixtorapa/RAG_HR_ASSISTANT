@@ -277,6 +277,83 @@ class TwoPassDocShortlistRetriever(BaseRetriever):
         return scoped_retriever.get_relevant_documents(query)
 
 
+# ==================== EXPANSIÓN HIJO → PADRE ====================
+
+class ParentExpansionRetriever(BaseRetriever):
+    """
+    Busca por el hijo y devuelve el padre.
+
+    Es la mitad que faltaba de la arquitectura parent-child. La ingesta ya
+    guardaba `parent_chunk_id` en cada micro-chunk, pero nadie lo usaba: la
+    búsqueda iba contra los dos tamaños a la vez y el mismo texto competía
+    consigo mismo (153 de 154 micro son subcadena literal de su macro).
+
+    La tensión del chunking es conocida: el trozo pequeño se RECUPERA mejor
+    —su embedding es específico y tiene menos ruido— pero RESPONDE peor,
+    porque le falta contexto. En vez de buscar el tamaño mágico, se usan los
+    dos para lo que cada uno hace bien: se busca con el hijo y se entrega el
+    padre.
+
+    El efecto sobre la precisión es directo: varios hijos del mismo padre
+    colapsan en UNA sola entrada, así que desaparece la redundancia que
+    medimos (21% de los caracteres recuperados eran texto repetido, hasta un
+    56% en preguntas sobre un solo documento).
+
+    El orden se conserva: la posición del padre la fija su primer hijo, así
+    que el ranking del retriever de abajo no se pierde.
+
+    Se desactiva con PARENT_EXPANSION=0.
+    """
+
+    base_retriever: BaseRetriever
+    vector_store: Chroma
+    max_docs: int = 12
+
+    def _buscar_padre(self, parent_id: str) -> Optional[Document]:
+        try:
+            data = self.vector_store.get(
+                where={"chunk_id": parent_id},
+                include=["documents", "metadatas"],
+                limit=1,
+            )
+            textos = data.get("documents") or []
+            metas = data.get("metadatas") or []
+            if textos:
+                return Document(page_content=textos[0], metadata=(metas[0] if metas else {}) or {})
+        except Exception as e:
+            print(f"⚠️ Expansión al padre falló para {parent_id}: {e}")
+        return None
+
+    def _get_relevant_documents(self, query: str, *, run_manager=None) -> List[Document]:
+        hijos = self.base_retriever.get_relevant_documents(query) or []
+
+        vistos: set = set()
+        salida: List[Document] = []
+
+        for d in hijos:
+            meta = d.metadata or {}
+            parent_id = (meta.get("parent_chunk_id") or "").strip()
+
+            # Sin padre (ya es macro, o viene de un formato sin jerarquía):
+            # se queda tal cual, pero igualmente deduplicado.
+            clave = parent_id or (meta.get("chunk_id") or d.page_content[:120])
+            if clave in vistos:
+                continue
+            vistos.add(clave)
+
+            salida.append(self._buscar_padre(parent_id) or d if parent_id else d)
+            if len(salida) >= self.max_docs:
+                break
+
+        if salida:
+            print(f"👪 Expansión hijo→padre: {len(hijos)} chunks → {len(salida)} documentos únicos")
+        return salida
+
+
+def _parent_expansion_enabled() -> bool:
+    return str(os.environ.get("PARENT_EXPANSION", "1")).strip().lower() in ("1", "true", "yes")
+
+
 # ==================== PROMPTS ====================
 
 CONDENSE_QUESTION_PROMPT = ChatPromptTemplate.from_messages(
@@ -597,7 +674,7 @@ def get_conversational_qa_chain(
     grano = (_chunk_type_filter() or {}).get("chunk_type", "all")
     cache_key = (
         f"{project_id}::{model_name}::{path_filter or ('DEPT:' + detected_department if detected_department else 'NO_FILTER')}"
-        f"::ACL:{security_scope_key}::GRANO:{grano}"
+        f"::ACL:{security_scope_key}::GRANO:{grano}::PAD:{int(_parent_expansion_enabled())}"
     )
     if cache_key in chain_cache:
         return chain_cache[cache_key]
@@ -701,6 +778,17 @@ def get_conversational_qa_chain(
                 first_pass_k=int(project_settings.get("two_pass_first_pass_k", 14)),
                 max_docs=int(project_settings.get("two_pass_max_docs", 22)),
             )
+
+    # ==================== Expansión hijo → padre ====================
+    # Va DESPUÉS del two-pass y ANTES del rerank: el two-pass trabaja con los
+    # hijos (que es donde está la señal precisa) y el LLM recibe los padres
+    # (que es donde está el contexto completo).
+    if _parent_expansion_enabled() and (_chunk_type_filter() or {}).get("chunk_type") == "micro":
+        final_retriever = ParentExpansionRetriever(
+            base_retriever=final_retriever,
+            vector_store=vector_store,
+            max_docs=int(project_settings.get("parent_expansion_max_docs", 12)),
+        )
 
     # ==================== Rerank / Compression (opt-in) ====================
     flashrank_enabled = str(os.environ.get("FLASHRANK_ENABLED", "0")).strip().lower() in ("1", "true", "yes")
