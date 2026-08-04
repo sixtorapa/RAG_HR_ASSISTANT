@@ -132,14 +132,20 @@ RAM counter would apply the cap per container and N containers would multiply it
 retrieval, parent expansion — over a golden dataset of 21 RAG questions written against
 the real documents, and scores it with RAGAS.
 
-| Metric | Score | What it measures |
-|---|---|---|
-| Context precision | **0.871** | Of what was retrieved, how much is relevant |
-| Context recall | 0.762 | Whether the context holds everything the answer needs |
-| **Faithfulness** | **0.958** | Whether the answer is anchored in the context |
-| Answer relevancy | 0.841 | Whether it answers what was asked |
+Figures are the mean of three runs, with the spread across them, because a single run
+does not settle these numbers.
 
-A query costs about **$0.0005** and 2,600 prompt tokens. Prompt tokens dominate in RAG —
+| Metric | Score | Spread | What it measures |
+|---|---|---|---|
+| Context precision | **0.818** | ±0.005 | Of what was retrieved, how much is relevant |
+| Context recall | 0.762 | ±0.000 | Whether the context holds everything the answer needs |
+| **Faithfulness** | **0.946** | ±0.011 | Whether the answer is anchored in the context |
+| Answer relevancy | 0.859 | ±0.011 | Whether it answers what was asked |
+
+Context recall lands on exactly 0.762 in every run: the metric is quantised per question,
+so that is 16 of 21, and the gap is one specific question rather than noise.
+
+A query costs about **$0.0003** and 2,300 prompt tokens. Prompt tokens dominate in RAG —
 the retrieved chunks are large and the answer is short — which makes retrieval breadth a
 cost decision, not only a quality one.
 
@@ -193,23 +199,36 @@ Three failures share one root: `/var/task` is read-only and only `/tmp` can be w
 3. **Lambda rejects OCI image manifests.** It needs Docker v2 schema 2, and
    `--provenance=false` alone is not enough — the push must set `oci-mediatypes=false`.
 
-Measured on the deployed function: cold start 4.7 s of init once the image is cached on the
-host, warm request 0.06 s, 308 MB used of 3008 allocated. Memory is over-allocated on
-purpose — in Lambda CPU scales with memory, and lowering it lengthens the cold start.
+Memory is over-allocated on purpose — in Lambda CPU scales with memory, and lowering it
+lengthens the cold start.
+
+### Measured on both deployments
+
+| | Railway | AWS Lambda |
+|---|---|---|
+| Generation model | `gpt-4o-mini` | Claude Sonnet 4.6 |
+| `/health`, warm | 0.46 s | 0.21 s |
+| First `/ask` on a cold container | 21.4 s → 200 | 30.2 s → **503** |
+| `/ask`, warm | **6.3 s** | 17.7 s |
+| Request ceiling | none | 29 s (API Gateway) |
+
+The gap between 6.3 s and 17.7 s is the model, not the code: Sonnet answers a heavier
+pipeline than the mini model does. Setting `MODEL_NAME=gpt-4o-mini` on the function maps
+it to Claude Haiku and should close most of it.
 
 ---
 
 ## Honest limitations
 
-- **API Gateway cuts requests at 29 s**, and a full `/ask` on a cold container has exceeded
-  it. End-to-end latency on Lambda has not been re-measured since the retrieval changes;
-  the figure to trust is the one you measure, and this one is stale.
+- **The first query on a cold Lambda container returns 503.** A warm `/ask` takes 17.7 s
+  against API Gateway's 29 s ceiling, but building the chain on a fresh container does not
+  fit in the window. Railway has no such ceiling and answers the same first query in 21 s.
 - **CI, not CD.** `.github/workflows/ci.yml` runs ruff, pytest and a Docker build with
   `push: false`. There is no deploy job; Railway deploys from its own git integration,
   gated on Actions passing.
-- **Test coverage is the weakest part of the repository.** 61 tests cover the models, the
-  routes and the SQL tool. The router, the retrieval chain and the PII guard have none, and
-  they are the components the design leans on hardest.
+- **Not every module is covered.** 295 tests cover the router, the guardrails, ingestion,
+  the retrieval decisions, the models and the routes. The console logger, the PowerPoint
+  loader and the summariser have none.
 - **The router's fast-path matches substrings without word boundaries**, so `"suma"` matches
   inside `"consumar"`. Since the forced path skips the LLM, a false positive routes without
   a safety net.
@@ -235,7 +254,7 @@ printf 'OPENAI_API_KEY=your-key\n' > .env
 
 python seed_hr_db.py                                    # toy HR SQLite database
 KNOWLEDGE_BASE_PATH=$PWD/knowledge_base python ingest.py --force
-pytest                                                  # 61 tests; OpenAI is mocked
+pytest                                                  # 295 tests; OpenAI is mocked
 python run.py                                           # http://localhost:5001
 ```
 
@@ -291,7 +310,7 @@ LANGCHAIN_PROJECT=hr-kb-assistant
 │   ├── pipeline.py             # Toolbox, dispatch loop, answer flow
 │   ├── guards.py               # Daily quota and input-side DLP
 │   ├── views.py                # HTML screens
-│   ├── projects.py             # Project and session management
+│   ├── chats.py                # Chat sessions and re-indexing
 │   ├── auth.py                 # Login / logout
 │   └── admin.py                # Activity panel and CSV export
 │
@@ -300,7 +319,7 @@ LANGCHAIN_PROJECT=hr-kb-assistant
 │   ├── agent_router.py         # Three-path routing
 │   ├── qa_chain.py             # RBAC, prefilter, two-pass, hybrid, parent expansion
 │   ├── ingester.py             # Loaders, chunking, LLM enrichment, indexing
-│   ├── custom_loaders.py       # PDF/PPTX loaders with table extraction and OCR
+│   ├── custom_loaders.py       # PDF/PPTX loaders, layout-aware text and tables
 │   ├── bm25_index.py           # BM25 built at ingest, persisted, loaded at query
 │   ├── sql_tool.py             # Text-to-SQL with guardrails
 │   ├── pii_guard.py            # Checksum-based PII detection
@@ -310,7 +329,7 @@ LANGCHAIN_PROJECT=hr-kb-assistant
 │   ├── evaluate_pipeline.py    # RAGAS over the deployed chain
 │   └── evaluate_rag.py         # RAGAS over three retrieval configurations
 ├── infra/                      # How the AWS side was built, in order
-└── tests/                      # 61 tests, OpenAI mocked
+└── tests/                      # 295 tests, OpenAI mocked
 ```
 
 ### infra/

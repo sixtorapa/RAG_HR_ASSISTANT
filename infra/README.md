@@ -69,11 +69,14 @@ Lambda, CPU scales with memory, and lowering it lengthens the cold start.
 
 ## Known ceiling
 
-An `/ask` round trip takes around 27 s against API Gateway's 29 s limit, and the first
-query on a cold container exceeds it and returns 503. The function itself completes —
-measured at 49 s for a heavier question — so this is a gateway limit, not a Lambda one.
-The pipeline makes several sequential LLM calls; the real fix is fewer of them, or
-streaming.
+A warm `/ask` takes 17.7 s against API Gateway's 29 s limit. The first query on a cold
+container still exceeds it and returns 503: building the chain — opening Chroma, loading
+the BM25 index, assembling the ensemble — does not fit in the window.
+
+The function itself completes well past 29 s, so this is a gateway limit rather than a
+Lambda one. Two levers are untried: the function runs Claude Sonnet because MODEL_NAME is
+unset and defaults to gpt-4o, and setting it to gpt-4o-mini maps to Haiku; and streaming
+would remove the ceiling entirely, since the connection opens on the first token.
 
 A Lambda Function URL, which has no 29 s ceiling, returned 403 despite `AuthType: NONE`
 and a `Principal: "*"` policy — AWS blocks public function URLs by default on new
