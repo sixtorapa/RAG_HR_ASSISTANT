@@ -40,7 +40,7 @@ def health():
 @login_required
 def ask(session_id):
     """
-    Responder una pregunta en una sesión de chat.
+    Responder una question en una sesión de chat.
 
     El endpoint solo hace de portero: valida, aplica los dos guardarraíles y
     delega. Todo el pipeline —router, herramientas, formato— vive en
@@ -51,15 +51,15 @@ def ask(session_id):
     payload = request.get_json(silent=True) or {}
     question_text = payload.get("question")
     if not question_text:
-        return jsonify({"error": "Falta la pregunta."}), 400
+        return jsonify({"error": "Falta la question."}), 400
 
     model_name = payload.get("model_name") or current_app.config["MODEL_NAME"]
 
     # Los dos guardarraíles van ANTES del LLM y ANTES de persistir nada: si el
     # dato llega al modelo o a nuestra propia BD, ya ha salido del perímetro.
-    bloqueo = _quota_block() or _dlp_block(question_text, f"user={current_user.id} session={session_id}")
-    if bloqueo:
-        return bloqueo
+    blocked = _quota_block() or _dlp_block(question_text, f"user={current_user.id} session={session_id}")
+    if blocked:
+        return blocked
 
     _bump_login_session_question()
 
@@ -83,7 +83,7 @@ def ask(session_id):
 @login_required
 def edit_and_resubmit(message_id):
     """
-    Reescribir una pregunta ya enviada y regenerar la respuesta.
+    Reescribir una question ya enviada y regenerar la respuesta.
 
     Antes esta función repetía el pipeline entero de ask() —router, bucle de
     herramientas, formato, persistencia—, unas 270 líneas calcadas. De ese
@@ -98,9 +98,9 @@ def edit_and_resubmit(message_id):
     if not new_text or user_message.sender != "user":
         return jsonify({"error": "Inválido"}), 400
 
-    bloqueo = _dlp_block(new_text, f"user={current_user.id} message={message_id}")
-    if bloqueo:
-        return bloqueo
+    blocked = _dlp_block(new_text, f"user={current_user.id} message={message_id}")
+    if blocked:
+        return blocked
 
     model_name = current_app.config["MODEL_NAME"]
 

@@ -1,5 +1,5 @@
 """
-test_retrieval.py — la factoría de proveedor y las dos piezas nuevas del
+test_retrieval.py — la factoría de provider y las dos piezas nuevas del
 retrieval: el filtro de granularidad y la expansión hijo -> padre.
 
 Nada de esto llama a un modelo ni abre un índice: se comprueban las decisiones,
@@ -21,7 +21,7 @@ from app.rag_logic.qa_chain import (
 
 
 # ══════════════════════════════════════════════════════════════════════════
-# Factoría de proveedor
+# Factoría de provider
 # ══════════════════════════════════════════════════════════════════════════
 
 @pytest.fixture
@@ -41,13 +41,13 @@ class TestFactoriaDeProveedor:
             llm_factory.get_llm("gpt-4o-mini", 0.0)
             openai.assert_called_once()
 
-    @pytest.mark.parametrize("valor", ["bedrock", "BEDROCK", "  Bedrock  ", "'bedrock'", '"bedrock"'])
-    def test_tolera_como_llegue_la_variable(self, monkeypatch, valor):
+    @pytest.mark.parametrize("value", ["bedrock", "BEDROCK", "  Bedrock  ", "'bedrock'", '"bedrock"'])
+    def test_tolera_como_llegue_la_variable(self, monkeypatch, value):
         """
         Una variable de entorno llega del .env, del panel de Railway, de la
         consola de Lambda o de un export: cada uno la trata distinto.
         """
-        monkeypatch.setenv("LLM_PROVIDER", valor)
+        monkeypatch.setenv("LLM_PROVIDER", value)
         with patch.object(llm_factory, "ChatBedrockConverse") as bedrock:
             llm_factory.get_llm("gpt-4o-mini", 0.0)
             bedrock.assert_called_once()
@@ -133,9 +133,9 @@ class TestFiltroDeGranularidad:
         monkeypatch.delenv("RETRIEVAL_CHUNK_TYPE", raising=False)
         assert _chunk_type_filter() == {"chunk_type": "micro"}
 
-    @pytest.mark.parametrize("valor", ["all", "any", "  ALL  "])
-    def test_all_desactiva_el_filtro(self, monkeypatch, valor):
-        monkeypatch.setenv("RETRIEVAL_CHUNK_TYPE", valor)
+    @pytest.mark.parametrize("value", ["all", "any", "  ALL  "])
+    def test_all_desactiva_el_filtro(self, monkeypatch, value):
+        monkeypatch.setenv("RETRIEVAL_CHUNK_TYPE", value)
         assert _chunk_type_filter() is None
 
     def test_macro_busca_por_los_padres(self, monkeypatch):
@@ -159,7 +159,7 @@ class TestFiltroDeGranularidad:
 
 def _hijo(chunk_id, parent_id):
     return Document(
-        page_content=f"texto del hijo {chunk_id}",
+        page_content=f"text del hijo {chunk_id}",
         metadata={"chunk_id": chunk_id, "parent_chunk_id": parent_id, "chunk_type": "micro"},
     )
 
@@ -203,9 +203,9 @@ class TestExpansionAlPadre:
             _hijo("h1", "P1"), _hijo("h2", "P1"), _hijo("h3", "P1"),
         ]
         r = _construir(base, _almacen({"P1": "página 1 entera"}))
-        salida = r.get_relevant_documents("cualquier cosa")
-        assert len(salida) == 1
-        assert salida[0].page_content == "página 1 entera"
+        out = r.get_relevant_documents("cualquier cosa")
+        assert len(out) == 1
+        assert out[0].page_content == "página 1 entera"
 
     def test_padres_distintos_se_conservan_todos(self):
         base = MagicMock()
@@ -230,9 +230,9 @@ class TestExpansionAlPadre:
         base = MagicMock()
         base.get_relevant_documents.return_value = [_hijo("h1", "DESAPARECIDO")]
         r = _construir(base, _almacen({}))
-        salida = r.get_relevant_documents("q")
-        assert len(salida) == 1
-        assert salida[0].page_content == "texto del hijo h1"
+        out = r.get_relevant_documents("q")
+        assert len(out) == 1
+        assert out[0].page_content == "text del hijo h1"
 
     def test_un_documento_sin_padre_pasa_tal_cual(self):
         suelto = Document(page_content="chunk de un .md", metadata={"chunk_id": "s1"})
@@ -260,5 +260,5 @@ class TestExpansionAlPadre:
         vs = MagicMock()
         vs.get.side_effect = RuntimeError("chroma caído")
         r = _construir(base, vs)
-        salida = r.get_relevant_documents("q")
-        assert salida[0].page_content == "texto del hijo h1"
+        out = r.get_relevant_documents("q")
+        assert out[0].page_content == "text del hijo h1"

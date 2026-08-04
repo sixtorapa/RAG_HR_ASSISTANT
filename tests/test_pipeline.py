@@ -68,9 +68,9 @@ class TestCuotaDiaria:
         db.session.commit()
         with app.test_request_context():
             with patch("app.main.guards.current_user", test_user):
-                bloqueo = _quota_block()
-        assert bloqueo is not None
-        cuerpo, codigo = bloqueo
+                blocked = _quota_block()
+        assert blocked is not None
+        cuerpo, codigo = blocked
         assert codigo == 429
         assert cuerpo.get_json()["quota_limit"] == 2
 
@@ -94,13 +94,13 @@ class TestDLPEnElEndpoint:
 
     def test_un_iban_devuelve_400(self, app):
         with app.test_request_context():
-            bloqueo = _dlp_block("mi cuenta es ES9121000418450200051332", "ctx")
-        assert bloqueo is not None
-        cuerpo, codigo = bloqueo
+            blocked = _dlp_block("mi cuenta es ES9121000418450200051332", "ctx")
+        assert blocked is not None
+        cuerpo, codigo = blocked
         assert codigo == 400
 
     def test_el_mensaje_de_error_no_repite_el_dato(self, app):
-        """Devolver el valor detectado en la respuesta sería filtrarlo igual."""
+        """Devolver el value detectado en la respuesta sería filtrarlo igual."""
         iban = "ES9121000418450200051332"
         with app.test_request_context():
             cuerpo, _ = _dlp_block(f"cuenta {iban}", "ctx")
@@ -111,7 +111,7 @@ class TestOrdenDeLosGuardarrailes:
 
     def test_el_endpoint_corta_antes_de_construir_nada(self, auth_client, test_chat_session, monkeypatch):
         """
-        La propiedad que importa: con PII en la pregunta, ni se construyen las
+        La propiedad que importa: con PII en la question, ni se construyen las
         herramientas ni se llama al router. Si el dato llega al modelo o a la
         base de datos, ya ha salido del perímetro.
         """
@@ -195,14 +195,14 @@ class TestDespachoDeHerramientas:
         assert r[0]["origin"] == "summarise_document"
 
     def test_el_resultado_sql_se_encadena_a_la_consulta_documental(self, caja):
-        """El modo híbrido: lo que devuelve SQL entra como contexto en DOCS."""
+        """El modo híbrido: lo que devuelve SQL entra como context en DOCS."""
         caja.sql_agent.run.return_value = {"answer": "t", "sql_raw_output": "dept | n\nEng | 12",
                                            "source_documents": []}
         caja.docs.run.return_value = {"answer": "según la política...", "source_documents": []}
         _run_tools([{"name": "query_hr_database", "args": {"query": "q"}},
                     {"name": "chat_with_documents", "args": {"question": "q"}}], caja, "q", [])
-        pregunta = caja.docs.run.call_args[0][0]["question"]
-        assert "SALIDA SQL" in pregunta
+        question = caja.docs.run.call_args[0][0]["question"]
+        assert "SALIDA SQL" in question
 
     def test_sin_llamadas_devuelve_lista_vacia(self, caja):
         assert _run_tools([], caja, "q", []) == []
@@ -216,7 +216,7 @@ class TestContextoSQL:
         assert "TABLA" in doc.page_content
 
     def test_recorta_las_salidas_largas(self):
-        doc = _sql_context_document({"sql_raw_output": "\n".join(f"fila {i}" for i in range(200))})
+        doc = _sql_context_document({"sql_raw_output": "\n".join(f"row {i}" for i in range(200))})
         assert len(doc.page_content.splitlines()) < 40
 
     def test_sin_contenido_no_produce_documento(self):
@@ -234,19 +234,19 @@ class TestAgenteDeFormato:
         Este detalle es el que hizo que la reformulación de SQLAgent fuese
         código muerto: su `answer` no se leía nunca.
         """
-        texto = _build_contributions_summary([
+        text = _build_contributions_summary([
             {"origin": "query_hr_database", "sql_raw_output": "TABLA CRUDA", "answer": "REFORMULADO"},
         ])
-        assert "TABLA CRUDA" in texto
-        assert "REFORMULADO" not in texto
+        assert "TABLA CRUDA" in text
+        assert "REFORMULADO" not in text
 
     def test_usa_answer_cuando_no_hay_salida_sql(self):
-        texto = _build_contributions_summary([{"origin": "chat_with_documents", "answer": "la respuesta"}])
-        assert "la respuesta" in texto
+        text = _build_contributions_summary([{"origin": "chat_with_documents", "answer": "la respuesta"}])
+        assert "la respuesta" in text
 
     def test_trunca_los_bloques_enormes(self):
-        texto = _build_contributions_summary([{"origin": "x", "answer": "y" * 20000}])
-        assert "TRUNCATED" in texto
+        text = _build_contributions_summary([{"origin": "x", "answer": "y" * 20000}])
+        assert "TRUNCATED" in text
 
     def test_sin_contribuciones_lo_dice(self):
         assert "No useful response" in _build_contributions_summary([])
@@ -265,7 +265,7 @@ class TestAgenteDeFormato:
             llm.invoke.return_value = MagicMock(content="  respuesta final  ")
             get_llm.return_value = llm
             r = ReasoningAgent(model_name="gpt-4o-mini").run(
-                "pregunta", [{"origin": "x", "answer": "dato", "source_documents": [Document(page_content="f")]}],
+                "question", [{"origin": "x", "answer": "dato", "source_documents": [Document(page_content="f")]}],
             )
         assert r["answer"] == "respuesta final"
         assert len(r["source_documents"]) == 1
@@ -278,7 +278,7 @@ class TestAgenteDeFormato:
 class TestBM25:
 
     def test_construye_desde_textos_y_metadata(self):
-        r = build_bm25_retriever(["texto uno", "texto dos"], [{"a": 1}, {"a": 2}])
+        r = build_bm25_retriever(["text uno", "text dos"], [{"a": 1}, {"a": 2}])
         assert r is not None
 
     def test_sin_documentos_devuelve_none(self):

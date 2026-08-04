@@ -3,7 +3,7 @@
 Punto ÚNICO donde se crean los clientes de LLM y de embeddings.
 
 Antes de este módulo, 19 sitios repartidos por 10 ficheros instanciaban
-`ChatOpenAI` / `OpenAIEmbeddings` directamente. Cambiar de proveedor obligaba
+`ChatOpenAI` / `OpenAIEmbeddings` directamente. Cambiar de provider obligaba
 a editar los 19. Ahora el resto del código pide "dame un modelo" y no sabe
 —ni le importa— quién se lo sirve.
 """
@@ -31,8 +31,8 @@ def _provider() -> str:
     """
     Proveedor activo: 'openai' (por defecto) o 'bedrock'.
 
-    Se lee en CADA llamada, no al importar el módulo: así un test o un script
-    pueden cambiar el proveedor sin reimportar nada.
+    Se lee en CADA call, no al importar el módulo: así un test o un script
+    pueden cambiar el provider sin reimportar nada.
 
     El defecto 'openai' no es casual — si alguien despliega sin definir la
     variable, el sistema se comporta exactamente como antes de esta migración.
@@ -43,26 +43,26 @@ def _provider() -> str:
     Las comillas se quitan por el mismo motivo por el que evaluate_rag.py ya
     saneaba OPENAI_API_KEY: llegan pegadas más a menudo de lo que parece.
 
-    Lo que NO se hace: aceptar alias tipo 'aws' o 'amazon'. El valor válido debe
-    poder leerse en este fichero; un valor no reconocido cae a OpenAI y AVISA,
+    Lo que NO se hace: aceptar alias tipo 'aws' o 'amazon'. El value válido debe
+    poder leerse en este fichero; un value no reconocido cae a OpenAI y AVISA,
     que es preferible a una lista de sinónimos que nadie mantiene.
     """
     # Normalizar PRIMERO y aplicar el defecto DESPUÉS: si se hace al revés, un
-    # valor de solo espacios ('   ') no cae al defecto —es truthy— y acaba
+    # value de solo espacios ('   ') no cae al defecto —es truthy— y acaba
     # resolviendo a cadena vacía.
-    valor = (os.environ.get("LLM_PROVIDER") or "").strip()
-    valor = valor.strip('"').strip("'").strip().lower()
-    return valor or "openai"
+    value = (os.environ.get("LLM_PROVIDER") or "").strip()
+    value = value.strip('"').strip("'").strip().lower()
+    return value or "openai"
 
 
 def _to_bedrock_id(model_name: str) -> str:
     """
-    Traduce un nombre de modelo de OpenAI al ID equivalente en Bedrock.
+    Traduce un name de modelo de OpenAI al ID equivalente en Bedrock.
 
     Si ya viene un ID de Bedrock (empieza por 'eu.', 'global.' o 'anthropic.'),
     se deja pasar tal cual.
 
-    Un modelo desconocido revienta AQUÍ, con nombre y apellido. La alternativa
+    Un modelo desconocido revienta AQUÍ, con name y apellido. La alternativa
     —caer a un modelo por defecto— haría indistinguible "pedí este modelo" de
     "me dieron otro", que es el mismo fallo silencioso de cost_calculator.py.
     """
@@ -83,15 +83,15 @@ def get_llm(model_name: str, temperature: float = 0.0, **kwargs):
     Devuelve un cliente de chat listo para usar.
 
     No devuelve el NOMBRE de un modelo: devuelve un objeto con métodos
-    (`.invoke()`, `.bind_tools()`, ...). Quien llama no sabe de qué proveedor es.
+    (`.invoke()`, `.bind_tools()`, ...). Quien llama no sabe de qué provider es.
 
     `**kwargs` reenvía lo que cada sitio necesite (`callbacks`,
     `callback_manager`, ...). Sin esto, esos argumentos se perderían en
     silencio y dejaría de verse el logging por consola.
     """
-    proveedor = _provider()
+    provider = _provider()
 
-    if proveedor == "bedrock":
+    if provider == "bedrock":
         return ChatBedrockConverse(
             model_id=_to_bedrock_id(model_name),
             temperature=temperature,
@@ -99,9 +99,9 @@ def get_llm(model_name: str, temperature: float = 0.0, **kwargs):
             **kwargs,
         )
 
-    if proveedor != "openai":
+    if provider != "openai":
         logger.warning(
-            "LLM_PROVIDER='%s' no reconocido; usando OpenAI.", proveedor
+            "LLM_PROVIDER='%s' no reconocido; usando OpenAI.", provider
         )
 
     return ChatOpenAI(model_name=model_name, temperature=temperature, **kwargs)

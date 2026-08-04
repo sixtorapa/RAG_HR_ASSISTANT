@@ -27,8 +27,8 @@ class LoaderConfig:
     toda esa rama era inalcanzable en la imagen desplegada.
 
     Dejarla habría sido mantener —y describir— una capacidad que el sistema no
-    tiene. Si algún día el corpus trae escaneados sin capa de texto, se añade la
-    dependencia y se vuelve a escribir; hoy los PDFs de este corpus llevan texto.
+    tiene. Si algún día el corpus trae escaneados sin capa de text, se añade la
+    dependencia y se vuelve a escribir; today los PDFs de este corpus llevan text.
     """
 
     pdf_extract_tables: bool = (
@@ -50,7 +50,7 @@ class BetterPDFLoader(BaseLoader):
     """
     Loader robusto para PDF:
     ✅ Devuelve 1 Document por PÁGINA (NUNCA descarta).
-    ✅ Combina: texto (fitz, layout-aware) + tablas en Markdown (pdfplumber).
+    ✅ Combina: text (fitz, layout-aware) + tablas en Markdown (pdfplumber).
     ✅ Páginas vacías se marcan con is_empty_page=True.
     """
 
@@ -84,7 +84,7 @@ class BetterPDFLoader(BaseLoader):
     def _load_with_pdfplumber(self) -> List[Document]:
         """
         Fallback cuando PyMuPDF (fitz) no está disponible o falla.
-        Con texto y tablas reales — nunca debe devolver [] salvo que el PDF en
+        Con text y tablas reales — nunca debe devolver [] salvo que el PDF en
         sí sea ilegible (corrupto o cifrado).
         """
         fname = _safe_basename(self.file_path)
@@ -126,22 +126,22 @@ class BetterPDFLoader(BaseLoader):
     @staticmethod
     def _strip_table_lines(base_text: str, table_text: str) -> str:
         """
-        Quita del texto plano las líneas que la tabla ya recoge en markdown.
+        Quita del text plano las líneas que la tabla ya recoge en markdown.
 
-        El extractor de texto (fitz/pdfplumber) devuelve la tabla como palabras
+        El extractor de text (fitz/pdfplumber) devuelve la tabla como palabras
         sueltas, y pdfplumber la devuelve otra vez como markdown. Sin esto, la
-        misma fila viaja DOS veces en el mismo chunk:
+        misma row viaja DOS veces en el mismo chunk:
 
             | 4.5 - 5.0 | Outstanding | Top 10%. Exceptional impact... |
             4.5 - 5.0 Outstanding Top 10%. Exceptional impact...
 
         Medido el 3-ago-2026 antes de este arreglo: 11 de los 14 chunks con
-        tabla repetían celdas, y el 56% de las líneas largas del índice entero
+        tabla repetían cells, y el 56% de las líneas largas del índice entero
         eran repeticiones. Se paga en tokens de prompt en CADA consulta y
         distorsiona las frecuencias de BM25.
 
         Criterio deliberadamente conservador: solo se borra una línea si su
-        forma normalizada coincide EXACTAMENTE con una fila completa de la tabla
+        forma normalizada coincide EXACTAMENTE con una row completa de la tabla
         o con una celda de cierta longitud. Ante la duda, se conserva: perder
         contenido real es mucho peor que dejar una repetición.
         """
@@ -151,24 +151,24 @@ class BetterPDFLoader(BaseLoader):
         def norm(s: str) -> str:
             return re.sub(r"\s+", " ", s or "").strip().lower()
 
-        prohibidas = set()
-        for linea in table_text.splitlines():
-            if not linea.strip().startswith("|"):
+        table_lines = set()
+        for line in table_text.splitlines():
+            if not line.strip().startswith("|"):
                 continue
-            celdas = [c.strip() for c in linea.strip().strip("|").split("|")]
-            if all(set(c) <= set("- ") for c in celdas):      # fila separadora
+            cells = [c.strip() for c in line.strip().strip("|").split("|")]
+            if all(set(c) <= set("- ") for c in cells):      # row separadora
                 continue
-            fila = norm(" ".join(c for c in celdas if c))
-            if fila:
-                prohibidas.add(fila)
-            for c in celdas:
-                if len(c) >= 12:      # celdas cortas ("25", "Sí") pueden ser texto legítimo
-                    prohibidas.add(norm(c))
+            row = norm(" ".join(c for c in cells if c))
+            if row:
+                table_lines.add(row)
+            for c in cells:
+                if len(c) >= 12:      # cells cortas ("25", "Sí") pueden ser text legítimo
+                    table_lines.add(norm(c))
 
-        conservadas = [ln for ln in base_text.splitlines() if norm(ln) not in prohibidas]
+        kept = [ln for ln in base_text.splitlines() if norm(ln) not in table_lines]
         # Cada línea borrada deja un hueco. Sin colapsarlos, quitar tres filas
         # seguidas deja seis saltos de línea que se pagan en tokens de prompt.
-        return re.sub(r"\n{3,}", "\n\n", "\n".join(conservadas)).strip()
+        return re.sub(r"\n{3,}", "\n\n", "\n".join(kept)).strip()
 
     def _build_page_document(self, pidx, page_count, base_text, table_text, fname):
         parts = []
@@ -185,7 +185,7 @@ class BetterPDFLoader(BaseLoader):
         page_out = "\n\n".join(parts).strip()
         is_empty = not page_out or len(page_out.split()) < 3
         if is_empty:
-            page_out = f"[Página {pidx + 1} — contenido visual sin texto extraíble]"
+            page_out = f"[Página {pidx + 1} — contenido visual sin text extraíble]"
 
         return Document(
             page_content=page_out,
@@ -309,7 +309,7 @@ class BetterPowerPointLoader(BaseLoader):
             page_out = slide_text.strip()
             is_empty = not page_out or len(page_out.split()) < 3
             if is_empty:
-                page_out = f"[Slide {s_i} — contenido visual sin texto extraíble]"
+                page_out = f"[Slide {s_i} — contenido visual sin text extraíble]"
             out_docs.append(Document(page_content=page_out, metadata={
                 "source": self.file_path, "file_type": "ppt",
                 "filename": fname, "source_file": fname, "relative_path": fname,

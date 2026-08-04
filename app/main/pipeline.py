@@ -1,6 +1,6 @@
 # app/main/pipeline.py
 """
-El pipeline de respuesta: de una pregunta a una respuesta guardada.
+El pipeline de respuesta: de una question a una respuesta guardada.
 
     override o router  ->  tool_calls  ->  un bucle de ejecución  ->  formato
 
@@ -57,17 +57,17 @@ def _extract_user_mode(raw_text: str):
     Formatos soportados (ejemplos):
       - "SQL: dame el top 10..."
       - "SQL dame el top 10..."
-      - "AMBAS - compara esto y dame contexto..."
+      - "AMBAS - compara esto y dame context..."
 
     Devuelve: (mode, cleaned_text)
       - mode: "sql" | "ambas" | None
-      - cleaned_text: pregunta sin el prefijo detectado
+      - cleaned_text: question sin el prefijo detectado
     """
     if not raw_text:
         return None, raw_text
 
     text = raw_text.strip()
-    # Solo si aparece al inicio como palabra completa.
+    # Solo si aparece al prefix como palabra completa.
     m = re.match(r"^(sql|ambas)\b", text, flags=re.IGNORECASE)
     if not m:
         return None, text
@@ -98,18 +98,18 @@ class _ToolBox:
     """Las herramientas del proyecto, construidas una sola vez por petición."""
 
     # Identificador fijo de la colección para la clave de caché de cadenas.
-    # Antes era el uuid de una fila de `project`; la aplicación sirve una sola
+    # Antes era el uuid de una row de `project`; la aplicación sirve una sola
     # base de conocimiento, así que la constante dice la verdad sin una tabla
     # detrás.
     COLECCION = "kb"
 
     def __init__(self, model_name, user, logger, use_web_search=False):
         cfg = current_app.config
-        ajustes = {
+        settings = {
             "system_instruction": cfg.get("SYSTEM_INSTRUCTION", ""),
             "sql_context": cfg.get("SQL_CONTEXT", ""),
         }
-        acl_settings = _settings_with_acl(ajustes, user)
+        acl_settings = _settings_with_acl(settings, user)
         allowed = user.get_allowed_departments()
         vector_store_path = cfg["UP_VECTOR_STORE_PATH"]
 
@@ -127,7 +127,7 @@ class _ToolBox:
         )
         self.sql = SQLDatabaseTool(
             model_name=model_name,
-            project_settings=ajustes,
+            project_settings=settings,
             allowed_departments=allowed,
         )
         self.excel = ExcelAnalysisTool(
@@ -144,10 +144,10 @@ class _ToolBox:
         self.reasoning = ReasoningAgent(model_name=model_name, callbacks=[logger])
 def _sql_context_document(step_result):
     """Comprime la salida SQL en un Document para encadenar SQL → DOCS."""
-    texto = (step_result.get("sql_raw_output") or step_result.get("answer") or "").strip()
-    if not texto:
+    text = (step_result.get("sql_raw_output") or step_result.get("answer") or "").strip()
+    if not text:
         return None
-    compacto = "\n".join([ln for ln in texto.splitlines() if ln.strip()][:25])
+    compacto = "\n".join([ln for ln in text.splitlines() if ln.strip()][:25])
     return Document(
         page_content=f"[SALIDA SQL - RESUMEN]\n{compacto}",
         metadata={"source": "SQL", "type": "sql_context"},
@@ -161,90 +161,89 @@ def _calls_from_override(raw_text, box):
     es un camino distinto, es solo saltarse la decisión. Lo que se ejecuta después
     es idéntico.
 
-    Devuelve (calls, pregunta_limpia). calls=None significa "que decida el router".
+    Devuelve (calls, clean_question). calls=None significa "que decida el router".
     """
     user_mode, cleaned = _extract_user_mode(raw_text)
-    pregunta = cleaned or raw_text
-    qt = pregunta.lower()
+    question = cleaned or raw_text
+    qt = question.lower()
 
     if any(k in qt for k in ("resumen", "resume", "summary", "síntesis")):
         m = re.search(r"(?:del|de la|documento|pdf|pptx?|presentación)\s+([a-z0-9_\-\. ]+)", qt)
         hint = (m.group(1).strip() if m else "")
-        return [{"name": box.summary.name, "args": {"doc_name_hint": hint}}], pregunta
+        return [{"name": box.summary.name, "args": {"doc_name_hint": hint}}], question
 
     if user_mode == "sql":
-        return [{"name": box.sql.name, "args": {"query": pregunta}}], pregunta
+        return [{"name": box.sql.name, "args": {"query": question}}], question
 
     if user_mode == "doc":
-        return [{"name": box.docs.name, "args": {"question": pregunta}}], pregunta
+        return [{"name": box.docs.name, "args": {"question": question}}], question
 
     if user_mode in ("ambas", "hib"):
         return [
-            {"name": box.sql.name, "args": {"query": pregunta}},
-            {"name": box.docs.name, "args": {"question": pregunta}},
-        ], pregunta
+            {"name": box.sql.name, "args": {"query": question}},
+            {"name": box.docs.name, "args": {"question": question}},
+        ], question
 
-    return None, pregunta
-def _run_tools(calls, box, pregunta, paired_history):
+    return None, question
+def _run_tools(calls, box, question, paired_history):
     """
     Bucle ÚNICO de despacho de herramientas.
 
     Recibe la lista de tool_calls venga de donde venga —del router o de un
-    override— y devuelve la lista de resultados normalizados. Si una llamada a
-    SQL produce salida, se encadena como contexto a la siguiente de documentos
+    override— y devuelve la lista de resultados normalizados. Si una llamada a SQL produce salida, se encadena como contexto a la siguiente de documentos
     (el modo híbrido).
     """
-    resultados = []
+    results = []
     sql_context = None
 
-    for llamada in calls or []:
-        nombre = llamada.get("name")
-        args = llamada.get("args") or {}
+    for call in calls or []:
+        name = call.get("name")
+        args = call.get("args") or {}
 
-        if nombre == box.docs.name:
-            q = args.get("question") or pregunta
+        if name == box.docs.name:
+            q = args.get("question") or question
             # El contexto de un paso SQL previo (modo híbrido) se antepone a la
             # pregunta, porque la cadena documental no acepta documentos extra.
             if sql_context is not None:
                 q = f"{q}\n\n{sql_context.page_content}"
-            paso = box.docs.run(
+            step = box.docs.run(
                 {"question": q, "chat_history": paired_history},
                 callbacks=[box.logger],
             )
 
-        elif nombre == box.summary.name:
-            paso = box.summary.run(
+        elif name == box.summary.name:
+            step = box.summary.run(
                 {"doc_name_hint": args.get("doc_name_hint", "") or ""},
                 callbacks=[box.logger],
             )
 
-        elif nombre == box.sql.name:
-            paso = box.sql_agent.run(args.get("query") or pregunta)
-            if isinstance(paso, dict):
-                sql_context = _sql_context_document(paso)
+        elif name == box.sql.name:
+            step = box.sql_agent.run(args.get("query") or question)
+            if isinstance(step, dict):
+                sql_context = _sql_context_document(step)
 
-        elif nombre == box.excel.name:
-            paso = box.excel.run(
+        elif name == box.excel.name:
+            step = box.excel.run(
                 {
-                    "query": args.get("query") or args.get("question") or pregunta,
+                    "query": args.get("query") or args.get("question") or question,
                     "file_name_hint": args.get("file_name_hint", "") or "",
                 },
                 callbacks=[box.logger],
             )
 
-        elif box.web is not None and nombre == box.web.name:
-            paso = box.web.run({"query": args.get("query") or pregunta}, callbacks=[box.logger])
+        elif box.web is not None and name == box.web.name:
+            step = box.web.run({"query": args.get("query") or question}, callbacks=[box.logger])
 
         else:
-            paso = {"answer": f"No sé qué herramienta usar para: {nombre}", "source_documents": []}
+            step = {"answer": f"No sé qué herramienta usar para: {name}", "source_documents": []}
 
-        if not isinstance(paso, dict):
-            paso = {"answer": str(paso) if paso else "Error interno en la herramienta.", "source_documents": []}
-        paso["origin"] = nombre
-        resultados.append(paso)
+        if not isinstance(step, dict):
+            step = {"answer": str(step) if step else "Error interno en la herramienta.", "source_documents": []}
+        step["origin"] = name
+        results.append(step)
 
-    return resultados
-def _history_for(session, hasta=None, limite=10):
+    return results
+def _history_for(session, hasta=None, limit=10):
     """
     Historial de la conversación en los dos formatos que hacen falta:
     mensajes de LangChain para el router, y pares (usuario, bot) para la cadena.
@@ -254,20 +253,20 @@ def _history_for(session, hasta=None, limite=10):
     if hasta is not None:
         mensajes = q.filter(Message.timestamp < hasta).order_by(Message.timestamp.asc()).all()
     else:
-        mensajes = q.order_by(Message.timestamp.desc()).limit(limite).all()
+        mensajes = q.order_by(Message.timestamp.desc()).limit(limit).all()
         mensajes.reverse()
 
     para_router = [
         (HumanMessage(content=m.content) if m.sender == "user" else AIMessage(content=m.content))
         for m in mensajes
     ]
-    emparejado = [
+    paired = [
         (mensajes[i].content, mensajes[i + 1].content)
         for i in range(0, len(mensajes) - 1, 2)
         if mensajes[i].sender == "user" and mensajes[i + 1].sender == "bot"
     ]
-    return para_router, emparejado
-def _answer_question(session, pregunta, model_name, box,
+    return para_router, paired
+def _answer_question(session, question, model_name, box,
                      historial_hasta=None, use_router=True):
     """
     El pipeline completo, y el único sitio donde vive.
@@ -277,14 +276,14 @@ def _answer_question(session, pregunta, model_name, box,
     respondió directamente sin herramientas — en ese caso `final_result` ya
     contiene la respuesta directa.
     """
-    para_router, emparejado = _history_for(session, hasta=historial_hasta)
+    para_router, paired = _history_for(session, hasta=historial_hasta)
 
-    calls, pregunta_limpia = _calls_from_override(pregunta, box)
+    calls, clean_question = _calls_from_override(question, box)
 
     if calls is None and use_router:
         router = AgentRouter(model_name=model_name, tools=box.all,
                              doc_path=current_app.config["KNOWLEDGE_BASE_PATH"])
-        eleccion = router.route(pregunta, para_router, callbacks=[box.logger])
+        eleccion = router.route(question, para_router, callbacks=[box.logger])
 
         if not getattr(eleccion, "tool_calls", None):
             # Camino 1 del router: responde él mismo, sin herramientas y sin
@@ -294,22 +293,22 @@ def _answer_question(session, pregunta, model_name, box,
                 primera, *resto = crudo.splitlines()
                 if primera.strip().upper().startswith("ROUTE:"):
                     crudo = "\n".join(resto).strip()
-            return {"answer": crudo or "No tengo respuesta para eso.", "source_documents": []}, pregunta_limpia
+            return {"answer": crudo or "No tengo respuesta para eso.", "source_documents": []}, clean_question
 
         calls = eleccion.tool_calls
 
     with get_openai_callback() as cb:
-        resultados = _run_tools(calls, box, pregunta_limpia, emparejado)
-    # El coste se registra por consulta. Antes se acumulaba en `project.cost`,
+        results = _run_tools(calls, box, clean_question, paired)
+    # El cost se registra por consulta. Antes se acumulaba en `project.cost`,
     # una columna que ninguna pantalla mostraba.
-    coste = calculate_cost(model_name, cb.prompt_tokens, cb.completion_tokens)
-    print(f"💶 Coste de la consulta: {coste:.6f} "
+    cost = calculate_cost(model_name, cb.prompt_tokens, cb.completion_tokens)
+    print(f"💶 Coste de la consulta: {cost:.6f} "
           f"({cb.prompt_tokens} prompt + {cb.completion_tokens} completion tokens)")
 
-    if not resultados:
-        resultados = [{"answer": "No se ejecutó ninguna herramienta.", "source_documents": [], "origin": box.docs.name}]
+    if not results:
+        results = [{"answer": "No se ejecutó ninguna herramienta.", "source_documents": [], "origin": box.docs.name}]
 
-    return box.reasoning.run(pregunta_limpia, resultados), pregunta_limpia
+    return box.reasoning.run(clean_question, results), clean_question
 def _finalize(session, question_text, final_result,
               title_question=None, existing_user_message=None):
     """

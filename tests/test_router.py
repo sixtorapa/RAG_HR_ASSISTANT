@@ -18,7 +18,7 @@ from unittest.mock import MagicMock, patch
 
 from app.rag_logic.agent_router import (
     AgentRouter,
-    _contiene_palabra,
+    _contains_whole_word,
     _is_greeting,
     _is_thanks,
     _looks_like_docs_intent,
@@ -48,39 +48,39 @@ class TestNormalizacion:
 
 class TestCoincidenciaPorPalabra:
     """
-    `clave in texto` casa dentro de otras palabras. Estos son los casos reales.
+    `key in text` casa dentro de otras palabras. Estos son los casos reales.
 
     Nota: el ejemplo "tabla" ⊂ "estable" que circulaba en la documentación es
     FALSO — "estable" no contiene "tabla". Los de aquí sí están verificados.
     """
 
-    @pytest.mark.parametrize("clave,frase", [
+    @pytest.mark.parametrize("key,frase", [
         ("suma", "quiero consumar la operación"),
         ("file", "un filete poco hecho"),
         ("hoja", "una plancha de hojalata"),
         ("total", "estoy totalmente de acuerdo"),
         ("pay", "lo pagué por paypal"),
     ])
-    def test_no_casa_dentro_de_otra_palabra(self, clave, frase):
-        assert clave in _norm(frase), "el caso dejó de ser un ejemplo de subcadena"
-        assert not _contiene_palabra(_norm(frase), clave)
+    def test_no_casa_dentro_de_otra_palabra(self, key, frase):
+        assert key in _norm(frase), "el caso dejó de ser un ejemplo de subcadena"
+        assert not _contains_whole_word(_norm(frase), key)
 
-    @pytest.mark.parametrize("clave,frase", [
+    @pytest.mark.parametrize("key,frase", [
         ("suma", "dame la suma del archivo"),
         ("file", "abre el file de gastos"),
         ("hoja", "la hoja de gastos"),
         ("salary", "what is the average salary?"),
     ])
-    def test_si_casa_como_palabra_suelta(self, clave, frase):
-        assert _contiene_palabra(_norm(frase), clave)
+    def test_si_casa_como_palabra_suelta(self, key, frase):
+        assert _contains_whole_word(_norm(frase), key)
 
     def test_claves_de_varias_palabras_toleran_espacios(self):
-        assert _contiene_palabra(_norm("dame la hoja de calculo"), "hoja de calculo")
-        assert _contiene_palabra(_norm("dame la hoja  de   calculo"), "hoja de calculo")
+        assert _contains_whole_word(_norm("dame la hoja de calculo"), "hoja de calculo")
+        assert _contains_whole_word(_norm("dame la hoja  de   calculo"), "hoja de calculo")
 
     def test_claves_con_extension_de_fichero(self):
-        assert _contiene_palabra(_norm("abre ventas.xlsx"), ".xlsx")
-        assert _contiene_palabra(_norm("el informe .xls de marzo"), ".xls")
+        assert _contains_whole_word(_norm("abre ventas.xlsx"), ".xlsx")
+        assert _contains_whole_word(_norm("el informe .xls de marzo"), ".xls")
 
     def test_contrapartida_asumida_no_casan_los_plurales(self):
         """
@@ -88,7 +88,7 @@ class TestCoincidenciaPorPalabra:
         como decisión: un falso negativo va al LLM, que decide bien; un falso
         positivo va a la herramienta equivocada sin red.
         """
-        assert not _contiene_palabra(_norm("los empleado"), "empleados")
+        assert not _contains_whole_word(_norm("los empleado"), "empleados")
         # Por eso la lista de señales enumera la forma que interesa:
         assert _looks_like_sql_intent("cuantos empleados hay")
 
@@ -107,11 +107,11 @@ class TestFalsoPositivoDeExcel:
     def test_excel_de_verdad_sigue_detectandose(self):
         assert _looks_like_excel_intent("abre el excel de nóminas")
         assert _looks_like_excel_intent("dame la suma del archivo de gastos")
-        assert _looks_like_excel_intent("cuántas celdas tiene el fichero")
+        assert _looks_like_excel_intent("cuántas cells tiene el fichero")
 
     @pytest.mark.parametrize("frase", [
         "¿cuál es el total de ventas?",        # calc sin fichero
-        "¿cuántas celdas tiene la tabla?",     # weak sin fichero
+        "¿cuántas cells tiene la tabla?",     # weak sin fichero
     ])
     def test_señales_debiles_sin_fichero_no_bastan(self, frase):
         assert not _looks_like_excel_intent(frase)
@@ -180,27 +180,27 @@ class TestLosTresCaminos:
 
     @pytest.mark.parametrize("frase", ["hola", "gracias", "", "   ", "???", "¿qué puedes hacer?"])
     def test_camino_1_responde_sin_llamar_al_llm(self, router, frase):
-        salida = router.route(frase, [])
-        assert not getattr(salida, "tool_calls", None)
-        assert "ROUTE: DIRECT" in salida.content
+        out = router.route(frase, [])
+        assert not getattr(out, "tool_calls", None)
+        assert "ROUTE: DIRECT" in out.content
         router.router_chain.invoke.assert_not_called()
 
     def test_camino_2_fuerza_sql_sin_llm(self, router):
-        salida = router.route("cuántos empleados activos hay", [])
-        assert [c["name"] for c in salida.tool_calls] == ["query_hr_database"]
+        out = router.route("cuántos empleados activos hay", [])
+        assert [c["name"] for c in out.tool_calls] == ["query_hr_database"]
         router.router_chain.invoke.assert_not_called()
 
     def test_camino_2_encadena_sql_y_docs_si_hay_las_dos_intenciones(self, router):
-        salida = router.route(
+        out = router.route(
             "cuánto cobra un senior y qué dice la política salarial", []
         )
-        assert [c["name"] for c in salida.tool_calls] == [
+        assert [c["name"] for c in out.tool_calls] == [
             "query_hr_database", "chat_with_documents",
         ]
 
     def test_camino_2_fuerza_excel_sin_llm(self, router):
-        salida = router.route("dame la suma del archivo de gastos", [])
-        assert [c["name"] for c in salida.tool_calls] == ["analista_de_excel"]
+        out = router.route("dame la suma del archivo de gastos", [])
+        assert [c["name"] for c in out.tool_calls] == ["analista_de_excel"]
         router.router_chain.invoke.assert_not_called()
 
     def test_camino_3_lo_ambiguo_llega_al_llm(self, router):
@@ -212,11 +212,11 @@ class TestLosTresCaminos:
 
     def test_smalltalk_corto_no_llega_al_llm(self, router):
         # <= 4 palabras y sin señal de SQL/Excel -> respuesta directa.
-        salida = router.route("y eso qué es", [])
-        assert not getattr(salida, "tool_calls", None)
+        out = router.route("y eso qué es", [])
+        assert not getattr(out, "tool_calls", None)
         router.router_chain.invoke.assert_not_called()
 
     def test_una_pregunta_corta_de_sql_si_se_enruta(self, router):
         # Corta, pero con señal clara: no debe caer en el smalltalk.
-        salida = router.route("headcount por departamento", [])
-        assert [c["name"] for c in salida.tool_calls] == ["query_hr_database"]
+        out = router.route("headcount por departamento", [])
+        assert [c["name"] for c in out.tool_calls] == ["query_hr_database"]

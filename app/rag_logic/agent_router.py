@@ -17,47 +17,47 @@ def _norm(s: str) -> str:
     return "".join(c for c in s if unicodedata.category(c) != "Mn")
 
 
-def _contiene_palabra(texto_norm: str, clave: str) -> bool:
+def _contains_whole_word(text_norm: str, key: str) -> bool:
     """
-    ¿Aparece `clave` como palabra completa en `texto_norm`?
+    ¿Aparece `key` como palabra completa en `text_norm`?
 
-    `clave in texto` es SUBCADENA, y ese era el defecto: "suma" casaba dentro
+    `key in text` es SUBCADENA, y ese era el defecto: "suma" casaba dentro
     de "consumar", "file" dentro de "filete", "hoja" dentro de "hojalata".
     Peligroso justo aquí porque el camino forzado del router se salta el LLM:
-    un falso positivo desvía la pregunta a la herramienta equivocada sin que
+    un falso positivo desvía la question a la herramienta equivocada sin que
     nada lo revise.
 
-    Se usan `(?<!\\w)` y `(?!\\w)` en vez de `\\b` porque hay claves que
+    Se usan `(?<!\\w)` y `(?!\\w)` en vez de `\\b` porque hay keys que
     empiezan por punto —".xlsx"— y `\\b` no se comporta igual delante de un
     carácter que no es de palabra.
 
-    Las claves de varias palabras admiten espacios variables: "hoja de calculo"
+    Las keys de varias palabras admiten espacios variables: "hoja de calculo"
     casa también con "hoja  de   calculo".
 
     ⚠️ Contrapartida asumida: al exigir palabra completa se pierden las
     variantes morfológicas. "empleado" ya no casa con "empleados". Por eso las
     listas de abajo enumeran las formas que interesan —"cobra"/"cobran",
     "empleados"— en vez de confiar en la coincidencia parcial. Es la decisión
-    correcta: un falso negativo manda la pregunta al LLM, que decide bien; un
+    correcta: un falso negativo manda la question al LLM, que decide bien; un
     falso positivo la manda a la herramienta equivocada sin red.
     """
-    clave_norm = _norm(clave)
-    if not clave_norm:
+    key_norm = _norm(key)
+    if not key_norm:
         return False
 
     # La guarda solo se pone donde hay frontera de palabra que proteger. Una
-    # clave como ".xlsx" va pegada al nombre del fichero ("ventas.xlsx"), así
+    # key como ".xlsx" va pegada al name del fichero ("ventas.xlsx"), así
     # que exigir que no la preceda un carácter de palabra la haría imposible
     # de encontrar. Se mira el primer y el último carácter de la clave.
-    inicio = r"(?<!\w)" if clave_norm[0].isalnum() or clave_norm[0] == "_" else ""
-    fin = r"(?!\w)" if clave_norm[-1].isalnum() or clave_norm[-1] == "_" else ""
+    prefix = r"(?<!\w)" if key_norm[0].isalnum() or key_norm[0] == "_" else ""
+    suffix = r"(?!\w)" if key_norm[-1].isalnum() or key_norm[-1] == "_" else ""
 
-    patron = inicio + re.escape(clave_norm).replace(r"\ ", r"\s+") + fin
-    return re.search(patron, texto_norm) is not None
+    pattern = prefix + re.escape(key_norm).replace(r"\ ", r"\s+") + suffix
+    return re.search(pattern, text_norm) is not None
 
 
-def _alguna_palabra(texto_norm: str, claves: List[str]) -> bool:
-    return any(_contiene_palabra(texto_norm, k) for k in claves)
+def _any_whole_word(text_norm: str, keys: List[str]) -> bool:
+    return any(_contains_whole_word(text_norm, k) for k in keys)
 
 
 def _is_greeting(q: str) -> bool:
@@ -79,7 +79,7 @@ def _looks_like_sql_intent(q: str) -> bool:
         "performance score", "rating", "top performers", "attrition", "turnover", "job postings",
         "cobra", "cobran", "gana", "ganan", "nomina", "nómina", "antiguedad", "antigüedad"
     ]
-    return _alguna_palabra(qn, sql_signals)
+    return _any_whole_word(qn, sql_signals)
 
 
 def _looks_like_docs_intent(q: str) -> bool:
@@ -89,26 +89,26 @@ def _looks_like_docs_intent(q: str) -> bool:
         "manual", "onboarding", "benefits", "beneficios", "normativa", "reglamento",
         "vacaciones", "permiso", "baja", "licencia"
     ]
-    return _alguna_palabra(qn, docs_signals)
+    return _any_whole_word(qn, docs_signals)
 
 
 def _looks_like_excel_intent(q: str) -> bool:
     qn = _norm(q)
     # Señales fuertes: el usuario habla explícitamente de un fichero Excel/spreadsheet.
     strong_signals = ["excel", ".xlsx", ".xls", "spreadsheet", "hoja de calculo", "hoja de cálculo"]
-    if _alguna_palabra(qn, strong_signals):
+    if _any_whole_word(qn, strong_signals):
         return True
 
-    # Señales débiles ("tabla", "hoja", "dashboard", "celdas") son demasiado genéricas:
-    # se usan igual para pedir resultados de SQL o resúmenes de docs. Solo cuentan
+    # Señales débiles ("tabla", "hoja", "dashboard", "cells") son demasiado genéricas:
+    # se usan igual para pedir results de SQL o resúmenes de docs. Solo cuentan
     # si además se menciona explícitamente un archivo, o si piden un cálculo sobre un archivo.
-    weak_signals = ["sheet", "dashboard", "tabla", "hoja", "celdas"]
+    weak_signals = ["sheet", "dashboard", "tabla", "hoja", "cells"]
     calc_signals = ["sum", "suma", "total", "promedio", "average", "median", "percent", "porcentaje"]
     file_signals = ["archivo", "fichero", "file"]
 
-    has_weak = _alguna_palabra(qn, weak_signals)
-    has_calc = _alguna_palabra(qn, calc_signals)
-    has_file = _alguna_palabra(qn, file_signals)
+    has_weak = _any_whole_word(qn, weak_signals)
+    has_calc = _any_whole_word(qn, calc_signals)
+    has_file = _any_whole_word(qn, file_signals)
 
     return (has_weak and has_file) or (has_calc and has_file)
 
@@ -194,7 +194,7 @@ ROUTE: <route> — <reason in 8-15 words>
             return AIMessage(content="ROUTE: DIRECT — Acknowledgement.\nYou're welcome! What else can I help you with?")
 
         # 2) Meta / ayuda
-        if _alguna_palabra(qn, ["help", "ayuda", "what can you do", "que puedes hacer",
+        if _any_whole_word(qn, ["help", "ayuda", "what can you do", "que puedes hacer",
                                 "who are you", "quien eres"]):
             return AIMessage(
                 content="ROUTE: DIRECT — Meta/help request.\nI can answer HR policy questions from internal docs, and HR metrics (salary, headcount, performance) from the HR database. What do you need?"
@@ -221,7 +221,7 @@ ROUTE: <route> — <reason in 8-15 words>
             return fast
 
         # ✅ Si parece SQL muy claro, forzamos tool_call SIN pasar por LLM
-        # (menos coste, más determinista). Si ADEMÁS parece pedir contexto de
+        # (menos cost, más determinista). Si ADEMÁS parece pedir context de
         # documentos (políticas, procedimientos...), encadenamos SQL → DOCS
         # (modo híbrido ya soportado en routes.py vía sql_context_doc).
         if _looks_like_sql_intent(user_input):
