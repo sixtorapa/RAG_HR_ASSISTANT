@@ -159,6 +159,30 @@ context precision from 0.86 to 0.64 on that setup, which is why the reranker sta
 
 ---
 
+## Testing
+
+```bash
+pytest        # 295 tests, OpenAI mocked — no API key, no cost
+```
+
+The tests assert properties rather than implementation, and the ones worth reading are the
+ones covering the parts the design leans on:
+
+| | Asserts |
+|---|---|
+| `test_guardrails.py` | An empty department list must deny **and** must not produce a null filter — returning `None` there would search the whole corpus. An IBAN with a broken check digit must **not** be detected, which is the entire argument for checksums over pattern matching. A detected value never appears whole in a finding, since findings go to the log. |
+| `test_router.py` | Each case really is an instance of substring containment *before* asserting that word matching rejects it, so the test cannot quietly become decorative. The first two paths must never invoke the LLM. |
+| `test_ingester.py` | No page with text disappears when chunking. Every micro chunk resolves to a parent that exists. Chunk ids are stable across runs, or incremental ingestion silently stops being incremental. |
+| `test_loaders.py` | Half of it asserts what must **not** be removed: `_strip_table_lines` deletes text from the corpus, and over-deleting is unrecoverable and invisible. |
+| `test_pipeline.py` | Driving `/ask` with PII in the question, neither the toolbox nor the router is ever constructed, and no message is persisted. |
+
+Two of them pin couplings that would otherwise be invisible. `_page_based_chunking` does not
+write `chunk_type` — parents are marked as a side effect of generating the micro chunks —
+and since retrieval filters on that field and defaults to `micro`, skipping micro generation
+would match nothing and return zero results without an error anywhere.
+
+---
+
 ## Running on two clouds
 
 The provider and the host are independent choices. Either can change without the other.
@@ -166,7 +190,7 @@ The provider and the host are independent choices. Either can change without the
 | | Railway | AWS |
 |---|---|---|
 | Compute | Container, always on | Lambda container behind API Gateway |
-| Generation | OpenAI `gpt-4o` / `gpt-4o-mini` | **Bedrock** — Claude Sonnet 4.6 / Haiku 4.5 |
+| Generation | OpenAI `gpt-4o-mini` | **Bedrock** — Claude Haiku 4.5 |
 | Embeddings | OpenAI `text-embedding-3-small` | OpenAI (unchanged — see below) |
 | Application database | PostgreSQL | RDS PostgreSQL |
 | Entry point | gunicorn (`startup.sh`) | `lambda_handler.py` via `apig-wsgi` |
@@ -206,35 +230,46 @@ lengthens the cold start.
 
 | | Railway | AWS Lambda |
 |---|---|---|
-| Generation model | `gpt-4o-mini` | Claude Haiku 4.5 |
+| Generation model | OpenAI `gpt-4o-mini` | Claude Haiku 4.5 |
 | `/health`, warm | 0.46 s | 0.21 s |
-| First `/ask` on a cold container | 21.4 s | 17.1 s |
-| `/ask`, warm | 6.3 s | 8.6 - 10.1 s |
+| `/ask`, warm | 6.3 s | 8.6 - 11.2 s |
+| First `/ask` on a cold container | 21.4 s | 16.6 - 26.5 s (four runs) |
 | Request ceiling | none | 29 s (API Gateway) |
 
 The function had been answering with Claude Sonnet, because `MODEL_NAME` was never set on
 it and `config.py` defaults to `gpt-4o`, which the factory maps to Sonnet. Three to four
 sequential calls to a large model took a cold request past 35 s, and API Gateway returned
-503 at its ceiling — the function itself always completed. Declaring the model in
-`Dockerfile.lambda` fixed it: the default in `config.py` is written for Railway, where no
-such ceiling exists.
+503 at its ceiling — CloudWatch recorded `Duration: 35654 ms` against a request the caller
+saw fail, because the function itself always completed. The model is now declared in
+`Dockerfile.lambda` rather than inherited: the default in `config.py` is written for
+Railway, where no request ceiling exists.
+
+The cold figure is a range because it is one: four consecutive cold containers answered the
+same question in 16.6, 17.1, 18.1 and 26.5 seconds. None returned 503, and the slowest came
+within 2.5 s of the ceiling.
 
 ---
 
 ## Honest limitations
 
-- **API Gateway still caps a request at 29 s**, and a cold `/ask` uses 17 s of that. The
-  margin is real but it is not large, and a heavier question on a cold container would
-  narrow it. Streaming is what removes the ceiling rather than widening it.
+- **The 29 s API Gateway ceiling is a margin, not headroom.** A cold `/ask` measured
+  between 16.6 s and 26.5 s across four runs — none failed, and the slowest was 2.5 s away.
+  Roughly 8 s of a cold request is building the chain, and moving that into the init phase
+  is the next lever; streaming is what removes the ceiling rather than widening it. Railway
+  has no such ceiling.
 - **CI, not CD.** `.github/workflows/ci.yml` runs ruff, pytest and a Docker build with
   `push: false`. There is no deploy job; Railway deploys from its own git integration,
   gated on Actions passing.
 - **Not every module is covered.** 295 tests cover the router, the guardrails, ingestion,
   the retrieval decisions, the models and the routes. The console logger, the PowerPoint
   loader and the summariser have none.
-- **The router's fast-path matches substrings without word boundaries**, so `"suma"` matches
-  inside `"consumar"`. Since the forced path skips the LLM, a false positive routes without
-  a safety net.
+- **Whole-word matching in the router loses morphological variants.** The heuristics used
+  to match substrings, so `"suma"` matched inside `"consumar"` and routed to the wrong tool
+  with no LLM to catch it. They now match whole words with accents normalised, which costs
+  the other direction: `"empleado"` no longer matches the keyword `"empleados"`, so the
+  lists spell out the forms that matter. It is the right trade for this component — a false
+  negative reaches the LLM, which decides well; a false positive reaches the wrong tool with
+  nothing behind it.
 - **BM25 tokenises on whitespace only** — no stemming, no accent normalisation. In Spanish
   `"política"` and `"politica"` are different terms.
 - Chunking is **recursive by tokens**, not semantic. The semantic part is an LLM enrichment
