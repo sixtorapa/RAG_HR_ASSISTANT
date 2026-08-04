@@ -9,7 +9,7 @@ Por qué importan:
 
 import pytest
 from datetime import datetime
-from app.models import User, Project, ChatSession, Message
+from app.models import User, ChatSession, Message
 
 
 class TestUserModel:
@@ -70,47 +70,6 @@ class TestUserModel:
         assert test_user.id.count("-") == 4
 
 
-class TestProjectModel:
-    """Tests del modelo Project."""
-
-    def test_create_project(self, db, test_project):
-        assert test_project.id is not None
-        assert test_project.status == "READY"
-        assert test_project.cost == 0.0
-
-    def test_project_repr(self, db, test_project):
-        assert "Test Project" in repr(test_project)
-
-    def test_project_status_pending_by_default(self, db):
-        p = Project(
-            name="Pending Project",
-            document_path="/tmp/d",
-            vector_store_path="/tmp/vs2",
-        )
-        db.session.add(p)
-        db.session.commit()
-        assert p.status == "PENDING"
-
-    def test_project_cost_accumulation(self, db, test_project):
-        """Simula acumulación de coste como hace la app real."""
-        test_project.cost += 0.0023
-        test_project.cost += 0.0041
-        db.session.commit()
-
-        refreshed = Project.query.get(test_project.id)
-        assert abs(refreshed.cost - 0.0064) < 0.0001
-
-    def test_project_settings_json(self, db, test_project):
-        """El campo settings debe soportar dicts anidados."""
-        test_project.settings = {
-            "search_k": 20,
-            "reranker": "flashrank",
-            "hybrid_weights": {"bm25": 0.55, "vector": 0.45},
-        }
-        db.session.commit()
-
-        refreshed = Project.query.get(test_project.id)
-        assert refreshed.settings["hybrid_weights"]["bm25"] == 0.55
 
 
 class TestChatSessionModel:
@@ -120,9 +79,8 @@ class TestChatSessionModel:
         assert test_chat_session.id is not None
         assert test_chat_session.name == "Test Chat"
 
-    def test_session_default_name(self, db, test_user, test_project):
+    def test_session_default_name(self, db, test_user):
         session = ChatSession(
-            project_id=test_project.id,
             user_id=test_user.id,
         )
         db.session.add(session)
@@ -169,11 +127,10 @@ class TestChatSessionModel:
         assert fetched.sources[0]["score"] == 0.87
         assert len(fetched.sources) == 2
 
-    def test_cascade_delete_session_deletes_messages(self, db, test_user, test_project):
+    def test_cascade_delete_session_deletes_messages(self, db, test_user):
         """Al borrar una sesión, sus mensajes se eliminan (cascade)."""
         session = ChatSession(
             name="Temp",
-            project_id=test_project.id,
             user_id=test_user.id,
         )
         db.session.add(session)

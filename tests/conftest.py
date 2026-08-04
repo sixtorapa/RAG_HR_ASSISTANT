@@ -7,7 +7,7 @@ os.environ.setdefault("SECRET_KEY", "test-secret-key")
 os.environ.setdefault("LANGCHAIN_TRACING_V2", "false")
 
 from app import create_app, db as _db
-from app.models import User, Project, ChatSession, Message
+from app.models import User, ChatSession, Message
 
 
 class TestConfig:
@@ -19,6 +19,9 @@ class TestConfig:
     UP_VECTOR_STORE_PATH = "/tmp/test_vs"
     KNOWLEDGE_BASE_PATH = "/tmp/test_docs"
     UP_PROJECT_NAME = "Test HR KB"
+    MODEL_NAME = "gpt-4o-mini"
+    SYSTEM_INSTRUCTION = ""
+    SQL_CONTEXT = ""
     OPENAI_API_KEY = "sk-test-fake-key"
     USD_TO_EUR_RATE = 0.92
     HR_DB_URI = "sqlite:///:memory:"
@@ -46,7 +49,6 @@ def clean_db(app):
         _db.session.rollback()
         Message.query.delete()
         ChatSession.query.delete()
-        Project.query.delete()
         User.query.delete()
         _db.session.commit()
 
@@ -68,28 +70,12 @@ def test_user(db):
     return user
 
 
-@pytest.fixture(scope="function")
-def test_project(db):
-    unique = uuid.uuid4().hex[:8]
-    project = Project(
-        name=f"Test Project {unique}",
-        document_path="/tmp/docs",
-        vector_store_path=f"/tmp/vs_{unique}",
-        status="READY",
-        model_name="gpt-4o-mini",
-        settings={},
-        cost=0.0,
-    )
-    db.session.add(project)
-    db.session.commit()
-    return project
 
 
 @pytest.fixture(scope="function")
-def test_chat_session(db, test_user, test_project):
+def test_chat_session(db, test_user):
     session = ChatSession(
         name="Test Chat",
-        project_id=test_project.id,
         user_id=test_user.id,
     )
     db.session.add(session)

@@ -42,7 +42,7 @@ def calculate_cost(model_name: str, prompt_tokens: int, completion_tokens: int) 
     (en USD si no lo está; se avisa por log).
 
     Devuelve 0.0 si el modelo no tiene precio conocido, registrando un error:
-    quien llama hace `project.cost += calculate_cost(...)`, así que un fallo
+    quien llama lo suma al coste de la petición, así que un fallo
     contable no debe romper la respuesta al usuario.
     """
     prices = TOKEN_PRICES.get(model_name)

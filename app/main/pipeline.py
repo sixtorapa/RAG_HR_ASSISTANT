@@ -11,7 +11,7 @@ vive aquí y los endpoints solo la invocan. Antes estaba todo dentro de
 
 import re
 
-from flask import jsonify
+from flask import current_app, jsonify
 from flask_login import current_user
 from langchain_community.callbacks import get_openai_callback
 from langchain_core.documents import Document
@@ -97,29 +97,41 @@ def _make_chat_title_from_question(q: str, max_len: int = 46) -> str:
 class _ToolBox:
     """Las herramientas del proyecto, construidas una sola vez por petición."""
 
-    def __init__(self, project, model_name, user, logger, use_web_search=False):
-        acl_settings = _settings_with_acl(project.settings, user)
+    # Identificador fijo de la colección para la clave de caché de cadenas.
+    # Antes era el uuid de una fila de `project`; la aplicación sirve una sola
+    # base de conocimiento, así que la constante dice la verdad sin una tabla
+    # detrás.
+    COLECCION = "kb"
+
+    def __init__(self, model_name, user, logger, use_web_search=False):
+        cfg = current_app.config
+        ajustes = {
+            "system_instruction": cfg.get("SYSTEM_INSTRUCTION", ""),
+            "sql_context": cfg.get("SQL_CONTEXT", ""),
+        }
+        acl_settings = _settings_with_acl(ajustes, user)
         allowed = user.get_allowed_departments()
+        vector_store_path = cfg["UP_VECTOR_STORE_PATH"]
 
         self.docs = ChatWithDocumentTool(
-            project_id=project.id,
-            vector_store_path=project.vector_store_path,
+            project_id=self.COLECCION,
+            vector_store_path=vector_store_path,
             model_name=model_name,
             project_settings=acl_settings,
         )
         self.summary = SummarizeDocumentTool(
-            project_id=project.id,
-            vector_store_path=project.vector_store_path,
+            project_id=self.COLECCION,
+            vector_store_path=vector_store_path,
             model_name=model_name,
             project_settings=acl_settings,
         )
         self.sql = SQLDatabaseTool(
             model_name=model_name,
-            project_settings=project.settings or {},
+            project_settings=ajustes,
             allowed_departments=allowed,
         )
         self.excel = ExcelAnalysisTool(
-            doc_path=project.document_path,
+            doc_path=cfg["KNOWLEDGE_BASE_PATH"],
             model_name=model_name,
             allowed_departments=allowed,
         )
@@ -255,7 +267,7 @@ def _history_for(session, hasta=None, limite=10):
         if mensajes[i].sender == "user" and mensajes[i + 1].sender == "bot"
     ]
     return para_router, emparejado
-def _answer_question(session, project, pregunta, model_name, box,
+def _answer_question(session, pregunta, model_name, box,
                      historial_hasta=None, use_router=True):
     """
     El pipeline completo, y el único sitio donde vive.
@@ -270,7 +282,8 @@ def _answer_question(session, project, pregunta, model_name, box,
     calls, pregunta_limpia = _calls_from_override(pregunta, box)
 
     if calls is None and use_router:
-        router = AgentRouter(model_name=model_name, tools=box.all, doc_path=project.document_path)
+        router = AgentRouter(model_name=model_name, tools=box.all,
+                             doc_path=current_app.config["KNOWLEDGE_BASE_PATH"])
         eleccion = router.route(pregunta, para_router, callbacks=[box.logger])
 
         if not getattr(eleccion, "tool_calls", None):
@@ -287,7 +300,11 @@ def _answer_question(session, project, pregunta, model_name, box,
 
     with get_openai_callback() as cb:
         resultados = _run_tools(calls, box, pregunta_limpia, emparejado)
-    project.cost += calculate_cost(model_name, cb.prompt_tokens, cb.completion_tokens)
+    # El coste se registra por consulta. Antes se acumulaba en `project.cost`,
+    # una columna que ninguna pantalla mostraba.
+    coste = calculate_cost(model_name, cb.prompt_tokens, cb.completion_tokens)
+    print(f"💶 Coste de la consulta: {coste:.6f} "
+          f"({cb.prompt_tokens} prompt + {cb.completion_tokens} completion tokens)")
 
     if not resultados:
         resultados = [{"answer": "No se ejecutó ninguna herramienta.", "source_documents": [], "origin": box.docs.name}]

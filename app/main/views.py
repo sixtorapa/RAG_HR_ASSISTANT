@@ -3,22 +3,18 @@
 
 from datetime import datetime, timedelta
 
-from flask import flash, jsonify, redirect, render_template, request, url_for
+from flask import current_app, jsonify, redirect, render_template, request, url_for
 from flask_login import current_user, login_required
 
 from app import db
 from app.main import bp
-from app.main.projects import _clear_chain_cache_for_project, _get_or_create_single_project
-from app.models import ChatSession, LoginSession, Message, Project, User
-from app.rag_logic.prompt_templates import get_all_templates, get_template_prompt
+from app.models import ChatSession, LoginSession, Message, User
 
 
 @bp.route("/")
 @login_required
 def index():
-    """Pantalla única (Home + Asistente UP) sin gestión de proyectos."""
-    project = _get_or_create_single_project()
-
+    """Pantalla única: home, chat y actividad."""
     tab = (request.args.get("tab") or "home").lower().strip()
     if tab not in ("home", "chat", "activity"):
         tab = "home"
@@ -34,15 +30,13 @@ def index():
     # Si viene session id, solo si es del usuario
     if session_id:
         session = ChatSession.query.filter_by(
-            id=session_id,
-            project_id=project.id,
-            user_id=current_user.id,
+            id=session_id, user_id=current_user.id,
         ).first()
 
     # Lista de sesiones del usuario (para sidebar tipo ChatGPT)
     sessions_list = (
         ChatSession.query
-        .filter_by(project_id=project.id, user_id=current_user.id)
+        .filter_by(user_id=current_user.id)
         .order_by(ChatSession.created_at.desc())
         .all()
     )
@@ -53,11 +47,7 @@ def index():
 
     # Si no hay ninguna, crear una nueva (IMPORTANTE: add+commit para evitar Detached)
     if session is None:
-        session = ChatSession(
-            name="Nuevo chat",
-            project=project,
-            user_id=current_user.id,
-        )
+        session = ChatSession(name="Nuevo chat", user_id=current_user.id)
         db.session.add(session)
         db.session.commit()
         sessions_list = [session]  # opcional: para que aparezca inmediatamente
@@ -143,7 +133,8 @@ def index():
 
     return render_template(
         "dashboard.html",
-        project=project,
+        kb_name=current_app.config["UP_PROJECT_NAME"],
+        model_name=current_app.config["MODEL_NAME"],
         session=session,
         messages=messages,
         sessions=sessions_list,
@@ -151,61 +142,12 @@ def index():
         activity_sessions=activity_sessions,
         admin_activity=admin_activity,  # <-- NUEVO
     )
-@bp.route("/project/<project_id>")
-@login_required
-def project_overview(project_id):
-    project = Project.query.get_or_404(project_id)
-    sessions = (
-        ChatSession.query
-        .filter_by(project_id=project.id, user_id=current_user.id)
-        .order_by(ChatSession.created_at.desc())
-        .all()
-    )
-    return render_template("project_overview.html", project=project, sessions=sessions)
 @bp.route("/chat/<session_id>")
 @login_required
 def chat_session(session_id):
     # Legacy: redirige al shell único
     return redirect(url_for("main.index", tab="chat", session=session_id))
-@bp.route("/settings/<project_id>", methods=["GET", "POST"])
-@login_required
-def project_settings(project_id):
-    project = Project.query.get_or_404(project_id)
-
-    if request.method == "POST":
-        current_settings = project.settings or {}
-        current_settings["k_value"] = int(request.form.get("k_value", 5))
-        tpl = request.form.get("template_selected", "")
-
-        if tpl and tpl != "custom":
-            current_settings["system_instruction"] = get_template_prompt(tpl)
-            current_settings["template_type"] = tpl
-        else:
-            custom = (request.form.get("system_instruction", "") or "").strip()
-            current_settings["system_instruction"] = custom
-            current_settings["template_type"] = "custom" if custom else "generico"
-
-        current_settings["sql_context"] = request.form.get("sql_context", "")
-        project.settings = current_settings
-        db.session.commit()
-
-        _clear_chain_cache_for_project(project.id)
-
-
-        flash("Ajustes guardados.", "success")
-        return redirect(url_for("main.project_settings", project_id=project.id))
-
-    settings = project.settings or {}
-    return render_template(
-        "settings.html",
-        project=project,
-        settings=settings,
-        templates=get_all_templates(),
-        current_template=settings.get("template_type", "generico"),
-        current_instruction=settings.get("system_instruction", ""),
-    )
 @bp.route("/check_status")
 def check_status():
-    projects = Project.query.all()
-    statuses = {p.id: p.status for p in projects}
-    return jsonify(statuses)
+    """Estado de la base de conocimiento para el sondeo de la UI."""
+    return jsonify({"status": "READY", "name": current_app.config["UP_PROJECT_NAME"]})

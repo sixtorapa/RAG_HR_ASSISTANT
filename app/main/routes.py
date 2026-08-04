@@ -9,14 +9,13 @@ tener 1.590 líneas haciendo las seis cosas a la vez.
 
 import os
 
-from flask import flash, jsonify, redirect, request, url_for
+from flask import current_app, flash, jsonify, redirect, request, url_for
 from flask_login import current_user, login_required
 
 from app import db
 from app.main import bp
 from app.main.guards import _dlp_block, _quota_block
 from app.main.auth import _bump_login_session_question
-from app.main.projects import _clear_chain_cache_for_project
 from app.main.pipeline import _answer_question, _finalize, _ToolBox
 from app.models import ChatSession, Message
 from app.rag_logic.console_logger import ConsoleLogger
@@ -48,14 +47,13 @@ def ask(session_id):
     _answer_question(), compartido con edit_and_resubmit().
     """
     session = ChatSession.query.filter_by(id=session_id, user_id=current_user.id).first_or_404()
-    project = session.project
 
     payload = request.get_json(silent=True) or {}
     question_text = payload.get("question")
     if not question_text:
         return jsonify({"error": "Falta la pregunta."}), 400
 
-    model_name = payload.get("model_name") or project.model_name or "gpt-4o"
+    model_name = payload.get("model_name") or current_app.config["MODEL_NAME"]
 
     # Los dos guardarraíles van ANTES del LLM y ANTES de persistir nada: si el
     # dato llega al modelo o a nuestra propia BD, ya ha salido del perímetro.
@@ -67,12 +65,12 @@ def ask(session_id):
 
     try:
         box = _ToolBox(
-            project, model_name, current_user, ConsoleLogger(),
+            model_name, current_user, ConsoleLogger(),
             use_web_search=payload.get("use_web_search", False),
         )
 
         final_result, titulo = _answer_question(
-            session, project, question_text, model_name, box,
+            session, question_text, model_name, box,
         )
 
         return _finalize(session, question_text, final_result, title_question=titulo)
@@ -95,7 +93,6 @@ def edit_and_resubmit(message_id):
     """
     user_message = Message.query.filter_by(id=message_id, user_id=current_user.id).first_or_404()
     session = user_message.session
-    project = session.project
 
     new_text = (request.json or {}).get("new_question")
     if not new_text or user_message.sender != "user":
@@ -105,7 +102,7 @@ def edit_and_resubmit(message_id):
     if bloqueo:
         return bloqueo
 
-    model_name = project.model_name or "gpt-4o"
+    model_name = current_app.config["MODEL_NAME"]
 
     try:
         # Se borra todo lo posterior a este mensaje —solo del usuario actual— y
@@ -120,10 +117,10 @@ def edit_and_resubmit(message_id):
             db.session.delete(m)
         user_message.content = new_text
 
-        box = _ToolBox(project, model_name, current_user, ConsoleLogger())
+        box = _ToolBox(model_name, current_user, ConsoleLogger())
 
         final_result, _ = _answer_question(
-            session, project, new_text, model_name, box,
+            session, new_text, model_name, box,
             historial_hasta=user_message.timestamp,
         )
 
@@ -136,6 +133,8 @@ def edit_and_resubmit(message_id):
         db.session.rollback()
         print(f"Error regen: {e}")
         return jsonify({"error": str(e)}), 500
+
+
 @bp.route("/clear_history/<session_id>", methods=["POST"])
 @login_required
 def clear_history(session_id):
@@ -144,7 +143,6 @@ def clear_history(session_id):
     try:
         session.messages.delete()
         db.session.commit()
-        _clear_chain_cache_for_project(session.project_id)
         flash("Historial borrado.", "success")
 
     except Exception as e:

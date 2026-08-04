@@ -4,7 +4,6 @@
 from datetime import datetime, timedelta
 
 from flask import Response, abort, redirect, render_template, request, stream_with_context, url_for
-from app.main.projects import _get_or_create_single_project
 from flask_login import current_user, login_required
 
 from app import db
@@ -18,13 +17,11 @@ def admin_activity():
     if getattr(current_user, "role", None) != "admin":
         abort(403)
 
-    # Redirigir al shell único (tab activity)
-    project = _get_or_create_single_project()
 
     # llevarte a una sesión válida para que el sidebar no rompa
     chat_sessions_list = (
         ChatSession.query
-        .filter_by(project_id=project.id, user_id=current_user.id)
+        .filter_by(user_id=current_user.id)
         .order_by(ChatSession.created_at.desc())
         .all()
     )
