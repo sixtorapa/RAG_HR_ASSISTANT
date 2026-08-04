@@ -22,7 +22,7 @@ from langchain_community.document_loaders import (
 from langchain.docstore.document import Document
 from pydantic import BaseModel, Field
 
-from .custom_loaders import BetterPDFLoader, BetterPowerPointLoader, OcrConfig
+from .custom_loaders import BetterPDFLoader, BetterPowerPointLoader, LoaderConfig
 from .path_utils import norm_path
 from .bm25_index import persist_bm25_index
 
@@ -59,9 +59,7 @@ def load_documents_from_path(data_path: str) -> List[Document]:
     documents: List[Document] = []
     print(f"Escaneando directorio raíz: {data_path}")
 
-    ocr_cfg = OcrConfig(
-        enabled=str(os.environ.get("OCR_ENABLED", "1")).strip() in ("1", "true", "True", "yes", "YES")
-    )
+    loader_cfg = LoaderConfig()
 
     for root, dirs, files in os.walk(data_path):
         dirs[:] = [d for d in dirs if not d.startswith(".")]
@@ -80,7 +78,7 @@ def load_documents_from_path(data_path: str) -> List[Document]:
                 new_docs: Optional[List[Document]] = None
 
                 if ext == "pdf":
-                    loader = BetterPDFLoader(file_path, ocr_cfg=ocr_cfg)
+                    loader = BetterPDFLoader(file_path, loader_cfg=loader_cfg)
                 elif ext in ["txt", "md", "html", "htm"]:
                     loader = TextLoader(file_path, encoding="utf-8")
                 elif ext == "docx":
@@ -88,7 +86,7 @@ def load_documents_from_path(data_path: str) -> List[Document]:
                 elif ext == "csv":
                     loader = CSVLoader(file_path, encoding="utf-8")
                 elif ext in ["pptx", "ppt"]:
-                    loader = BetterPowerPointLoader(file_path, ocr_cfg=ocr_cfg)
+                    loader = BetterPowerPointLoader(file_path, loader_cfg=loader_cfg)
                 elif ext in ["xlsx", "xls"]:
                     try:
                         excel_sheets = pd.read_excel(file_path, sheet_name=None)

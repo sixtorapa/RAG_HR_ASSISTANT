@@ -147,7 +147,7 @@ class TestDocumentoDePagina:
 
     def test_la_tabla_va_delante_del_texto(self, loader):
         doc = loader._build_page_document(
-            0, 3, "Texto corrido de la página.", "", TABLA, "documento.pdf", False, {},
+            0, 3, "Texto corrido de la página.", TABLA, "documento.pdf",
         )
         pos_tabla = doc.page_content.index("DATOS TABULARES")
         pos_texto = doc.page_content.index("Texto corrido")
@@ -158,38 +158,30 @@ class TestDocumentoDePagina:
         doc = loader._build_page_document(
             0, 3,
             "Leave Policy\nAnnual Leave 25 days/year 2 weeks minimum",
-            "", TABLA, "documento.pdf", False, {},
+            TABLA, "documento.pdf",
         )
         # Una sola vez, dentro del bloque markdown
         assert doc.page_content.count("25 days/year") == 1
         assert "Leave Policy" in doc.page_content
 
     def test_una_pagina_sin_texto_se_marca_como_vacia(self, loader):
-        doc = loader._build_page_document(4, 10, "", "", "", "documento.pdf", False, {})
+        doc = loader._build_page_document(4, 10, "", "", "documento.pdf")
         assert doc.metadata["is_empty_page"] is True
         assert "Página 5" in doc.page_content
 
     def test_la_metadata_de_pagina_es_coherente(self, loader):
-        doc = loader._build_page_document(2, 10, "contenido suficiente aquí", "", "", "documento.pdf", False, {})
+        doc = loader._build_page_document(2, 10, "contenido suficiente aquí", "", "documento.pdf")
         assert doc.metadata["page"] == 2
         assert doc.metadata["page_number"] == 3      # 1-indexado para citar
         assert doc.metadata["page_count"] == 10
         assert doc.metadata["is_empty_page"] is False
 
     def test_marca_si_la_pagina_tiene_tabla(self, loader):
-        con = loader._build_page_document(0, 1, "texto de la pagina", "", TABLA, "d.pdf", False, {})
-        sin = loader._build_page_document(0, 1, "texto de la pagina", "", "", "d.pdf", False, {})
+        con = loader._build_page_document(0, 1, "texto de la pagina", TABLA, "d.pdf")
+        sin = loader._build_page_document(0, 1, "texto de la pagina", "", "d.pdf")
         assert con.metadata["has_table"] is True
         assert sin.metadata["has_table"] is False
 
-    def test_el_ocr_se_anade_identificado(self, loader):
-        doc = loader._build_page_document(
-            0, 1, "texto base", "texto reconocido", "", "d.pdf", True, {0: "x"},
-        )
-        assert "[TEXTO ADICIONAL OCR]" in doc.page_content
-        assert doc.metadata["ocr_used"] is True
-        assert doc.metadata["ocr_used_page"] is True
-
     def test_devuelve_un_document_de_langchain(self, loader):
-        doc = loader._build_page_document(0, 1, "texto", "", "", "d.pdf", False, {})
+        doc = loader._build_page_document(0, 1, "texto", "", "d.pdf")
         assert isinstance(doc, Document)
