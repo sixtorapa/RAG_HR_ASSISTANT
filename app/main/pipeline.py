@@ -39,11 +39,10 @@ def clean_metadata_for_json(metadata):
     return clean_meta
 def _settings_with_acl(base_settings, user) -> dict:
     """
-    Inyecta el guardarril de control de acceso por departamento del usuario actual
-    en los project_settings que se le pasan a ChatWithDocumentTool/SummarizeDocumentTool.
-    Sin esto, qa_chain.get_conversational_qa_chain no sabe a qué tiene acceso el
-    usuario y, por diseño fail-closed, denegaría todo (ver allowed_departments en
-    qa_chain.py).
+    Inject the current user's department access guardrail into the settings
+    passed to the document tools. Without it,
+    qa_chain.get_conversational_qa_chain does not know what the user may see and,
+    being fail-closed by design, would deny everything.
     """
     settings = dict(base_settings or {})
     settings["allowed_departments"] = user.get_allowed_departments()
@@ -81,7 +80,7 @@ def _extract_user_mode(raw_text: str):
 def _make_chat_title_from_question(q: str, max_len: int = 46) -> str:
     q = (q or "").strip()
     if not q:
-        return "Nuevo chat"
+        return "New chat"
 
     # Limpieza rápida
     q = re.sub(r"\s+", " ", q)
@@ -93,15 +92,14 @@ def _make_chat_title_from_question(q: str, max_len: int = 46) -> str:
     if len(title) > max_len:
         title = title[:max_len].rsplit(" ", 1)[0].strip() + "…"
 
-    return title or "Nuevo chat"
+    return title or "New chat"
 class _ToolBox:
-    """Las herramientas del proyecto, construidas una sola vez por petición."""
+    """The project's tools, built once per request."""
 
-    # Identificador fijo de la colección para la clave de caché de cadenas.
-    # Antes era el uuid de una row de `project`; la aplicación sirve una sola
-    # base de conocimiento, así que la constante dice la verdad sin una tabla
-    # detrás.
-    COLECCION = "kb"
+    # Fixed collection identifier for the chain cache key. It used to be the
+    # uuid of a `project` row; the application serves one knowledge base, so a
+    # constant states the truth without a table behind it.
+    COLLECTION = "kb"
 
     def __init__(self, model_name, user, logger, use_web_search=False):
         cfg = current_app.config
@@ -114,13 +112,13 @@ class _ToolBox:
         vector_store_path = cfg["UP_VECTOR_STORE_PATH"]
 
         self.docs = ChatWithDocumentTool(
-            project_id=self.COLECCION,
+            project_id=self.COLLECTION,
             vector_store_path=vector_store_path,
             model_name=model_name,
             project_settings=acl_settings,
         )
         self.summary = SummarizeDocumentTool(
-            project_id=self.COLECCION,
+            project_id=self.COLLECTION,
             vector_store_path=vector_store_path,
             model_name=model_name,
             project_settings=acl_settings,
@@ -143,7 +141,7 @@ class _ToolBox:
         self.sql_agent = SQLAgent(self.sql, model_name=model_name, callbacks=[logger])
         self.reasoning = ReasoningAgent(model_name=model_name, callbacks=[logger])
 def _sql_context_document(step_result):
-    """Comprime la salida SQL en un Document para encadenar SQL → DOCS."""
+    """Compress SQL output into a Document, to chain SQL → DOCS."""
     text = (step_result.get("sql_raw_output") or step_result.get("answer") or "").strip()
     if not text:
         return None
@@ -154,14 +152,14 @@ def _sql_context_document(step_result):
     )
 def _calls_from_override(raw_text, box):
     """
-    Los modos explícitos del usuario (@sql, @ambas, @doc, o pedir un "resumen")
-    producen la MISMA estructura de tool_calls que devolvería el router.
+    Explicit user modes (SQL:, AMBAS, or asking for a summary) produce the SAME
+    tool_calls structure the router would return.
 
-    Esa es la simplificación que elimina tres bloques duplicados: un override no
-    es un camino distinto, es solo saltarse la decisión. Lo que se ejecuta después
-    es idéntico.
+    That is the simplification that removed three duplicated blocks: an override
+    is not a different path, it only skips the decision. What runs afterwards is
+    identical.
 
-    Devuelve (calls, clean_question). calls=None significa "que decida el router".
+    Returns (calls, clean_question). calls=None means "let the router decide".
     """
     user_mode, cleaned = _extract_user_mode(raw_text)
     question = cleaned or raw_text
@@ -187,11 +185,11 @@ def _calls_from_override(raw_text, box):
     return None, question
 def _run_tools(calls, box, question, paired_history):
     """
-    Bucle ÚNICO de despacho de herramientas.
+    The single tool dispatch loop.
 
-    Recibe la lista de tool_calls venga de donde venga —del router o de un
-    override— y devuelve la lista de resultados normalizados. Si una llamada a SQL produce salida, se encadena como contexto a la siguiente de documentos
-    (el modo híbrido).
+    Takes the tool_calls list from wherever it came — the router or an override —
+    and returns normalised results. When a SQL call produces output, it is chained
+    as context into the following document call (the hybrid mode).
     """
     results = []
     sql_context = None
@@ -202,8 +200,8 @@ def _run_tools(calls, box, question, paired_history):
 
         if name == box.docs.name:
             q = args.get("question") or question
-            # El contexto de un paso SQL previo (modo híbrido) se antepone a la
-            # pregunta, porque la cadena documental no acepta documentos extra.
+            # Context from a preceding SQL step is prepended to the question,
+            # since the document chain takes no extra documents.
             if sql_context is not None:
                 q = f"{q}\n\n{sql_context.page_content}"
             step = box.docs.run(
@@ -245,9 +243,9 @@ def _run_tools(calls, box, question, paired_history):
     return results
 def _history_for(session, hasta=None, limit=10):
     """
-    Historial de la conversación en los dos formatos que hacen falta:
-    mensajes de LangChain para el router, y pares (usuario, bot) para la cadena.
-    `hasta` acota a lo anterior a un mensaje concreto (regeneración).
+    Conversation history in the two shapes needed: LangChain messages for the
+    router, and (user, bot) pairs for the chain. `hasta` limits it to everything
+    before a given message, for regeneration.
     """
     q = Message.query.filter_by(session_id=session.id, user_id=current_user.id)
     if hasta is not None:
@@ -269,12 +267,10 @@ def _history_for(session, hasta=None, limit=10):
 def _answer_question(session, question, model_name, box,
                      historial_hasta=None, use_router=True):
     """
-    El pipeline completo, y el único sitio donde vive.
+    The whole pipeline, and the only place it lives.
 
-    override o router → tool_calls → un bucle de ejecución → agente de formato.
-    Devuelve (final_result, pregunta_para_el_titulo) o (None, ...) si el router
-    respondió directamente sin herramientas — en ese caso `final_result` ya
-    contiene la respuesta directa.
+    override or router → tool_calls → one dispatch loop → formatting agent.
+    Returns (final_result, question_for_the_title).
     """
     para_router, paired = _history_for(session, hasta=historial_hasta)
 
@@ -286,8 +282,8 @@ def _answer_question(session, question, model_name, box,
         eleccion = router.route(question, para_router, callbacks=[box.logger])
 
         if not getattr(eleccion, "tool_calls", None):
-            # Camino 1 del router: responde él mismo, sin herramientas y sin
-            # recuperación, así que tampoco hay fuentes que citar.
+            # Router path 1: it answers directly, with no tools and no
+            # retrieval, so there are no sources to cite.
             crudo = (getattr(eleccion, "content", "") or "").strip()
             if crudo:
                 primera, *resto = crudo.splitlines()
@@ -302,7 +298,7 @@ def _answer_question(session, question, model_name, box,
     # El cost se registra por consulta. Antes se acumulaba en `project.cost`,
     # una columna que ninguna pantalla mostraba.
     cost = calculate_cost(model_name, cb.prompt_tokens, cb.completion_tokens)
-    print(f"💶 Coste de la consulta: {cost:.6f} "
+    print(f"💶 Query cost: {cost:.6f} "
           f"({cb.prompt_tokens} prompt + {cb.completion_tokens} completion tokens)")
 
     if not results:
@@ -312,15 +308,13 @@ def _answer_question(session, question, model_name, box,
 def _finalize(session, question_text, final_result,
               title_question=None, existing_user_message=None):
     """
-    Cierre común de una respuesta: formatear fuentes, persistir el par de
-    mensajes, renombrar el chat si hace falta, guardar el hecho en memoria y
-    devolver el JSON.
+    Common close of a response: format sources, persist the message pair, rename
+    the chat if it is still untitled, and return the JSON.
 
-    Este bloque estaba COPIADO CINCO VECES dentro de ask() (resumen, override
-    SQL, override ambas, respuesta directa y camino principal) y dos más en
-    edit_and_resubmit(). No es solo fealdad: de ese copia-pega salieron los tres
-    `NameError: memory_store` que destapó ruff al dejar de ignorar F821 — alguien
-    duplicó el bloque y se dejó una línea por el camino.
+    This block was COPIED FIVE TIMES inside ask() and twice more in
+    edit_and_resubmit(). Not merely ugly: that copy-paste produced the three
+    `NameError: memory_store` crashes ruff exposed once F821 stopped being
+    ignored — someone duplicated the block and dropped a line on the way.
     """
     answer_text = final_result.get("answer") or "Error generando respuesta."
 
@@ -334,8 +328,8 @@ def _finalize(session, question_text, final_result,
         elif isinstance(doc, dict):
             sources_formatted.append(doc)
 
-    # En una regeneración el mensaje del usuario ya existe (se acaba de editar),
-    # así que solo se añade la respuesta nueva.
+    # On a regeneration the user message already exists — it was just edited —
+    # so only the new answer is added.
     if existing_user_message is not None:
         user_msg = existing_user_message
     else:

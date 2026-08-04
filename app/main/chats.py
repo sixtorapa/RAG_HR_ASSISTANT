@@ -74,7 +74,7 @@ def reindex():
 @bp.route("/create_chat", methods=["POST"])
 @login_required
 def create_chat():
-    new_session = ChatSession(name="Nuevo chat", user_id=current_user.id)
+    new_session = ChatSession(name="New chat", user_id=current_user.id)
     db.session.add(new_session)
     db.session.commit()
     return redirect(url_for("main.index", tab="chat", session=new_session.id))

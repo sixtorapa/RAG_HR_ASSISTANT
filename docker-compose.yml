@@ -4,8 +4,8 @@ services:
     build: .
     container_name: hr_kb_app
     ports:
-      # 8080, no 5001: el Dockerfile fija PORT=8080 y gunicorn escucha ahí.
-      # El compose no exportaba PORT, así que publicar 5001 no servía a nadie.
+      # 8080 rather than 5001: the Dockerfile sets PORT=8080 and gunicorn listens
+      # there. Compose never exported PORT, so publishing 5001 served nobody.
       - "8080:8080"
     env_file:
       - .env                         # never commit this file
@@ -26,10 +26,10 @@ services:
       timeout: 10s
       retries: 3
 
-  # ── ChromaDB standalone — DESACTIVADO ────────────────────────────────────
-  # La app usa Chroma EMBEBIDO: `Chroma(persist_directory=...)` en qa_chain.py,
-  # ingester.py y summarizer.py. No hay ningún cliente HTTP contra un servidor.
-  # Este servicio levantaba un contenedor con el que no hablaba nadie.
+  # ── Standalone ChromaDB — DISABLED ───────────────────────────────────────
+  # The app uses Chroma EMBEDDED: `Chroma(persist_directory=...)` in qa_chain.py,
+  # ingester.py and summarizer.py. There is no HTTP client against a server, so
+  # this service was starting a container nobody talked to.
   #
   # chromadb:
   #   image: chromadb/chroma:latest

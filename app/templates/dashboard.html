@@ -162,11 +162,11 @@
       {% if active_tab == 'chat' %}
         <form action="{{ url_for('main.create_chat') }}" method="POST" class="w-100">
           <button type="submit" class="side-btn side-btn-solid">
-            <i class="bi bi-plus-lg"></i> Nuevo chat
+            <i class="bi bi-plus-lg"></i> New chat
           </button>
         </form>
 
-        <div class="sidebar-section-title">Historial</div>
+        <div class="sidebar-section-title">History</div>
         <div class="chat-list">
           {% for s in sessions %}
             <a class="chat-item {{ 'active' if session and s.id == session.id else '' }}" href="{{ url_for('main.index', tab='chat', session=s.id) }}">
@@ -229,7 +229,7 @@
           <div class="d-flex justify-content-between align-items-end mb-4">
             <div>
               <h1 class="hero-title h3 mb-1">Analytics Dashboard</h1>
-              <p class="text-muted mb-0">Visión de uso y auditoría de sesiones. <span class="badge-soft ms-2">Últimos 30 días</span></p>
+              <p class="text-muted mb-0">Usage overview and session audit. <span class="badge-soft ms-2">Last 30 days</span></p>
             </div>
             <a class="btn btn-ghost-enterprise btn-sm" href="{{ url_for('main.export_sessions_csv') }}">
               <i class="bi bi-download me-2"></i>Exportar CSV
@@ -237,14 +237,14 @@
           </div>
 
           {% if not activity_sessions or activity_sessions|length == 0 %}
-            <div class="surface-card p-4 text-center text-muted">No hay actividad registrada todavía.</div>
+            <div class="surface-card p-4 text-center text-muted">No activity recorded yet.</div>
           {% else %}
             <div class="row g-3 mb-4">
               <div class="col-12 col-md-6 col-xl-3">
                 <div class="surface-card kpi-card">
                   <div class="d-flex justify-content-between align-items-start">
                     <div>
-                      <div class="metric-label mb-1">Sesiones</div>
+                      <div class="metric-label mb-1">Sessions</div>
                       <div class="metric-value" id="kpiSessions">—</div>
                     </div>
                     <div class="kpi-icon"><i class="bi bi-box-arrow-in-right"></i></div>
@@ -255,7 +255,7 @@
                 <div class="surface-card kpi-card">
                   <div class="d-flex justify-content-between align-items-start">
                     <div>
-                      <div class="metric-label mb-1">Usuarios Activos</div>
+                      <div class="metric-label mb-1">Active users</div>
                       <div class="metric-value" id="kpiUsers">—</div>
                     </div>
                     <div class="kpi-icon"><i class="bi bi-people"></i></div>
@@ -266,7 +266,7 @@
                 <div class="surface-card kpi-card">
                   <div class="d-flex justify-content-between align-items-start">
                     <div>
-                      <div class="metric-label mb-1">Preguntas (Prompts)</div>
+                      <div class="metric-label mb-1">Questions (prompts)</div>
                       <div class="metric-value" id="kpiQuestions">—</div>
                     </div>
                     <div class="kpi-icon"><i class="bi bi-chat-dots"></i></div>
@@ -277,7 +277,7 @@
                 <div class="surface-card kpi-card">
                   <div class="d-flex justify-content-between align-items-start">
                     <div>
-                      <div class="metric-label mb-1">Duración Media</div>
+                      <div class="metric-label mb-1">Average duration</div>
                       <div class="metric-value" id="kpiAvgDuration">—</div>
                     </div>
                     <div class="kpi-icon"><i class="bi bi-stopwatch"></i></div>
@@ -289,7 +289,7 @@
             <div class="row g-4 mb-4">
               <div class="col-12 col-lg-8">
                 <div class="surface-card p-4 h-100 d-flex flex-column">
-                  <h3 class="hero-title h6 mb-4">Tendencia de Actividad</h3>
+                  <h3 class="hero-title h6 mb-4">Activity trend</h3>
                   <div style="position: relative; flex: 1; min-height: 250px;">
                     <canvas id="chartSessionsPerDay"></canvas>
                   </div>
@@ -298,11 +298,11 @@
               <div class="col-12 col-lg-4">
                 <div class="surface-card p-0 h-100 overflow-hidden">
                   <div class="p-4 border-bottom" style="border-color: var(--border-light) !important;">
-                    <h3 class="hero-title h6 mb-0">Top Usuarios</h3>
+                    <h3 class="hero-title h6 mb-0">Top users</h3>
                   </div>
                   <table class="table table-clean mb-0 w-100">
                     <tbody id="topUsersBody">
-                      <tr><td colspan="3" class="text-muted text-center py-4">Sin datos</td></tr>
+                      <tr><td colspan="3" class="text-muted text-center py-4">No data</td></tr>
                     </tbody>
                   </table>
                 </div>
@@ -311,17 +311,17 @@
 
             <div class="surface-card overflow-hidden">
               <div class="p-4 border-bottom" style="border-color: var(--border-light) !important;">
-                <h3 class="hero-title h6 mb-0">Registro de Sesiones (Auditoría)</h3>
+                <h3 class="hero-title h6 mb-0">Session log (audit)</h3>
               </div>
               <div class="table-responsive">
                 <table class="table table-clean align-middle mb-0 w-100">
                   <thead style="background: var(--bg-app);">
                     <tr>
-                      <th>Usuario</th>
-                      <th>Inicio</th>
-                      <th>Última Actividad</th>
-                      <th class="text-center">Preguntas</th>
-                      <th class="text-end">Duración</th>
+                      <th>User</th>
+                      <th>Started</th>
+                      <th>Last activity</th>
+                      <th class="text-center">Questions</th>
+                      <th class="text-end">Duration</th>
                     </tr>
                   </thead>
                   <tbody>

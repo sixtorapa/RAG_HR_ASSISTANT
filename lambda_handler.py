@@ -1,41 +1,41 @@
 """
-Punto de entrada para AWS Lambda.
+AWS Lambda entry point.
 
-Flask habla WSGI: una función síncrona que recibe (environ, start_response).
-Lambda no habla WSGI: entrega un diccionario JSON con el evento de API Gateway
-y espera otro diccionario de vuelta. `apig_wsgi` es el traductor entre ambos.
+Flask speaks WSGI: a synchronous function taking (environ, start_response).
+Lambda does not: it hands over a JSON dictionary holding the API Gateway event
+and expects another back. `apig_wsgi` is the translator between the two.
 
-Por qué apig-wsgi y no Mangum: Mangum es para ASGI (FastAPI, Starlette).
-Flask es WSGI. Meter Mangum aquí sería el adaptador equivocado.
+Why apig-wsgi and not Mangum: Mangum is for ASGI (FastAPI, Starlette). Flask is
+WSGI, so Mangum here would be the wrong adapter.
 
-Todo lo de nivel de módulo se ejecuta UNA vez por contenedor, en la fase de
-init del arranque en frío, y se reutiliza en las invocaciones calientes.
-Por eso `create_app()` va aquí fuera y no dentro de `handler`: construirlo en
-cada invocación pagaría el arranque siempre.
+Everything at module level runs ONCE per container, during the cold-start init
+phase, and is reused by warm invocations. That is why `create_app()` sits out
+here rather than inside `handler`: building it per invocation would pay the
+startup cost every time.
 """
 
 import os
 
 from apig_wsgi import make_lambda_handler
 
-# En Lambda el único directorio escribible es /tmp. El vector store viaja
-# horneado en la imagen y se lee en solo-lectura; cualquier cosa que necesite
-# escribir (caché de librerías, ficheros temporales) tiene que ir a /tmp.
+# In Lambda the only writable directory is /tmp. The vector store travels baked
+# into the image and is read from there; anything that needs to write — library
+# caches, temporary files — has to go to /tmp.
 os.environ.setdefault("HOME", "/tmp")
 os.environ.setdefault("MPLCONFIGDIR", "/tmp/matplotlib")
 os.environ.setdefault("HF_HOME", "/tmp/huggingface")
 os.environ.setdefault("TRANSFORMERS_CACHE", "/tmp/huggingface")
 
-# ── El vector store NO puede servirse desde la imagen ────────────────────────
-# La receta habitual dice "hornea el vector store en la imagen y léelo en
-# solo lectura". Con Chroma no funciona: su SQLite se abre en lectura-ESCRITURA
-# incluso para consultar, porque necesita su journal. El síntoma es
+# ── The vector store cannot be served from the image ─────────────────────────
+# The usual advice is "bake the vector store into the image and read it in
+# place". That does not work with Chroma: its SQLite opens read-WRITE even for
+# queries, because it needs its journal. The symptom is
 #   "attempt to write a readonly database (code: 8)"
-# y la consulta falla aunque el índice esté ahí.
+# and retrieval fails while the index sits right there.
 #
-# Se copia a /tmp en la fase de init: 8,7 MB, una vez por contenedor, no por
-# invocación. /tmp da 512 MB y es efímero, pero el índice es de solo consulta y
-# viaja en la imagen, así que reconstruirlo no cuesta nada.
+# It is copied to /tmp during the init phase: 8.7 MB, once per container rather
+# than once per invocation. /tmp gives 512 MB and is ephemeral, but the index is
+# read-only and travels in the image, so rebuilding it costs nothing.
 _ORIGEN = "/var/task/vector_store"
 _DESTINO = "/tmp/vector_store"
 if os.path.isdir(_ORIGEN) and not os.path.isdir(_DESTINO):
@@ -50,19 +50,16 @@ from config import Config  # noqa: E402
 
 app = create_app(Config)
 
-# Flask sitúa `instance_path` junto al código, o sea dentro de /var/task, que en
-# Lambda es de SOLO LECTURA. `ChatMemoryStore` guarda ahí la memoria conversacional
-# como un Chroma persistente, así que sin esto /ask revienta con 500 al intentar
-# crear los ficheros. Se reubica en /tmp, el único directorio escribible.
+# Flask puts `instance_path` next to the code, inside /var/task, which is
+# READ-ONLY in Lambda. Anything writing there fails with a 500, so it is moved to
+# /tmp, the only writable directory.
 #
-# Consecuencia asumida y que hay que saber explicar: /tmp es POR CONTENEDOR y
-# efímero. La memoria conversacional sobrevive entre invocaciones calientes del
-# mismo contenedor, pero no se comparte entre contenedores ni sobrevive a un
-# arranque en frío. Para memoria duradera habría que sacarla a un almacén externo
-# (la BD, S3 o EFS) — es la misma limitación que ya tiene `chain_cache`.
+# The consequence is worth knowing: /tmp is PER CONTAINER and ephemeral. Whatever
+# is written there survives warm invocations of the same container, but is not
+# shared between containers and does not survive a cold start.
 app.instance_path = "/tmp/instance"
 os.makedirs(app.instance_path, exist_ok=True)
 
-# binary_support=True para que las respuestas no textuales (imágenes, ficheros)
-# viajen en base64 en vez de corromperse.
+# binary_support=True so non-text responses (images, files) travel base64-encoded
+# instead of being corrupted.
 handler = make_lambda_handler(app, binary_support=True)

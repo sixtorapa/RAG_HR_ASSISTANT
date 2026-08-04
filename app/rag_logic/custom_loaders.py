@@ -13,22 +13,21 @@ logging.getLogger("pdfminer").setLevel(logging.ERROR)
 
 
 # ============================================================
-# OCR config
+# Loader config
 # ============================================================
 @dataclass
 class LoaderConfig:
     """
-    Ajustes de la carga de documentos.
+    Document loading settings.
 
-    Aquí hubo OCR: detección de páginas pobres, señales visuales, render a DPI
-    y tesseract. Se eliminó el 4-ago-2026 porque NO PODÍA EJECUTARSE: ni
-    `pytesseract` está en requirements-prod.txt ni `tesseract` en ninguno de los
-    dos Dockerfiles, así que `_tesseract_available()` devolvía False siempre y
-    toda esa rama era inalcanzable en la imagen desplegada.
+    There used to be OCR here: poor-page detection, visual cues, DPI rendering
+    and tesseract. It was removed because it COULD NOT RUN — neither
+    `pytesseract` is in requirements-prod.txt nor `tesseract` in either
+    Dockerfile, so the whole branch was unreachable in any deployed image.
 
-    Dejarla habría sido mantener —y describir— una capacidad que el sistema no
-    tiene. Si algún día el corpus trae escaneados sin capa de text, se añade la
-    dependencia y se vuelve a escribir; today los PDFs de este corpus llevan text.
+    Keeping it would have meant maintaining, and describing, a capability the
+    system does not have. If the corpus ever brings scans without a text layer,
+    the dependency gets added and this gets rewritten. Today's PDFs carry text.
     """
 
     pdf_extract_tables: bool = (
@@ -44,14 +43,14 @@ def _safe_basename(path: str) -> str:
 
 
 # ============================================================
-# PDF Loader — NUNCA descarta páginas
+# PDF loader — never discards a page
 # ============================================================
 class BetterPDFLoader(BaseLoader):
     """
-    Loader robusto para PDF:
-    ✅ Devuelve 1 Document por PÁGINA (NUNCA descarta).
+    Robust PDF loader.
+    ✅ Returns one Document per PAGE, never discarding any.
     ✅ Combina: text (fitz, layout-aware) + tablas en Markdown (pdfplumber).
-    ✅ Páginas vacías se marcan con is_empty_page=True.
+    ✅ Empty pages are marked with is_empty_page=True.
     """
 
     def __init__(self, file_path: str, loader_cfg: Optional[LoaderConfig] = None):
@@ -83,9 +82,9 @@ class BetterPDFLoader(BaseLoader):
 
     def _load_with_pdfplumber(self) -> List[Document]:
         """
-        Fallback cuando PyMuPDF (fitz) no está disponible o falla.
-        Con text y tablas reales — nunca debe devolver [] salvo que el PDF en
-        sí sea ilegible (corrupto o cifrado).
+        Fallback for when PyMuPDF (fitz) is unavailable or fails.
+        With real text and tables — it must never return [] unless the PDF itself
+        is unreadable (corrupt or encrypted).
         """
         fname = _safe_basename(self.file_path)
         try:
@@ -117,33 +116,34 @@ class BetterPDFLoader(BaseLoader):
                     f"pages_with_text={page_count - len(empty_pages)} | empty_pages={len(empty_pages)}"
                 )
                 if empty_pages:
-                    print(f"   📋 Páginas vacías: {empty_pages}")
+                    print(f"   📋 Empty pages: {empty_pages}")
                 return documents
         except Exception as e:
-            print(f"❌ pdfplumber también falló en {fname}: {e}")
+            print(f"❌ pdfplumber also failed on {fname}: {e}")
             return []
 
     @staticmethod
     def _strip_table_lines(base_text: str, table_text: str) -> str:
         """
-        Quita del text plano las líneas que la tabla ya recoge en markdown.
+        Remove from the plain text those lines the table already carries in
+        markdown.
 
-        El extractor de text (fitz/pdfplumber) devuelve la tabla como palabras
-        sueltas, y pdfplumber la devuelve otra vez como markdown. Sin esto, la
-        misma row viaja DOS veces en el mismo chunk:
+        The text extractor (fitz/pdfplumber) returns a table as loose words, and
+        pdfplumber returns it again as markdown. Without this, the same row
+        travels TWICE inside one chunk:
 
             | 4.5 - 5.0 | Outstanding | Top 10%. Exceptional impact... |
             4.5 - 5.0 Outstanding Top 10%. Exceptional impact...
 
-        Medido el 3-ago-2026 antes de este arreglo: 11 de los 14 chunks con
-        tabla repetían cells, y el 56% de las líneas largas del índice entero
-        eran repeticiones. Se paga en tokens de prompt en CADA consulta y
-        distorsiona las frecuencias de BM25.
+        Measured before this fix: 11 of the 14 chunks holding a table repeated
+        cells, and 56% of the long lines across the whole index were repetitions.
+        It is paid in prompt tokens on EVERY query and it distorts BM25 term
+        frequencies.
 
-        Criterio deliberadamente conservador: solo se borra una línea si su
-        forma normalizada coincide EXACTAMENTE con una row completa de la tabla
-        o con una celda de cierta longitud. Ante la duda, se conserva: perder
-        contenido real es mucho peor que dejar una repetición.
+        Deliberately conservative: a line is only removed when its normalised
+        form matches a full table row exactly, or a cell of some length. When in
+        doubt it is kept — losing real content is far worse than leaving a
+        repetition.
         """
         if not (base_text or "").strip() or not (table_text or "").strip():
             return base_text
@@ -162,22 +162,25 @@ class BetterPDFLoader(BaseLoader):
             if row:
                 table_lines.add(row)
             for c in cells:
-                if len(c) >= 12:      # cells cortas ("25", "Sí") pueden ser text legítimo
+                if len(c) >= 12:      # short cells ("25", "Yes") can be legitimate text
                     table_lines.add(norm(c))
 
         kept = [ln for ln in base_text.splitlines() if norm(ln) not in table_lines]
-        # Cada línea borrada deja un hueco. Sin colapsarlos, quitar tres filas
-        # seguidas deja seis saltos de línea que se pagan en tokens de prompt.
+        # Every removed line leaves a gap. Uncollapsed, dropping three rows in a
+        # row leaves six blank lines, paid for in prompt tokens.
         return re.sub(r"\n{3,}", "\n\n", "\n".join(kept)).strip()
 
     def _build_page_document(self, pidx, page_count, base_text, table_text, fname):
         parts = []
 
-        # 1. Prioridad a la tabla si existe (aporta estructura)
+        # 1. Table first when present: it carries the structure
+        # The marker stays in Spanish: it is inside the indexed text, so changing
+        # it would require a full re-ingest and would invalidate the measured
+        # evaluation numbers. It is content, not a comment.
         if (table_text or "").strip():
             parts.append(f"--- DATOS TABULARES (Pág {pidx + 1}) ---\n{table_text.strip()}\n-----------------------------")
 
-        # 2. Texto base, ya sin las líneas que la tabla acaba de recoger
+        # 2. Base text, with the lines the table just captured removed
         base_text = self._strip_table_lines(base_text, table_text)
         if (base_text or "").strip():
             parts.append(base_text.strip())
@@ -200,7 +203,7 @@ class BetterPDFLoader(BaseLoader):
 
     def load(self) -> List[Document]:
         fname = _safe_basename(self.file_path)
-        print(f"📄 Procesando PDF: {fname}")
+        print(f"📄 Processing PDF: {fname}")
         documents: List[Document] = []
 
         # === NIVEL 1: PyMuPDF ===
@@ -240,7 +243,7 @@ class BetterPDFLoader(BaseLoader):
                                 except Exception:
                                     continue
                     except Exception as e:
-                        print(f"   ⚠️ Extracción de tablas falló: {e}")
+                        print(f"   ⚠️ Table extraction failed: {e}")
 
                 empty_pages = []
                 for pidx in range(page_count):
@@ -258,17 +261,17 @@ class BetterPDFLoader(BaseLoader):
                     f"empty_pages={len(empty_pages)} | total_chars={total_chars}"
                 )
                 if empty_pages:
-                    print(f"   📋 Páginas vacías: {empty_pages}")
+                    print(f"   📋 Empty pages: {empty_pages}")
                 return documents
         except Exception as e:
-            print(f"⚠️ PyMuPDF falló en {fname}: {e} — usando fallback pdfplumber")
+            print(f"⚠️ PyMuPDF failed on {fname}: {e} — falling back to pdfplumber")
 
-        # === NIVEL 2: pdfplumber — nunca devolver [] solo por falta de fitz ===
+        # === LEVEL 2: pdfplumber — never return [] merely because fitz is missing ===
         return self._load_with_pdfplumber()
 
 
 # ============================================================
-# PowerPoint Loader — NUNCA descarta slides
+# PowerPoint loader — never discards a slide
 # ============================================================
 class BetterPowerPointLoader(BaseLoader):
     def __init__(self, file_path: str, loader_cfg: Optional[LoaderConfig] = None):
@@ -290,16 +293,16 @@ class BetterPowerPointLoader(BaseLoader):
 
     def load(self):
         fname = _safe_basename(self.file_path)
-        print(f"📊 Procesando PPT: {fname}")
+        print(f"📊 Processing PPT: {fname}")
         try:
             from pptx import Presentation
         except Exception as e:
-            print(f"❌ Falta python-pptx: {e}")
+            print(f"❌ python-pptx missing: {e}")
             return []
         try:
             prs = Presentation(self.file_path)
         except Exception as e:
-            print(f"❌ No se pudo abrir PPT: {e}")
+            print(f"❌ Could not open PPT: {e}")
             return []
 
         out_docs = []

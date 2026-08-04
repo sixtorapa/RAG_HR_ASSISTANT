@@ -85,7 +85,7 @@ class TestChatSessionModel:
         )
         db.session.add(session)
         db.session.commit()
-        assert session.name == "Nuevo Chat"
+        assert session.name == "New chat"
 
     def test_add_messages_to_session(self, db, test_chat_session, test_user):
         user_msg = Message(

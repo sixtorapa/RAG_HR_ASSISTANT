@@ -17,7 +17,7 @@ from langchain.retrievers import EnsembleRetriever, ContextualCompressionRetriev
 from .path_utils import norm_path
 from .bm25_index import build_bm25_retriever, load_bm25_index
 
-# Rerank (opcional)
+# Reranking (optional)
 try:
     from langchain.retrievers.document_compressors import FlashrankRerank
     _FLASHRANK_AVAILABLE = True
@@ -28,7 +28,7 @@ except Exception:
 from langchain_core.prompts import ChatPromptTemplate
 
 
-# ==================== UTILIDADES ====================
+# ==================== UTILITIES ====================
 
 def _norm(s: str) -> str:
     return norm_path(s)
@@ -44,10 +44,10 @@ def _ratio(a: str, b: str) -> float:
     return SequenceMatcher(None, _norm(a), _norm(b)).ratio()
 
 
-# ==================== PREFILTRO NATIVO POR METADATA ====================
+# ==================== NATIVE METADATA PREFILTER ====================
 
 def _combine_filters(*filters: Optional[dict]) -> Optional[dict]:
-    """Combina filtros de Chroma con $and. None se ignora."""
+    """Combine Chroma filters with $and. None is ignored."""
     present = [f for f in filters if f]
     if not present:
         return None
@@ -56,30 +56,30 @@ def _combine_filters(*filters: Optional[dict]) -> Optional[dict]:
     return {"$and": present}
 
 
-# ==================== FILTRO DE GRANULARIDAD (macro vs micro) ====================
-# La ingesta indexa DOS tamaños del mismo text en la misma colección: macro
-# (páginas agrupadas, ~350 palabras) y micro (250 tokens, con parent_chunk_id).
-# Medido el 3-ago-2026 sobre el índice real: **153 de los 154 micro son subcadena
-# literal de su macro**. Es decir, el mismo contenido compite consigo mismo en
-# cada búsqueda, y cuando gana dos veces, el LLM recibe el mismo text duplicado.
-# En cuatro preguntas del golden set, el 21% de los caracteres recuperados eran
-# repeticiones — y hasta el 56% en las que caen sobre un solo documento.
+# ==================== GRANULARITY FILTER (macro vs micro) ====================
+# Ingestion indexes TWO sizes of the same text in one collection: macro chunks
+# (grouped pages, ~350 words) and micro chunks (250 tokens, carrying a
+# parent_chunk_id). Measured against the real index: 153 of the 154 micro chunks
+# are literal substrings of their macro parent, so the same content competes with
+# itself on every search — and when it wins twice, the model receives it twice.
+# Across four golden-set questions, 21% of the retrieved characters were repeated
+# text, rising to 56% on questions that land on a single document.
 #
-# El diseño parent-child dice "busca por el hijo, que es preciso, y cita por el
-# padre, que tiene el contexto". Buscar por los dos es justo lo que ese diseño
-# no dice. Este filtro aplica la mitad que sí se puede aplicar today.
+# The parent-child design says "search with the child, which is precise, and cite
+# the parent, which carries the context". Searching with both is precisely what
+# that design does not say.
 #
-# Se controla por variable de entorno para poder medirlo y revertirlo sin tocar
-# código, igual que FLASHRANK_ENABLED:
-#   RETRIEVAL_CHUNK_TYPE=micro  (por defecto) — solo children
-#   RETRIEVAL_CHUNK_TYPE=macro                — solo padres
-#   RETRIEVAL_CHUNK_TYPE=all                  — comportamiento anterior
+# Controlled by an environment variable so it can be measured and reverted
+# without touching code, the same way FLASHRANK_ENABLED is:
+#   RETRIEVAL_CHUNK_TYPE=micro  (default) — children only
+#   RETRIEVAL_CHUNK_TYPE=macro            — parents only
+#   RETRIEVAL_CHUNK_TYPE=all              — previous behaviour
 def _chunk_type_filter() -> Optional[dict]:
     value = (os.environ.get("RETRIEVAL_CHUNK_TYPE") or "micro").strip().lower()
     if value in ("all", "any", ""):
         return None
     if value not in ("micro", "macro"):
-        print(f"⚠️ RETRIEVAL_CHUNK_TYPE='{value}' no reconocido; usando 'micro'.")
+        print(f"⚠️ RETRIEVAL_CHUNK_TYPE='{value}' not recognised; using 'micro'.")
         value = "micro"
     return {"chunk_type": value}
 
@@ -94,21 +94,18 @@ def _build_scoped_retriever(
     security_filter: Optional[dict] = None,
 ) -> BaseRetriever:
     """
-    Prefiltro NATIVO por metadata, en vez de lanzar la búsqueda sobre todo el corpus
-    y descartar results en Python después (lo que hacían SmartPathRetriever/
-    MultiPathRetriever). Reutilizable para distintos campos de metadata: por archivo
-    concreto (`relative_path_norm`) o por departamento (`department`).
+    Prefilter natively on metadata instead of searching the whole corpus and
+    discarding results in Python afterwards. Reusable across metadata fields: a
+    specific file (`relative_path_norm`) or a department (`department`).
 
-    `security_filter` (si se pasa) es un filtro de Chroma que SIEMPRE se combina con
-    AND sobre el filtro funcional — es el guardarril de control de acceso por
-    departamento (ver get_conversational_qa_chain). Nunca se ignora ni se aplica solo
-    "si hay tiempo": un documento fuera del security_filter no puede salir nunca,
-    aunque el filtro funcional (archivo concreto, departamento detectado) lo pidiera.
+    `security_filter`, when given, is ALWAYS ANDed with the functional filter. It
+    is the department access guardrail, and it is never skipped: a document
+    outside it can never surface, even when the functional filter asks for it.
 
-    - Vector leg: Chroma recibe `filter` en el propio search_kwargs -> el MMR search
-      solo considera los chunks que matchean, vía el índice de metadata de Chroma.
-    - BM25 leg: se construye SOLO con los chunks de ese filtro (vector_store.get(where=...)),
-      no con el corpus completo -> rápido independientemente de cuántos documentos haya en total.
+    - Vector leg: Chroma receives `filter` inside search_kwargs, so the MMR search
+      only considers matching chunks, through Chroma's own metadata index.
+    - BM25 leg: built ONLY from the filtered chunks (vector_store.get(where=...)),
+      not the full corpus, so it stays fast however large the corpus grows.
     """
     norm_values = [norm_path(v) for v in (values or []) if (v or "").strip()]
     functional_filter = (
@@ -143,12 +140,13 @@ def _build_scoped_retriever(
     return scoped_retriever
 
 
-# ==================== 2-PASS RETRIEVAL (DOC SHORTLIST) ====================
+# ==================== TWO-PASS RETRIEVAL (DOCUMENT SHORTLIST) ====================
 
 def _doc_id_from_meta(meta: dict) -> str:
     """
-    Identificador estable de "documento" para agrupar chunks.
-    Priorizamos relative_path (si existe), si no filename/source_file/source.
+    Stable document identifier used to group chunks.
+
+    Prefers relative_path, falling back to filename, source_file or source.
     """
     meta = meta or {}
     rel = (meta.get("relative_path") or "").strip()
@@ -159,7 +157,7 @@ def _doc_id_from_meta(meta: dict) -> str:
 
 def _tokenize_query_for_boost(query: str) -> List[str]:
     """
-    Tokens simples para boost de doc (evita stopwords básicas y tokens cortos).
+    Simple tokens for the document boost, skipping basic stopwords and short tokens.
     """
     q = _norm(query)
     toks = re.findall(r"[a-z0-9áéíóúüñ]+", q, flags=re.IGNORECASE)
@@ -172,7 +170,7 @@ def _tokenize_query_for_boost(query: str) -> List[str]:
             continue
         out.append(t)
 
-    # dedupe conservando orden
+    # de-duplicate while preserving order
     seen = set()
     uniq: List[str] = []
     for t in out:
@@ -191,9 +189,10 @@ def _pick_top_docs_from_candidates(
     min_votes: int = 2,
 ) -> List[str]:
     """
-    Elige top documentos por "votos" (cuántos chunks aparecen en candidatos)
-    + boost si el doc parece contener tokens importantes del query.
-    Devuelve lista de doc_ids (relative_path o filename/source).
+    Pick the top documents by vote — how many of their chunks made the candidate
+    list — plus a boost when the document name carries query tokens.
+
+    Returns a list of document ids.
     """
     if not candidates:
         return []
@@ -208,7 +207,7 @@ def _pick_top_docs_from_candidates(
             stats[doc_id] = {"votes": 0, "boost": 0.0, "meta": meta}
         stats[doc_id]["votes"] += 1
 
-        # Boost simple: si tokens aparecen en filename/relative_path/folder_context
+        # Simple boost: tokens appearing in filename/relative_path/folder_context
         hay = " ".join([
             _norm(meta.get("filename", "")),
             _norm(meta.get("relative_path", "")),
@@ -224,7 +223,8 @@ def _pick_top_docs_from_candidates(
         reverse=True,
     )
 
-    # Si ni el top-1 alcanza min_votes, consideramos "no hay claridad" -> fallback
+    # If not even the top document reaches min_votes, treat it as "no clear
+    # winner" and fall back
     top_doc_id, top_info = ranked[0]
     if top_info["votes"] < min_votes:
         return []
@@ -243,12 +243,12 @@ def _pick_top_docs_from_candidates(
 
 class TwoPassDocShortlistRetriever(BaseRetriever):
     """
-    1) Primer pase: base_retriever global (ensemble sin filtrar, para descubrir qué doc(s)
-       son relevantes cuando el usuario no menciona uno explícitamente).
-    2) Elegir top docs por votos/boost.
-    3) Segundo pase: prefiltro NATIVO multi-doc vía scoped_retriever_factory
-       (_build_scoped_retriever), no post-filtrado en Python sobre una segunda
-       búsqueda sin filtrar.
+    1) First pass: the unfiltered ensemble, to discover which documents are
+       relevant when the user names none.
+    2) Pick the winners by votes and boost.
+    3) Second pass: a native multi-document prefilter through
+       scoped_retriever_factory — not Python post-filtering over a second
+       unfiltered search.
     """
     base_retriever: BaseRetriever
     scoped_retriever_factory: Callable[[List[str], int], BaseRetriever]
@@ -277,7 +277,7 @@ class TwoPassDocShortlistRetriever(BaseRetriever):
         return scoped_retriever.get_relevant_documents(query)
 
 
-# ==================== EXPANSIÓN HIJO → PADRE ====================
+# ==================== CHILD → PARENT EXPANSION ====================
 
 class ParentExpansionRetriever(BaseRetriever):
     """
@@ -334,8 +334,8 @@ class ParentExpansionRetriever(BaseRetriever):
             meta = d.metadata or {}
             parent_id = (meta.get("parent_chunk_id") or "").strip()
 
-            # Sin padre (ya es macro, o viene de un formato sin jerarquía):
-            # se queda tal cual, pero igualmente deduplicado.
+            # No parent (already a macro chunk, or from a format without a
+            # hierarchy): keep it as is, still de-duplicated.
             key = parent_id or (meta.get("chunk_id") or d.page_content[:120])
             if key in seen:
                 continue
@@ -405,11 +405,11 @@ def construir_template_qa(instruccion_personalizada: str = "") -> PromptTemplate
     return PromptTemplate(template=template, input_variables=["context", "chat_history", "question"])
 
 
-# ==================== CATÁLOGO DE DOCUMENTOS ====================
+# ==================== DOCUMENT CATALOGUE ====================
 
 _catalog_cache: Dict[str, Dict[str, str]] = {}
 # cache_key -> { "filename_lower": "relative_path_lower" }
-# además se usa para matching por stem
+# also used for stem matching
 
 def _build_doc_catalog(vector_store: Chroma, cache_key: str) -> Dict[str, str]:
     if cache_key in _catalog_cache:
@@ -433,33 +433,34 @@ def _build_doc_catalog(vector_store: Chroma, cache_key: str) -> Dict[str, str]:
 
 def _detect_doc_filter(question: str, catalog: Dict[str, str]) -> Optional[str]:
     """
-    Devuelve un string para filtrar (relative_path o filename) si detecta que el usuario
-    está refiriéndose a un documento concreto.
+    Return a filter string (relative_path or filename) when the question refers
+    to one specific document.
     """
     q = _norm(question)
 
-    # 1) Si viene con extensión explícita
-    # Sin espacio en la clase de caracteres: si lo incluyéramos, capturaría toda la
-    # frase anterior al nombre de archivo en vez de solo el nombre (p.ej. "según el
-    # documento X.pdf" -> "documento x.pdf" en lugar de "x.pdf").
+    # 1) An explicit file extension in the question
+    # No space in the character class: including it would capture the whole
+    # phrase before the filename instead of the filename alone — "according to
+    # document X.pdf" would match "document x.pdf" rather than "x.pdf".
     m = re.search(r"([a-z0-9áéíóúüñ_\-\.]+)\.(pdf|pptx|ppt)\b", q, flags=re.IGNORECASE)
     if m:
         candidate = _norm(m.group(0))
-        # match directo
+        # direct match
         if candidate in catalog:
             return catalog[candidate]
-        # match por stem
+        # stem match
         st = _stem(candidate)
         if st in catalog:
             return catalog[st]
         return candidate  # al menos intentarlo
 
-    # 2) Match fuzzy contra stems conocidos (solo si la pregunta parece pedir doc)
+    # 2) Fuzzy match against known stems, only if the question looks like it is
+    #    asking about a document
     looks_doc = any(k in q for k in ["pdf", "ppt", "pptx", "documento", "presentación", "informe", "según", "del archivo"])
     if not looks_doc:
         return None
 
-    # 2.A) Match directo por palabra completa
+    # 2.A) Direct whole-word match
     for k in catalog.keys():
         if "." in k:
             continue
@@ -483,12 +484,12 @@ def _detect_doc_filter(question: str, catalog: Dict[str, str]) -> Optional[str]:
     return None
 
 
-# ==================== CLASIFICADOR DE DEPARTAMENTO ====================
-# Heurística por keywords (rápida, gratis, determinista). Si se quisiera más
-# precisión a costa de latencia/coste, esto se sustituiría por una llamada LLM
-# (clasificación zero-shot contra la lista de departamentos) o por similitud de
-# embeddings contra una descripción corta de cada departamento — el resto del
-# pipeline (filtro nativo por metadata "department") no cambiaría.
+# ==================== DEPARTMENT CLASSIFIER ====================
+# Keyword heuristic: fast, free and deterministic. Trading latency and cost for
+# precision would mean an LLM call (zero-shot classification against the list of
+# departments) or embedding similarity against a short description of each one.
+# The rest of the pipeline — the native metadata prefilter on "department" —
+# would not change.
 
 _DEPARTMENT_KEYWORDS: Dict[str, List[str]] = {
     "compensation_benefits": [
@@ -548,9 +549,10 @@ _DEPARTMENT_KEYWORDS: Dict[str, List[str]] = {
 
 def _detect_department(question: str) -> Optional[str]:
     """
-    Heurística de clasificación de departamento por keywords.
-    Devuelve None si no hay una señal clara (evita filtrar mal y perder el
-    documento correcto) — en ese caso el caller debe caer al flujo sin filtro.
+    Classify the department by keyword.
+
+    Returns None when there is no clear signal, so the caller falls through to
+    the unfiltered path: filtering wrongly loses the right document entirely.
     """
     q = _norm(question)
     if not q:
@@ -569,18 +571,18 @@ def _detect_department(question: str) -> Optional[str]:
     top_dept, top_score = ranked[0]
     second_score = ranked[1][1] if len(ranked) > 1 else 0
 
-    # Solo confiamos si hay una señal clara y sin ambigüedad entre dos departamentos
+    # Only trusted when the signal is clear and unambiguous between two departments
     if top_score >= 1 and top_score > second_score:
         return top_dept
 
     return None
 
 
-# ==================== GUARDARRIL: CONTROL DE ACCESO POR DEPARTAMENTO ====================
-# A diferencia de _detect_department (heurística, optimización, puede fallar sin
-# consecuencias graves), esto es un control de seguridad: SIEMPRE se aplica con AND
-# sobre cualquier filtro funcional (ver _build_scoped_retriever/_combine_filters),
-# nunca se ignora ni se "mejora" con detección de intención.
+# ==================== GUARDRAIL: DEPARTMENT ACCESS CONTROL ====================
+# Unlike _detect_department (a heuristic, an optimisation, able to fail without
+# consequences), this is a security control: it is ALWAYS ANDed with any
+# functional filter (see _build_scoped_retriever/_combine_filters), never skipped
+# and never "improved" with intent detection.
 
 def _build_security_filter(allowed_departments: Optional[List[str]]) -> Optional[dict]:
     """
@@ -594,18 +596,18 @@ def _build_security_filter(allowed_departments: Optional[List[str]]) -> Optional
         return None
     norm_allowed = sorted({norm_path(d) for d in allowed_departments if (d or "").strip()})
     if not norm_allowed:
-        # Valor de department que ningún chunk real puede tener -> 0 results,
-        # en vez de depender de cómo Chroma trate un $in vacío.
+        # A department value no real chunk can carry -> zero results, rather
+        # than relying on how Chroma treats an empty $in.
         return {"department": "__no_access__"}
     return {"department": {"$in": norm_allowed}}
 
 
-# ==================== CACHÉ DE CADENAS ====================
+# ==================== CHAIN CACHE ====================
 
 chain_cache: Dict[str, ConversationalRetrievalChain] = {}
 
 
-# ==================== FUNCIÓN PRINCIPAL ====================
+# ==================== MAIN ENTRY POINT ====================
 
 def get_conversational_qa_chain(
     project_id: str,
@@ -615,19 +617,18 @@ def get_conversational_qa_chain(
     search_kwargs_override: Optional[dict] = None,
 ):
     """
-    Crea una ConversationalRetrievalChain optimizada para:
-    - 50 PDFs/PPTs
-    - alta precisión
-    - “doc-aware retrieval” (si se menciona un doc, filtra)
+    Build the ConversationalRetrievalChain that answers document questions.
+
+    Document-aware: naming a document in the question scopes retrieval to it.
     """
 
     if project_settings is None:
         project_settings = {}
 
-    # --- Guardarril: control de acceso por departamento (RBAC) ---
-    # Fail closed por defecto: si el caller no pasa "allowed_departments", se asume
-    # sin acceso a ningún departamento, no acceso total. Lo inyecta routes.py desde
-    # current_user.get_allowed_departments() (None para admin = sin restricción).
+    # --- Guardrail: department access control (RBAC) ---
+    # Fail closed by default: a caller that omits "allowed_departments" gets no
+    # access at all rather than full access. It is injected from
+    # current_user.get_allowed_departments() — None for an admin means no limit.
     allowed_departments = project_settings.get("allowed_departments", [])
     security_filter = _build_security_filter(allowed_departments)
 
@@ -635,7 +636,7 @@ def get_conversational_qa_chain(
     temperature = float(project_settings.get("temperature", 0.0))
     llm = get_llm(model_name, temperature)
 
-    # --- Embeddings / Vector Store ---
+    # --- Embeddings / vector store ---
     embedding_model = os.environ.get("UP_EMBEDDING_MODEL", "text-embedding-3-small")
     embeddings = get_embeddings(embedding_model)
     vector_store = Chroma(
@@ -643,34 +644,34 @@ def get_conversational_qa_chain(
         embedding_function=embeddings,
     )
 
-    # --- Catalog (para detectar doc por name) ---
+    # --- Catalogue, used to detect a document by name ---
     catalog_key = f"{project_id}::{vector_store_path}"
     catalog = _build_doc_catalog(vector_store, cache_key=catalog_key)
 
-    # --- Override manual (si viene desde herramienta) ---
+    # --- Manual override, when a tool supplies one ---
     forced_filter = None
     if search_kwargs_override and "python_path_filter" in search_kwargs_override:
         forced_filter = search_kwargs_override["python_path_filter"]
 
-    # Auto-detección: si el usuario menciona doc, filtramos
+    # Auto-detection: filter if the user names a document
     auto_filter = None
     if not forced_filter:
         auto_filter = _detect_doc_filter(project_settings.get("last_user_question", ""), catalog)
 
     path_filter = forced_filter or auto_filter
 
-    # Detección de departamento — solo relevante si no hay path_filter explícito.
-    # Se calcula aquí (no más abajo) para que entre en la cache key: dos preguntas
-    # sin path_filter pero de departamentos distintos NO deben compartir chain/retriever.
+    # Department detection, relevant only without an explicit path filter.
+    # Computed here rather than further down so it reaches the cache key: two
+    # questions from different departments must not share a cached chain.
     detected_department = None if path_filter else _detect_department(project_settings.get("last_user_question", ""))
 
-    # --- Cache key (incluye filtro/departamento Y el alcance de seguridad) ---
+    # --- Cache key: filter, department and security scope ---
     # Crítico: dos usuarios con distinto allowed_departments NUNCA deben compartir
     # chain/retriever cacheados, aunque hagan la misma question.
     security_scope_key = "ADMIN" if allowed_departments is None else ",".join(sorted(allowed_departments)) or "NONE"
-    # La granularidad entra en la clave por el mismo motivo que la ACL: dos
-    # configuraciones distintas no pueden compartir retriever cacheado, o al
-    # cambiar la variable seguirías sirviendo la cadena vieja hasta reiniciar.
+    # Granularity belongs in the key for the same reason the ACL does: two
+    # configurations must not share a cached retriever, or flipping the variable
+    # keeps serving the old chain until the process restarts.
     granularity = (_chunk_type_filter() or {}).get("chunk_type", "all")
     cache_key = (
         f"{project_id}::{model_name}::{path_filter or ('DEPT:' + detected_department if detected_department else 'NO_FILTER')}"
@@ -679,14 +680,14 @@ def get_conversational_qa_chain(
     if cache_key in chain_cache:
         return chain_cache[cache_key]
 
-    # ==================== Retriever base (MMR + k alto) ====================
+    # ==================== Base retriever (MMR, high k) ====================
     k_base = int(project_settings.get("k_base", 28 if not path_filter else 60))
     fetch_k = max(k_base * 4, 80)
 
-    # Closure que el TwoPassDocShortlistRetriever usa en su 2º pase (prefiltro nativo multi-doc).
-    # security_filter va SIEMPRE, aunque el primer pase ya estuviera acotado: defensa en
-    # profundidad, no cuesta nada extra y evita que un futuro cambio en el primer pase
-    # abra un agujero aquí sin que nadie se dé cuenta.
+    # Closure used by TwoPassDocShortlistRetriever on its second pass.
+    # security_filter is applied ALWAYS, even when the first pass was already
+    # scoped: defence in depth costs nothing here, and stops a future change to
+    # the first pass from quietly opening a hole in this one.
     def _scoped_retriever_factory(values: List[str], max_docs: int) -> BaseRetriever:
         return _build_scoped_retriever(
             vector_store=vector_store,
@@ -699,9 +700,9 @@ def get_conversational_qa_chain(
         )
 
     if path_filter:
-        # El usuario menciona doc/ruta -> prefiltro NATIVO directo a 1 documento.
-        # security_filter va con AND: si ese documento no está en un departamento
-        # permitido para este usuario, esto devuelve 0 results (deny), nunca el doc.
+        # The user named a document or path -> native prefilter to that document.
+        # security_filter is ANDed in: a document outside the user's departments
+        # yields zero results, never the document.
         final_retriever: BaseRetriever = _build_scoped_retriever(
             vector_store=vector_store,
             values=[path_filter],
@@ -712,18 +713,17 @@ def get_conversational_qa_chain(
             security_filter=security_filter,
         )
     else:
-        # detected_department ya se calculó arriba (antes de la cache key).
-        # Si hay señal clara, prefiltramos nativamente por "department" ANTES de
-        # construir el ensemble, en vez de buscar siempre sobre el corpus completo.
-        # Con baja confianza, no filtramos (más seguro perder velocidad que perder
-        # el documento correcto) — pero el guardarril de acceso (security_filter) se
-        # aplica igual, detectemos departamento o no: es quien decide qué se puede
-        # ver, la heurística solo decide qué se mira primero para ir más rápido.
-        # El filtro de granularidad obliga a pasar por el retriever con prefiltro
-        # nativo: la pata BM25 persistida se construyó con macro Y micro, así que
-        # filtrar solo la pata vectorial dejaría entrar los macro por la otra
-        # puerta. _build_scoped_retriever reconstruye BM25 con el subconjunto ya
-        # filtrado (son ~150 chunks: milisegundos).
+        # With a clear department signal, prefilter natively on "department"
+        # BEFORE assembling the ensemble instead of always searching the whole
+        # corpus. On low confidence nothing is filtered — losing speed beats
+        # losing the right document. The access guardrail applies either way:
+        # it decides what may be seen, the heuristic only decides what is looked
+        # at first.
+        # The granularity filter forces the scoped retriever: the persisted BM25
+        # index was built over macro AND micro chunks, so filtering only the
+        # vector leg would let macro chunks in through the other door.
+        # _build_scoped_retriever rebuilds BM25 over the filtered subset — around
+        # 150 chunks, a matter of milliseconds.
         if detected_department or security_filter or _chunk_type_filter():
             if detected_department:
                 print(f"🏷️ Departamento detectado: {detected_department}")
@@ -744,14 +744,14 @@ def get_conversational_qa_chain(
                 search_kwargs={"k": k_base, "fetch_k": fetch_k, "lambda_mult": 0.55},
             )
 
-            # ==================== BM25 (índice persistido, no se reconstruye en cada query) ====================
+            # ==================== BM25 (persisted index, not rebuilt per query) ====================
             ensemble_retriever = vector_retriever
             try:
                 bm25 = load_bm25_index(vector_store_path)
                 if bm25 is not None:
                     print("✅ BM25 activo (índice persistido)")
                 else:
-                    # Fallback defensivo: vector store aún no re-indexado con el nuevo flujo persistente.
+                    # Defensive fallback: vector store not yet re-indexed with the persistent flow.
                     data = vector_store.get(include=["documents", "metadatas"])
                     bm25 = build_bm25_retriever(data.get("documents", []) or [], data.get("metadatas", []) or [])
                     if bm25 is not None:
@@ -766,7 +766,7 @@ def get_conversational_qa_chain(
                 print(f"⚠️ BM25 desactivado por error: {e}")
                 ensemble_retriever = vector_retriever
 
-        # ✅ Two-pass retrieval (doc shortlist) para evitar mezclar documentos en preguntas genéricas
+        # Two-pass retrieval: stops generic questions from blending documents
         final_retriever = ensemble_retriever
         two_pass_enabled = bool(project_settings.get("two_pass_enabled", True))
         if two_pass_enabled:
@@ -779,10 +779,10 @@ def get_conversational_qa_chain(
                 max_docs=int(project_settings.get("two_pass_max_docs", 22)),
             )
 
-    # ==================== Expansión hijo → padre ====================
-    # Va DESPUÉS del two-pass y ANTES del rerank: el two-pass trabaja con los
-    # children (que es donde está la señal precisa) y el LLM recibe los padres
-    # (que es donde está el contexto completo).
+    # ==================== Child → parent expansion ====================
+    # Runs AFTER the two-pass and BEFORE reranking: the two-pass works over the
+    # children, where the precise signal is, and the model receives the parents,
+    # where the full context is.
     if _parent_expansion_enabled() and (_chunk_type_filter() or {}).get("chunk_type") == "micro":
         final_retriever = ParentExpansionRetriever(
             base_retriever=final_retriever,
@@ -790,7 +790,7 @@ def get_conversational_qa_chain(
             max_docs=int(project_settings.get("parent_expansion_max_docs", 12)),
         )
 
-    # ==================== Rerank / Compression (opt-in) ====================
+    # ==================== Reranking / compression (opt-in) ====================
     flashrank_enabled = str(os.environ.get("FLASHRANK_ENABLED", "0")).strip().lower() in ("1", "true", "yes")
 
     if _FLASHRANK_AVAILABLE and flashrank_enabled:

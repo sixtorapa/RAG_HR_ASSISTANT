@@ -1,15 +1,15 @@
-# Dependencias de desarrollo y evaluación.
+# Development and evaluation dependencies.
 #
-# NO van en requirements-prod.txt a propósito: esa lista construye la imagen, y
-# en Lambda el tamaño de la imagen es tiempo de arranque en frío. RAGAS arrastra
-# datasets y pyarrow, que no pintan nada en el contenedor que responde.
+# Deliberately kept out of requirements-prod.txt: that list builds the image, and
+# on Lambda image size is cold-start time. ragas pulls in datasets and pyarrow,
+# which have no business in the container that answers requests.
 #
 #   pip install -r requirements-prod.txt -r requirements-dev.txt
 
 pytest==9.1.1
 
-# Juez LLM de la suite de evaluación (evaluation/*.py).
-# Pineado <0.3: la 0.2.x depende de langchain-core 0.3.x, que es la línea sobre
-# la que vive qa_chain.py. La 0.3 subiría core a 1.x y el repo deja de importar,
-# igual que pasó con langchain-aws.
+# LLM judge for the evaluation suite (evaluation/*.py).
+# Pinned below 0.3 for the same reason langchain-aws is pinned: 0.2.x depends on
+# langchain-core 0.3.x, the line qa_chain.py lives on. 0.3 would take core to 1.x
+# and the repository would stop importing.
 ragas>=0.2.0,<0.3.0

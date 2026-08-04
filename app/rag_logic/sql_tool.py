@@ -21,7 +21,7 @@ from typing import ClassVar
 from flask import current_app
 
 
-# Intento inicial + reintentos con feedback del error real de SQLite
+# Initial attempt plus retries, fed the real SQLite error each time
 MAX_SQL_ATTEMPTS = 3
 
 
@@ -53,14 +53,14 @@ def _is_select_only(sql: str) -> bool:
     return not any(re.search(rf"\b{kw}\b", upper) for kw in _FORBIDDEN_SQL_KEYWORDS)
 
 
-# ── Guardarril de control de acceso por departamento (mismo concepto que en
-# qa_chain.py / excel_tool.py, aplicado a columnas en vez de a documentos) ──
-# Esta BD (hr_data.db) tiene su propio esquema de "departments" (Engineering,
-# Sales...), que NO es el mismo concepto que los departamentos del knowledge_base
-# (compensation_benefits, recruitment_talent...). Lo único que mapeamos aquí es:
-# si el usuario no tiene acceso al departamento RAG "compensation_benefits",
-# tampoco puede consultar columnas de salario/presupuesto vía SQL — son la misma
-# categoría de dato sensible, solo que vive en dos sitios distintos.
+# ── Department access guardrail, the same idea as in qa_chain.py and
+# excel_tool.py, applied to columns rather than documents ──
+# This database (hr_data.db) has its own "departments" schema (Engineering,
+# Sales…), which is NOT the same concept as the knowledge_base departments
+# (compensation_benefits, recruitment_talent…). The only mapping made here: a
+# user without access to the RAG department "compensation_benefits" cannot query
+# salary or budget columns over SQL either — the same category of sensitive data,
+# living in two places.
 _RESTRICTED_COLUMNS_BY_DEPARTMENT = {
     "compensation_benefits": ("salary", "budget"),
 }
@@ -89,7 +89,7 @@ class HRDatabaseTool(BaseTool):
 
     # Guardarril de acceso: None = sin restricción (admin); list (incl. vacía) =
     # restringido a esos departamentos -> bloquea columnas sensibles asociadas
-    # a los departamentos que NO estén en la lista (ver _RESTRICTED_COLUMNS_BY_DEPARTMENT).
+    # to departments NOT on the list (see _RESTRICTED_COLUMNS_BY_DEPARTMENT).
     allowed_departments: Optional[List[str]] = None
 
     def _blocked_columns(self) -> set:
@@ -217,8 +217,8 @@ Rules:
                 if not _is_select_only(generated_sql):
                     return "❌ Generated query rejected: only single read-only SELECT statements are allowed."
 
-                # ── Guardarril de acceso: columnas sensibles fuera de scope ────
-                # Determinista, no depende de que el LLM respete la nota del prompt.
+                # ── Access guardrail: sensitive columns out of scope ────────
+                # Deterministic: it does not rely on the LLM honouring the prompt.
                 if _touches_restricted_columns(generated_sql, blocked_columns):
                     print(f"🚫 SQL guardrail: query bloqueada por columna restringida -> {generated_sql}")
                     return (
@@ -237,7 +237,7 @@ Rules:
                     last_error = str(e)
                     if attempt == MAX_SQL_ATTEMPTS - 1:
                         break
-                    # ✅ Self-correction: pasamos el error real de SQLite al LLM para que corrija la query
+                    # Self-correction: the real SQLite error goes back to the LLM
                     messages.append(AIMessage(content=generated_sql))
                     messages.append(HumanMessage(
                         content=(
@@ -282,5 +282,5 @@ Rules:
                 conn.close()
 
 
-# Alias para compatibilidad con routes.py
+# Alias kept for backwards compatibility with the dispatch loop
 SQLDatabaseTool = HRDatabaseTool

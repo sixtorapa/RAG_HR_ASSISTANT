@@ -1,16 +1,16 @@
 # ─────────────────────────────────────────────────────────────────────────────
-# requirements-prod.txt — Linux/Docker (Railway)
+# requirements-prod.txt — Linux and Docker
 #
-# Diferencias vs requirements.txt (Windows):
-#   - torch instalado aparte en Dockerfile con --index-url cpu (ahorra ~1.2 GB)
-#   - python-magic-bin ELIMINADO (Windows only) → reemplazado por python-magic
-#     El sistema Linux necesita: apt install libmagic1  (ya en Dockerfile)
-#   - pyreadline3 ELIMINADO (Windows only)
-#   - colorama ELIMINADO (no necesario en Linux)
+# torch is absent on purpose: its only use was the FlashRank reranker, which is
+# off by default because measuring it dropped context precision from 0.86 to
+# 0.64. It cost hundreds of MB, and on Lambda image size is cold-start time.
+#
+# python-magic (not python-magic-bin) needs libmagic1 from the system, which both
+# Dockerfiles install.
 # ─────────────────────────────────────────────────────────────────────────────
 
 aiofiles==25.1.0
-apig-wsgi==2.20.0        # adaptador API Gateway -> WSGI (Flask). Mangum NO: es ASGI.
+apig-wsgi==2.20.0        # API Gateway -> WSGI adapter. Not Mangum: that is ASGI.
 aiohappyeyeballs==2.6.1
 aiohttp==3.13.2
 aiosignal==1.4.0
@@ -82,9 +82,10 @@ jsonschema-specifications==2025.9.1
 kubernetes==34.1.0
 boto3==1.43.58
 langchain==0.3.27
-langchain-aws==0.2.35   # PINEADO <1.0 a propósito: langchain-aws 1.x sube
-                        # langchain-core a 1.x, que elimina langchain_core.memory
-                        # y rompe qa_chain.py (ConversationalRetrievalChain).
+langchain-aws==0.2.35   # PINNED below 1.0 on purpose: langchain-aws 1.x lifts
+                        # langchain-core to 1.x, which removes
+                        # langchain_core.memory and breaks qa_chain.py
+                        # (ConversationalRetrievalChain).
 langchain-community==0.3.31
 langchain-core==0.3.79
 langchain-experimental==0.3.4

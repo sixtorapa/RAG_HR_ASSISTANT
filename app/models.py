@@ -5,25 +5,24 @@ from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 
 
-# La tabla `project` se eliminó el 4-ago-2026. De sus ocho columnas, cinco eran
-# una copia de variables de entorno (nombre, rutas, modelo), `status` valía
-# siempre "READY", `id` solo existía para una clave foránea, y `cost` se
-# acumulaba en una columna que no se mostraba en ninguna pantalla. Lo único con
-# estado real —la instrucción de sistema y el contexto SQL— es configuración y
-# vive en config.py.
+# The `project` table was removed. Of its eight columns, five were a copy of
+# environment variables (name, paths, model), `status` was always "READY", `id`
+# existed only for a foreign key, and `cost` accumulated in a column no screen
+# displayed. The only real state — the system instruction and the SQL context —
+# is configuration and lives in config.py.
 #
-# No era código de más: era una fuente de verdad duplicada. Cambiar
-# UP_VECTOR_STORE_PATH no movía un proyecto ya creado, porque la ruta estaba
-# congelada en la fila — uno de los tres fallos que solo aparecieron al
-# desplegar en Lambda.
+# The cost was never the extra code: it was a duplicated source of truth.
+# Changing UP_VECTOR_STORE_PATH did not move an existing project, because the
+# path was frozen in the row — one of the three failures that only appeared on
+# Lambda.
 
 
 class ChatSession(db.Model):
     """
-    Representa una conversación específica de un usuario.
+    A single user conversation.
     """
     id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    name = db.Column(db.String(100), nullable=False, default="Nuevo Chat")
+    name = db.Column(db.String(100), nullable=False, default="New chat")
 
     user_id = db.Column(db.String(36), db.ForeignKey('user.id'), nullable=False)
 
@@ -61,8 +60,9 @@ from flask_login import UserMixin
 
 class LoginSession(db.Model):
     """
-    Sesión de login del usuario (observación básica).
-    1 fila por login. Se cierra en logout (o queda abierta si no hubo logout).
+    A user login session, for basic activity tracking.
+
+    One row per login, closed on logout (and left open when there is none).
     """
     id = db.Column(db.Integer, primary_key=True)
 
@@ -98,9 +98,9 @@ class User(UserMixin, db.Model):
     role = db.Column(db.String(20), default="user")  # user | admin
     is_active = db.Column(db.Boolean, default=True)
 
-    # Control de acceso por departamento (guardarril): lista de slugs de
-    # knowledge_base/<department>/ a los que este usuario tiene acceso.
-    # Semántica resuelta en get_allowed_departments(), no leer este campo directo.
+    # Department access control: the knowledge_base/<department>/ slugs this user
+    # may see. The semantics are resolved in get_allowed_departments(); do not
+    # read this field directly.
     allowed_departments = db.Column(db.JSON, nullable=True)
 
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -122,14 +122,13 @@ class User(UserMixin, db.Model):
 
     def get_allowed_departments(self):
         """
-        Resuelve el alcance de departamentos de este usuario para el prefiltro
-        de seguridad en retrieval (qa_chain._build_scoped_retriever).
+        Resolve this user's department scope for the retrieval security filter.
 
         Returns:
-            None  -> sin restricción (solo admin). Ve todos los departamentos.
-            []    -> sin acceso a ningún departamento (fail closed por defecto:
-                     un usuario "user" sin allowed_departments asignado no ve nada).
-            list  -> restringido exactamente a esos departamentos.
+            None  -> unrestricted, admin only. Sees every department.
+            []    -> no access to any department. Fail-closed by default: a
+                     regular user with no departments assigned sees nothing.
+            list  -> restricted to exactly those departments.
         """
         if self.role == "admin":
             return None

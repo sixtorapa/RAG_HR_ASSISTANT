@@ -1,14 +1,13 @@
 # ─────────────────────────────────────────────────────────────────────────────
 # HR Knowledge Base Assistant — Dockerfile
-# Target: Railway / any Linux container host
-# Python 3.12 slim · sin torch · sin Tesseract
-# (la imagen de Lambda es otra: ver Dockerfile.lambda)
+# Target: Railway, or any Linux container host.
+# Python 3.12 slim, no torch. The Lambda image is separate: see Dockerfile.lambda.
 # ─────────────────────────────────────────────────────────────────────────────
 
-# 3.12 y no 3.11: langchain-aws exige numpy<2 solo en Python <3.12, lo que
-# choca con el numpy>=2.3.0 de requirements-prod.txt. El .venv donde pasan los
-# 61 tests ya es 3.12.13 — con 3.11 la imagen resolvía un grafo de dependencias
-# distinto del que se probaba en local.
+# 3.12 rather than 3.11: langchain-aws pins numpy<2 only below 3.12, which
+# clashes with the numpy>=2.3.0 in requirements-prod.txt. On 3.11 the image
+# resolved a different dependency graph from the one the tests ran against —
+# "works on my machine" in its purest form.
 FROM python:3.12-slim
 
 # ── System dependencies ───────────────────────────────────────────────────────
@@ -21,17 +20,17 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # ── Working directory ─────────────────────────────────────────────────────────
 WORKDIR /app
 
-# ── Install Python deps ───────────────────────────────────────────────────────
-# torch NO se instala: su único uso era FlashrankRerank en qa_chain.py, y el
-# reranker está desactivado por defecto (FLASHRANK_ENABLED=0) porque al medirlo
-# hundía la context precision de 0.86 a 0.64. Arrastraba cientos de MB, y en
-# Lambda el tamaño de la imagen es tiempo de arranque en frío.
-# Para reactivar FlashRank hay que volver a añadirlo con el índice CPU:
+# ── Python dependencies ───────────────────────────────────────────────────────
+# torch is NOT installed. Its only use was FlashrankRerank in qa_chain.py, and
+# the reranker is off by default (FLASHRANK_ENABLED=0) because measuring it
+# dropped context precision from 0.86 to 0.64. It dragged in hundreds of MB, and
+# on Lambda image size is cold-start time.
+# To bring FlashRank back, reinstall it from the CPU index:
 #   pip install torch==2.5.1 --index-url https://download.pytorch.org/whl/cpu
 COPY requirements-prod.txt .
 RUN pip install --no-cache-dir -r requirements-prod.txt
 
-# ── Copy application source ───────────────────────────────────────────────────
+# ── Application source ───────────────────────────────────────────────────
 COPY . .
 
 # ── Runtime environment ───────────────────────────────────────────────────────

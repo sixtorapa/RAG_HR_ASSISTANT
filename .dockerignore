@@ -1,9 +1,9 @@
 .env
 *.db
-# ...excepto la BD analítica de RRHH: son datos de referencia de solo lectura
-# (sql_tool solo admite SELECT/WITH), así que viaja horneada en la imagen igual
-# que el vector store. La BD transaccional —usuarios, sesiones, mensajes— vive
-# en RDS, que es la que sí necesita escritura.
+# ...except the HR analytics database: read-only reference data (sql_tool allows
+# only SELECT/WITH), so it travels baked into the image like the vector store.
+# The transactional database — users, sessions, messages — lives in RDS, which is
+# the one that needs to write.
 !hr_data.db
 __pycache__/
 *.pyc
@@ -12,14 +12,14 @@ __pycache__/
 .gitignore
 instance/
 
-# Entornos virtuales locales: una copia completa de Python que nunca se ejecuta
-# dentro del contenedor (la imagen instala sus dependencias en /usr/local).
-# Medido el 29-jul-2026: 906 MB de la imagen. En Lambda, tamaño = cold start.
+# Local virtualenvs: a full copy of Python that never runs inside the container,
+# since the image installs its dependencies into /usr/local. Measured at 906 MB
+# of the image. On Lambda, size is cold-start time.
 .venv/
 venv/
 env/
 
-# Artefactos de desarrollo
+# Development artefacts
 .pytest_cache/
 .github/
 *.log

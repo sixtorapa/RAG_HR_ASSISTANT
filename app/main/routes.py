@@ -1,10 +1,10 @@
 # app/main/routes.py
 """
-Los endpoints del chat. Nada más.
+The chat endpoints. Nothing else.
 
-El pipeline vive en pipeline.py, los guardarraíles en guards.py, y el resto de
-pantallas en views.py / projects.py / auth.py / admin.py. Este fichero llegó a
-tener 1.590 líneas haciendo las seis cosas a la vez.
+The pipeline lives in pipeline.py, the guardrails in guards.py, and the remaining
+screens in views.py, chats.py, auth.py and admin.py. This file once ran to 1,590
+lines doing all six jobs at once.
 """
 
 import os
@@ -24,13 +24,13 @@ from app.rag_logic.console_logger import ConsoleLogger
 @bp.route("/health")
 def health():
     """
-    Liveness probe. SIN @login_required a propósito: un healthcheck de Docker,
-    de un balanceador o de Lambda no puede iniciar sesión.
+    Liveness probe. Deliberately without @login_required: a healthcheck from
+    Docker, a load balancer or Lambda cannot log in.
 
-    Deliberadamente barato: solo confirma que el proceso está vivo y sirviendo.
-    NO comprueba la base de datos ni el vector store. Un healthcheck que
-    depende de servicios externos convierte una caída momentánea de la BD en
-    un reinicio del contenedor, y eso empeora el incidente en vez de arreglarlo.
+    Deliberately cheap too — it confirms the process is alive and serving, and
+    checks neither the database nor the vector store. A healthcheck that depends
+    on external services turns a brief database blip into a container restart,
+    which makes the incident worse rather than better.
     """
     return {
         "status": "ok",
@@ -40,10 +40,11 @@ def health():
 @login_required
 def ask(session_id):
     """
-    Responder una question en una sesión de chat.
+    Answer a question in a chat session.
 
-    El endpoint solo hace de portero: valida, aplica los dos guardarraíles y
-    delega. Todo el pipeline —router, herramientas, formato— vive en
+    The endpoint is only a doorman: it validates, applies both guardrails and
+    delegates. The whole pipeline lives in _answer_question(), shared with
+    edit_and_resubmit().
     _answer_question(), compartido con edit_and_resubmit().
     """
     session = ChatSession.query.filter_by(id=session_id, user_id=current_user.id).first_or_404()
@@ -55,8 +56,8 @@ def ask(session_id):
 
     model_name = payload.get("model_name") or current_app.config["MODEL_NAME"]
 
-    # Los dos guardarraíles van ANTES del LLM y ANTES de persistir nada: si el
-    # dato llega al modelo o a nuestra propia BD, ya ha salido del perímetro.
+    # Both guardrails run BEFORE the LLM and BEFORE anything is persisted: once
+    # the data reaches the model or our own database, it has left the perimeter.
     blocked = _quota_block() or _dlp_block(question_text, f"user={current_user.id} session={session_id}")
     if blocked:
         return blocked
@@ -83,12 +84,12 @@ def ask(session_id):
 @login_required
 def edit_and_resubmit(message_id):
     """
-    Reescribir una question ya enviada y regenerar la respuesta.
+    Rewrite an already-sent question and regenerate the answer.
 
-    Antes esta función repetía el pipeline entero de ask() —router, bucle de
-    herramientas, formato, persistencia—, unas 270 líneas calcadas. De ese
-    copia-pega salieron los tres `NameError: memory_store` que destapó ruff al
-    reactivar F821: alguien duplicó el bloque y se dejó una línea.
+    This function used to repeat the entire ask() pipeline — router, dispatch
+    loop, formatting, persistence — around 270 duplicated lines. That copy-paste
+    produced the three `NameError: memory_store` crashes ruff exposed when F821
+    was re-enabled: someone duplicated the block and dropped a line.
     Ahora las dos rutas comparten _answer_question().
     """
     user_message = Message.query.filter_by(id=message_id, user_id=current_user.id).first_or_404()
@@ -105,9 +106,9 @@ def edit_and_resubmit(message_id):
     model_name = current_app.config["MODEL_NAME"]
 
     try:
-        # Se borra todo lo posterior a este mensaje —solo del usuario actual— y
-        # se reescribe su contenido. El historial que verá el router es el
-        # anterior a este punto, no el que había cuando se preguntó la primera vez.
+        # Everything after this message is deleted — only the current user's —
+        # and its content rewritten. The history the router sees is what came
+        # before this point, not what existed when it was first asked.
         posteriores = Message.query.filter(
             Message.session_id == session.id,
             Message.user_id == current_user.id,

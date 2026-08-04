@@ -20,16 +20,16 @@ from app.rag_logic.pii_guard import find_sensitive_entities
 
 def _quota_block():
     """
-    Tope diario de preguntas para toda la instalación.
+    Daily question cap for the whole installation.
 
-    Existe porque la demo pública va contra Bedrock, que es pago por uso SIN tope
-    automático: las alarmas de presupuesto de AWS avisan, no cortan. OpenAI es
-    prepago y se frena solo, así que Railway no lo necesita — por eso solo se
-    activa si DAILY_QUESTION_LIMIT está definida y es > 0.
+    It exists because the public demo runs against Bedrock, which is pay-per-use
+    with no automatic ceiling: AWS budget alarms warn, they do not stop. OpenAI is
+    prepaid and stops itself, so Railway does not need this — hence it only
+    activates when DAILY_QUESTION_LIMIT is set and above zero.
 
-    El contador vive en la BASE DE DATOS, no en memoria del proceso: en Lambda
-    cada contenedor tiene su propia memoria, así que un contador en RAM aplicaría
-    el tope "por contenedor" y N contenedores en paralelo lo multiplicarían.
+    The counter lives in the DATABASE, not in process memory: in Lambda each
+    container has its own memory, so a RAM counter would apply the cap per
+    container and N parallel containers would multiply it.
     """
     limit = int(os.environ.get("DAILY_QUESTION_LIMIT", "0") or 0)
     if limit <= 0:
@@ -54,11 +54,11 @@ def _quota_block():
         "quota_limit": limit,
     }), 429
 def _dlp_block(text, context):
-    """Guardarraíl de entrada. Devuelve la respuesta de error, o None si está limpio."""
-    hallazgos = find_sensitive_entities(text)
-    if not hallazgos:
+    """Input guardrail. Returns the error response, or None when clean."""
+    findings = find_sensitive_entities(text)
+    if not findings:
         return None
-    print(f"🚫 DLP: bloqueado {context} — detectado: {sorted({f.kind for f in hallazgos})}")
+    print(f"🚫 DLP: bloqueado {context} — detectado: {sorted({f.kind for f in findings})}")
     return jsonify({
         "error": (
             "Tu mensaje parece contener datos identificativos o financieros "

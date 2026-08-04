@@ -450,7 +450,7 @@
             <form id="deleteChatForm" action="{{ url_for('main.delete_chat', session_id=session.id) }}" method="POST">
                 <button type="button"
                         class="btn btn-light btn-sm text-danger"
-                        title="Eliminar chat"
+                        title="Delete chat"
                         data-bs-toggle="modal"
                         data-bs-target="#deleteChatModal">
                     <i class="bi bi-trash"></i>
@@ -524,7 +524,7 @@
 
         <div class="input-area">
             <div class="input-group">
-                <button class="btn btn-outline-secondary" type="button" id="web-toggle-btn" onclick="toggleWebSearch()" title="Buscar en Web">
+                <button class="btn btn-outline-secondary" type="button" id="web-toggle-btn" onclick="toggleWebSearch()" title="Search the web">
                     <i class="bi bi-globe"></i>
                 </button>
 
@@ -536,7 +536,7 @@
                 <textarea
                     id="user-input"
                     class="form-control bg-light border-start-0"
-                    placeholder="Escribe tu mensaje aquí... (Enter para enviar · Shift+Enter para salto de línea)"
+                    placeholder="Type your message… (Enter to send · Shift+Enter for a new line)"
                     rows="1"
                 ></textarea>
 
@@ -552,7 +552,7 @@
 
             <div class="text-center mt-2 d-flex justify-content-center gap-3">
                 <small class="text-muted" style="font-size: 0.7rem;"><i class="bi bi-cpu"></i> Modelo: {{ model_name or 'Default' }}</small>
-                <small class="text-muted" id="web-status" style="font-size: 0.7rem; display: none;"><i class="bi bi-globe-americas text-primary"></i> Internet Activo</small>
+                <small class="text-muted" id="web-status" style="font-size: 0.7rem; display: none;"><i class="bi bi-globe-americas text-primary"></i> Web search on</small>
             </div>
         </div>
 
@@ -565,15 +565,15 @@
                     <h5 class="modal-title" id="deleteChatModalLabel">
                         <i class="bi bi-trash3 me-2"></i>Eliminar chat
                     </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <p class="mb-1"><strong>¿Seguro que se desea eliminar este chat completo?</strong></p>
-                    <p class="text-muted mb-0" style="font-size:.9rem;">Esta acción no se puede deshacer.</p>
+                    <p class="mb-1"><strong>Delete this entire chat?</strong></p>
+                    <p class="text-muted mb-0" style="font-size:.9rem;">This cannot be undone.</p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-danger" id="confirmDeleteChatBtn">Eliminar</button>
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger" id="confirmDeleteChatBtn">Delete</button>
                 </div>
             </div>
         </div>
@@ -835,7 +835,7 @@
                         </h2>
                         <div id="${collapseId}" class="accordion-collapse collapse" data-bs-parent="#${accId}">
                             <div class="accordion-body">
-                                <div><strong>Documento:</strong> ${escapeHtml(filename)}</div>
+                                <div><strong>Document:</strong> ${escapeHtml(filename)}</div>
                                 <div class="mt-1"><strong>Páginas/Slides utilizados:</strong> ${escapeHtml(locsText)}</div>
                             </div>
                         </div>
@@ -897,7 +897,7 @@
             const userHTML = `
                 <div class="message-row user-row">
                     <div class="avatar avatar-user">
-                        <img src="{{ url_for('static', filename='img/logo-white.svg') }}" alt="Usuario" class="avatar-img">
+                        <img src="{{ url_for('static', filename='img/logo-white.svg') }}" alt="User" class="avatar-img">
                     </div>
                     <div class="d-flex flex-column align-items-end" style="max-width: 100%;">
                         <div class="message-bubble user-bubble">

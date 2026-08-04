@@ -64,7 +64,7 @@ class TestFactoriaDeProveedor:
         with patch.object(llm_factory, "ChatOpenAI") as openai:
             llm_factory.get_llm("gpt-4o-mini", 0.0)
             openai.assert_called_once()
-        assert "no reconocido" in caplog.text
+        assert "not recognised" in caplog.text
 
     def test_traduce_el_modelo_a_un_perfil_de_inferencia_europeo(self, monkeypatch):
         """

@@ -11,7 +11,7 @@ from langchain.schema import AIMessage
 
 
 def _norm(s: str) -> str:
-    """Minúsculas, sin acentos y sin espacios sobrantes."""
+    """Lowercase, accent-stripped, whitespace-trimmed."""
     s = (s or "").strip().lower()
     s = unicodedata.normalize("NFD", s)
     return "".join(c for c in s if unicodedata.category(c) != "Mn")
@@ -21,34 +21,32 @@ def _contains_whole_word(text_norm: str, key: str) -> bool:
     """
     ¿Aparece `key` como palabra completa en `text_norm`?
 
-    `key in text` es SUBCADENA, y ese era el defecto: "suma" casaba dentro
-    de "consumar", "file" dentro de "filete", "hoja" dentro de "hojalata".
-    Peligroso justo aquí porque el camino forzado del router se salta el LLM:
-    un falso positivo desvía la question a la herramienta equivocada sin que
-    nada lo revise.
+    `key in text` is SUBSTRING containment, and that was the defect: "suma"
+    matched inside "consumar", "file" inside "filete", "hoja" inside "hojalata".
+    Dangerous precisely here, because the router's forced path skips the LLM: a
+    false positive sends the question to the wrong tool with nothing reviewing it.
 
-    Se usan `(?<!\\w)` y `(?!\\w)` en vez de `\\b` porque hay keys que
-    empiezan por punto —".xlsx"— y `\\b` no se comporta igual delante de un
-    carácter que no es de palabra.
+    `(?<!\\w)` and `(?!\\w)` are used instead of `\\b` because some keys start
+    with a dot — ".xlsx" — and `\\b` behaves differently before a non-word
+    character.
 
-    Las keys de varias palabras admiten espacios variables: "hoja de calculo"
-    casa también con "hoja  de   calculo".
+    Multi-word keys tolerate variable spacing: "hoja de calculo" also matches
+    "hoja  de   calculo".
 
-    ⚠️ Contrapartida asumida: al exigir palabra completa se pierden las
-    variantes morfológicas. "empleado" ya no casa con "empleados". Por eso las
-    listas de abajo enumeran las formas que interesan —"cobra"/"cobran",
-    "empleados"— en vez de confiar en la coincidencia parcial. Es la decisión
-    correcta: un falso negativo manda la question al LLM, que decide bien; un
-    falso positivo la manda a la herramienta equivocada sin red.
+    ⚠️ Accepted trade-off: requiring whole words loses morphological variants.
+    "empleado" no longer matches "empleados", so the lists below spell out the
+    forms that matter rather than relying on partial matching. It is the right
+    call: a false negative reaches the LLM, which decides well; a false positive
+    reaches the wrong tool with no safety net.
     """
     key_norm = _norm(key)
     if not key_norm:
         return False
 
-    # La guarda solo se pone donde hay frontera de palabra que proteger. Una
-    # key como ".xlsx" va pegada al name del fichero ("ventas.xlsx"), así
-    # que exigir que no la preceda un carácter de palabra la haría imposible
-    # de encontrar. Se mira el primer y el último carácter de la clave.
+    # The guard only goes where there is a word boundary to protect. A key like
+    # ".xlsx" sits against the filename ("sales.xlsx"), so demanding no preceding
+    # word character would make it impossible to find. The first and last
+    # characters of the key decide.
     prefix = r"(?<!\w)" if key_norm[0].isalnum() or key_norm[0] == "_" else ""
     suffix = r"(?!\w)" if key_norm[-1].isalnum() or key_norm[-1] == "_" else ""
 
@@ -94,14 +92,14 @@ def _looks_like_docs_intent(q: str) -> bool:
 
 def _looks_like_excel_intent(q: str) -> bool:
     qn = _norm(q)
-    # Señales fuertes: el usuario habla explícitamente de un fichero Excel/spreadsheet.
+    # Strong signals: the user explicitly names an Excel file or spreadsheet.
     strong_signals = ["excel", ".xlsx", ".xls", "spreadsheet", "hoja de calculo", "hoja de cálculo"]
     if _any_whole_word(qn, strong_signals):
         return True
 
-    # Señales débiles ("tabla", "hoja", "dashboard", "cells") son demasiado genéricas:
-    # se usan igual para pedir results de SQL o resúmenes de docs. Solo cuentan
-    # si además se menciona explícitamente un archivo, o si piden un cálculo sobre un archivo.
+    # Weak signals ("tabla", "hoja", "dashboard", "celdas") are too generic: they
+    # serve SQL results and document summaries just as often. They only count
+    # alongside an explicit file, or a calculation over a file.
     weak_signals = ["sheet", "dashboard", "tabla", "hoja", "cells"]
     calc_signals = ["sum", "suma", "total", "promedio", "average", "median", "percent", "porcentaje"]
     file_signals = ["archivo", "fichero", "file"]
@@ -134,7 +132,7 @@ class AgentRouter:
         llm = get_llm(self.model_name, self.temperature)
         self.llm_with_tools = llm.bind_tools(self.tools)
 
-        # Importante: limitar “excel” a casos con señales claras.
+        # Important: restrict Excel to cases with clear signals.
         system_prompt = f"""You are a ROUTING ORCHESTRATOR for an internal HR & Knowledge Base assistant.
 Your ONLY job is to decide which tool(s) to call based on the user's question.
 
@@ -183,25 +181,25 @@ ROUTE: <route> — <reason in 8-15 words>
         q = (user_input or "").strip()
         qn = _norm(q)
 
-        # 0) vacío / solo símbolos
+        # 0) Empty, or symbols only
         if not qn or re.fullmatch(r"[\W_]+", qn):
             return AIMessage(content="ROUTE: DIRECT — Empty/low-content message.\nHi! Ask me about HR policies (docs) or HR metrics (SQL).")
 
-        # 1) Saludos / gracias
+        # 1) Greetings and acknowledgements
         if _is_greeting(q):
             return AIMessage(content="ROUTE: DIRECT — Greeting detected.\nHi! How can I help you — HR docs (policies) or HR data (SQL)?")
         if _is_thanks(q):
             return AIMessage(content="ROUTE: DIRECT — Acknowledgement.\nYou're welcome! What else can I help you with?")
 
-        # 2) Meta / ayuda
+        # 2) Meta and help
         if _any_whole_word(qn, ["help", "ayuda", "what can you do", "que puedes hacer",
                                 "who are you", "quien eres"]):
             return AIMessage(
                 content="ROUTE: DIRECT — Meta/help request.\nI can answer HR policy questions from internal docs, and HR metrics (salary, headcount, performance) from the HR database. What do you need?"
             )
 
-        # 3) Smalltalk corto (evita LLM + tools en mensajes cortos)
-        #    Regla: si <= 4 palabras y NO parece SQL/Excel/docs, responder directo.
+        # 3) Short smalltalk: four words or fewer with no SQL or Excel signal is
+        #    answered directly, sparing an LLM call and a tool run.
         if len(qn.split()) <= 4 and not _looks_like_sql_intent(q) and not _looks_like_excel_intent(q):
             return AIMessage(
                 content="ROUTE: DIRECT — Short smalltalk; no tools needed.\nGot it — tell me what you want to check (docs or HR data)."
@@ -215,15 +213,14 @@ ROUTE: <route> — <reason in 8-15 words>
         chat_history: List[Any],
         callbacks: Optional[List[Any]] = None,
     ):
-        # ✅ Fast path para evitar que el LLM haga tonterías (Excel con “hi”)
+        # Fast path: stops the LLM doing something silly, like Excel for "hi"
         fast = self._fast_route(user_input)
         if fast is not None:
             return fast
 
-        # ✅ Si parece SQL muy claro, forzamos tool_call SIN pasar por LLM
-        # (menos cost, más determinista). Si ADEMÁS parece pedir context de
-        # documentos (políticas, procedimientos...), encadenamos SQL → DOCS
-        # (modo híbrido ya soportado en routes.py vía sql_context_doc).
+        # A clear SQL intent forces the tool call WITHOUT consulting the LLM:
+        # less cost, more determinism. If the question also asks for document
+        # context — policies, procedures — SQL and DOCS are chained.
         if _looks_like_sql_intent(user_input):
             class _ForcedChoice:
                 def __init__(self, tool_calls):
@@ -235,7 +232,7 @@ ROUTE: <route> — <reason in 8-15 words>
                 calls.append({"name": "chat_with_documents", "args": {"question": user_input}})
             return _ForcedChoice(calls)
 
-        # ✅ Si parece Excel claro, forzamos Excel; si no, el LLM decide entre DOCS/SUMMARY/WEB
+        # A clear Excel intent forces Excel; otherwise the LLM chooses.
         if _looks_like_excel_intent(user_input):
             class _ForcedChoice:
                 def __init__(self, tool_name: str, query: str):

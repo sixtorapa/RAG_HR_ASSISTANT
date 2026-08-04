@@ -145,11 +145,11 @@ class TestMakeChatTitle:
 
     def test_empty_returns_default(self):
         title = self.fn("")
-        assert title == "Nuevo chat"
+        assert title == "New chat"
 
     def test_whitespace_only_returns_default(self):
         title = self.fn("   ")
-        assert title == "Nuevo chat"
+        assert title == "New chat"
 
     def test_newlines_cleaned(self):
         title = self.fn("Pregunta\ncon\nsaltos de línea")

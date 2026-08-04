@@ -47,7 +47,7 @@ def index():
 
     # Si no hay ninguna, crear una nueva (IMPORTANTE: add+commit para evitar Detached)
     if session is None:
-        session = ChatSession(name="Nuevo chat", user_id=current_user.id)
+        session = ChatSession(name="New chat", user_id=current_user.id)
         db.session.add(session)
         db.session.commit()
         sessions_list = [session]  # opcional: para que aparezca inmediatamente

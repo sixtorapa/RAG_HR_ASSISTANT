@@ -9,14 +9,14 @@ load_dotenv()
 class Config:
     SECRET_KEY = os.environ.get("SECRET_KEY") or "change-me-in-production"
 
-    # ── SQLAlchemy (app sessions / users) ──────────────────────────────────
+    # ── SQLAlchemy: users, chat sessions, messages ─────────────────────────
     SQLALCHEMY_DATABASE_URI = (
         os.environ.get("DATABASE_URL")
         or "sqlite:///" + os.path.join(basedir, "app.db")
     )
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
-    # ── HR Analytics DB (toy SQLite, swap for Postgres/Redshift via env) ───
+    # ── HR analytics database (SQLite here; swap via env for Postgres) ─────
     HR_DB_URI = os.environ.get(
         "HR_DB_URI",
         "sqlite:///" + os.path.join(basedir, "hr_data.db"),
@@ -34,16 +34,16 @@ class Config:
         os.path.join(basedir, "docs"),
     )
 
-    # ── Identidad y modelo ──────────────────────────────────────────────────
+    # ── Identity and model ──────────────────────────────────────────────────
     UP_PROJECT_NAME = os.environ.get("UP_PROJECT_NAME", "HR Knowledge Base")
     MODEL_NAME = os.environ.get("MODEL_NAME", "gpt-4o")
 
-    # ── Ajustes del asistente ───────────────────────────────────────────────
-    # Vivían en una columna JSON de la tabla `project`, que no era más que una
-    # copia de la configuración capaz de desincronizarse de ella. Aquí son lo
-    # que siempre fueron: configuración (12-factor, como el resto de la app).
-    #   SYSTEM_INSTRUCTION -> se antepone al prompt de respuesta documental
-    #   SQL_CONTEXT        -> descripción del esquema para el generador de SQL
+    # ── Assistant settings ──────────────────────────────────────────────────
+    # These lived in a JSON column of the `project` table, which was no more than
+    # a copy of the configuration, able to drift from it. Here they are what they
+    # always were: configuration.
+    #   SYSTEM_INSTRUCTION -> prepended to the document answer prompt
+    #   SQL_CONTEXT        -> schema description for the SQL generator
     SYSTEM_INSTRUCTION = os.environ.get("SYSTEM_INSTRUCTION", "")
     SQL_CONTEXT = os.environ.get("SQL_CONTEXT", "")
     UP_ADMIN_TOKEN = os.environ.get("UP_ADMIN_TOKEN", "")

@@ -1,11 +1,10 @@
 # app/rag_logic/llm_factory.py
 """
-Punto ÚNICO donde se crean los clientes de LLM y de embeddings.
+The SINGLE place where LLM and embedding clients are created.
 
-Antes de este módulo, 19 sitios repartidos por 10 ficheros instanciaban
-`ChatOpenAI` / `OpenAIEmbeddings` directamente. Cambiar de provider obligaba
-a editar los 19. Ahora el resto del código pide "dame un modelo" y no sabe
-—ni le importa— quién se lo sirve.
+Before this module, 19 sites across 10 files instantiated `ChatOpenAI` and
+`OpenAIEmbeddings` directly, so changing provider meant editing all 19. The rest
+of the code now asks for a model and neither knows nor cares who serves it.
 """
 
 import logging
@@ -16,9 +15,9 @@ from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 
 logger = logging.getLogger(__name__)
 
-# Equivalencias OpenAI → Bedrock. IDs verificados en eu-west-1 el 29-jul-2026:
-# son inference profiles europeos (prefijo "eu."), no IDs de modelo a secas.
-# Con "anthropic.claude-..." sin prefijo, Bedrock responde ValidationException.
+# OpenAI → Bedrock equivalences. These IDs are European inference profiles (the
+# "eu." prefix), not bare model IDs: a bare "anthropic.claude-..." makes Bedrock
+# answer with ValidationException.
 BEDROCK_MODEL_MAP = {
     "gpt-4o-mini": "eu.anthropic.claude-haiku-4-5-20251001-v1:0",
     "gpt-4o":      "eu.anthropic.claude-sonnet-4-6",
@@ -29,27 +28,27 @@ DEFAULT_EMBEDDING_MODEL = "text-embedding-3-small"
 
 def _provider() -> str:
     """
-    Proveedor activo: 'openai' (por defecto) o 'bedrock'.
+    The active provider: 'openai' (default) or 'bedrock'.
 
-    Se lee en CADA call, no al importar el módulo: así un test o un script
-    pueden cambiar el provider sin reimportar nada.
+    Read on EVERY call rather than at import time, so a test or a script can
+    change provider without re-importing anything.
 
-    El defecto 'openai' no es casual — si alguien despliega sin definir la
-    variable, el sistema se comporta exactamente como antes de esta migración.
+    The 'openai' default is not incidental: deploying without setting the
+    variable behaves exactly as the system did before the migration existed.
 
-    Se normaliza con tolerancia porque una variable de entorno puede llegar de
-    muchos sitios (.env, panel de Railway, consola de Lambda, export en shell) y
-    cada uno la trata distinto: ' Bedrock ', "BEDROCK", 'bedrock'.
-    Las comillas se quitan por el mismo motivo por el que evaluate_rag.py ya
-    saneaba OPENAI_API_KEY: llegan pegadas más a menudo de lo que parece.
+    Normalisation is tolerant because an environment variable arrives from many
+    places — a .env file, the Railway panel, the Lambda console, a shell export —
+    and each treats it differently: ' Bedrock ', "BEDROCK", 'bedrock'. Quotes are
+    stripped for the same reason the evaluation script already sanitised
+    OPENAI_API_KEY: they come attached more often than you would think.
 
-    Lo que NO se hace: aceptar alias tipo 'aws' o 'amazon'. El value válido debe
-    poder leerse en este fichero; un value no reconocido cae a OpenAI y AVISA,
-    que es preferible a una lista de sinónimos que nadie mantiene.
+    What is NOT done: accepting aliases like 'aws' or 'amazon'. A valid value must
+    be readable in this file; an unrecognised one falls back to OpenAI and WARNS,
+    which beats a list of synonyms nobody maintains.
     """
-    # Normalizar PRIMERO y aplicar el defecto DESPUÉS: si se hace al revés, un
-    # value de solo espacios ('   ') no cae al defecto —es truthy— y acaba
-    # resolviendo a cadena vacía.
+    # Normalise FIRST and apply the default AFTER: the other way round, a
+    # whitespace-only value ('   ') is truthy, misses the default and resolves to
+    # an empty string.
     value = (os.environ.get("LLM_PROVIDER") or "").strip()
     value = value.strip('"').strip("'").strip().lower()
     return value or "openai"
@@ -57,37 +56,37 @@ def _provider() -> str:
 
 def _to_bedrock_id(model_name: str) -> str:
     """
-    Traduce un name de modelo de OpenAI al ID equivalente en Bedrock.
+    Translate an OpenAI model name into its Bedrock equivalent.
 
-    Si ya viene un ID de Bedrock (empieza por 'eu.', 'global.' o 'anthropic.'),
-    se deja pasar tal cual.
+    A value that is already a Bedrock ID ('eu.', 'global.' or 'anthropic.') passes
+    through untouched.
 
-    Un modelo desconocido revienta AQUÍ, con name y apellido. La alternativa
-    —caer a un modelo por defecto— haría indistinguible "pedí este modelo" de
-    "me dieron otro", que es el mismo fallo silencioso de cost_calculator.py.
+    An unknown model raises HERE, by name. Falling back to a default would make
+    "I asked for this model" indistinguishable from "I was given another" — the
+    same silent failure mode cost_calculator.py was fixed for.
     """
     if model_name.startswith(("eu.", "global.", "anthropic.")):
         return model_name
 
     if model_name not in BEDROCK_MODEL_MAP:
         raise ValueError(
-            f"No hay equivalente en Bedrock para el modelo '{model_name}'. "
-            f"Conocidos: {sorted(BEDROCK_MODEL_MAP)}. "
-            f"Añádelo a BEDROCK_MODEL_MAP en llm_factory.py."
+            f"No Bedrock equivalent for model '{model_name}'. "
+            f"Known: {sorted(BEDROCK_MODEL_MAP)}. "
+            f"Add it to BEDROCK_MODEL_MAP in llm_factory.py."
         )
     return BEDROCK_MODEL_MAP[model_name]
 
 
 def get_llm(model_name: str, temperature: float = 0.0, **kwargs):
     """
-    Devuelve un cliente de chat listo para usar.
+    Return a chat client ready to use.
 
-    No devuelve el NOMBRE de un modelo: devuelve un objeto con métodos
-    (`.invoke()`, `.bind_tools()`, ...). Quien llama no sabe de qué provider es.
+    Not the NAME of a model: an object with methods (`.invoke()`,
+    `.bind_tools()`, ...). The caller does not know which provider served it.
 
-    `**kwargs` reenvía lo que cada sitio necesite (`callbacks`,
-    `callback_manager`, ...). Sin esto, esos argumentos se perderían en
-    silencio y dejaría de verse el logging por consola.
+    `**kwargs` forwards whatever each site needs (`callbacks`,
+    `callback_manager`, ...). Without it those arguments vanish silently and
+    console logging stops appearing.
     """
     provider = _provider()
 
@@ -101,7 +100,7 @@ def get_llm(model_name: str, temperature: float = 0.0, **kwargs):
 
     if provider != "openai":
         logger.warning(
-            "LLM_PROVIDER='%s' no reconocido; usando OpenAI.", provider
+            "LLM_PROVIDER='%s' not recognised; using OpenAI.", provider
         )
 
     return ChatOpenAI(model_name=model_name, temperature=temperature, **kwargs)
@@ -109,12 +108,11 @@ def get_llm(model_name: str, temperature: float = 0.0, **kwargs):
 
 def get_embeddings(model: str = None, **kwargs):
     """
-    Devuelve el cliente de embeddings. SIEMPRE OpenAI, ignore LLM_PROVIDER.
+    Return the embeddings client. ALWAYS OpenAI, ignoring LLM_PROVIDER.
 
-    Decisión consciente: los vectores guardados en Chroma se generaron con
-    `text-embedding-3-small`. Cambiar el modelo de embeddings invalida el
-    índice entero (obliga a reingerir el corpus) y además invalidaría las
-    métricas de evaluación ya medidas. La generación se migra; el espacio
-    vectorial no se toca.
+    A deliberate decision: the vectors in Chroma were built with
+    `text-embedding-3-small`. Changing the embedding model invalidates the whole
+    index — forcing a full re-ingest — and invalidates the evaluation numbers
+    already measured. Generation migrates; the vector space does not.
     """
     return OpenAIEmbeddings(model=model or DEFAULT_EMBEDDING_MODEL, **kwargs)

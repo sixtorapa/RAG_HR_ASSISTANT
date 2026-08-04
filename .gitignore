@@ -42,10 +42,10 @@ instance/
 # 🐳 Docker
 # ─────────────────────────────────────────────
 *.log
-# vector_store/ SE MANTIENE TRACKEADO A PROPÓSITO.
-# Se intentó ignorarlo el 4-ago-2026 —son 16 MB de binarios en cada diff— y
-# rompe el despliegue: el Dockerfile de Railway hace `COPY . .` y toma el
-# índice del repositorio, así que ignorarlo despliega una app sin índice y las
-# preguntas documentales devuelven cero, sin ningún error que lo delate.
-# Para poder ignorarlo antes habría que construir el índice en el arranque o
-# montarlo en un volumen; mientras el índice viaje en la imagen, va en git.
+# vector_store/ IS TRACKED ON PURPOSE.
+# Ignoring it was tried — 16 MB of binaries in every diff — and it breaks the
+# deployment: the Railway Dockerfile does `COPY . .` and takes the index from the
+# repository, so ignoring it ships an app with no index, and document questions
+# return nothing with no error to give it away.
+# Ignoring it would first require building the index at startup or mounting it in
+# a volume. While the index travels in the image, it stays in git.

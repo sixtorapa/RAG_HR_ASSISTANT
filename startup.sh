@@ -2,18 +2,17 @@
 set -e
 
 echo ">>> Checking database state..."
-# Las migraciones antiguas de este proyecto son ALTER TABLE que asumen que la
-# tabla ya existe (se crearon pensando en una BD ya inicializada por
-# db.create_all(), no desde cero). Por eso no podemos simplemente correr
-# "flask db upgrade" siempre: en una base de datos nueva, replicaría esas
-# migraciones contra tablas que create_all() ya habría creado con el esquema
-# final, fallando con "column already exists". Así que decidimos según si la
-# tabla "user" ya existe:
-#   - No existe (BD nueva)      -> create_all() + stamp head (crea todo de una vez)
-#   - Ya existe (BD persistente) -> flask db upgrade (aplica solo lo pendiente de verdad)
-# set +e/-e: este chequeo usa el código de salida (0/1) como señal a propósito
-# (BD existente / BD nueva) — con "set -e" activo, un exit 1 aquí mata el script
-# entero antes de poder leer "$?", aunque no sea un error real.
+# The older migrations in this project are ALTER TABLE statements that assume the
+# table already exists: they were written against a database initialised by
+# db.create_all(), not one built from scratch. So "flask db upgrade" cannot be
+# run unconditionally — on a fresh database it would replay those migrations
+# against tables create_all() had already created with the final schema, failing
+# with "column already exists". The branch is decided by whether "user" exists:
+#   - absent  (fresh database)      -> create_all() + stamp head, all at once
+#   - present (existing database)   -> flask db upgrade, applying what is pending
+# set +e/-e: this check uses the exit code (0/1) as a signal on purpose. With
+# "set -e" active, an exit 1 here would kill the script before "$?" can be read,
+# even though it is not an error.
 set +e
 python - <<'PYEOF'
 import sys
@@ -50,8 +49,8 @@ python create_admin.py
 echo ">>> Starting gunicorn..."
 echo ">>> ENV: WEB_CONCURRENCY=${WEB_CONCURRENCY:-<unset>} GUNICORN_CMD_ARGS=${GUNICORN_CMD_ARGS:-<unset>} GUNICORN_WORKERS=${GUNICORN_WORKERS:-<unset>} GUNICORN_THREADS=${GUNICORN_THREADS:-<unset>}"
 
-# Railway a veces mete WEB_CONCURRENCY; nosotros CAPAMOS por defecto a 1
-# (si quieres más, que sea explícito con GUNICORN_WORKERS)
+# Railway sometimes injects WEB_CONCURRENCY. Default to a single worker here;
+# more has to be asked for explicitly through GUNICORN_WORKERS.
 WORKERS="${GUNICORN_WORKERS:-1}"
 THREADS="${GUNICORN_THREADS:-1}"
 
