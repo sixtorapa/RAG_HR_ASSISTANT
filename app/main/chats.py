@@ -61,10 +61,7 @@ def reindex():
         flash(f"Error reindexando: {e}", "danger")
         return redirect(url_for("main.index"))
 
-    try:
-        chain_cache.clear()
-    except Exception:
-        pass
+    _clear_chain_cache()
 
     if ok:
         flash("✅ Índice actualizado correctamente.", "success")
