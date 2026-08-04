@@ -7,6 +7,8 @@
 ![Docker](https://img.shields.io/badge/docker-ready-blue)
 ![AWS](https://img.shields.io/badge/AWS-Lambda%20%2B%20Bedrock-orange)
 ![LangSmith](https://img.shields.io/badge/observability-LangSmith-purple)
+![Tests](https://img.shields.io/badge/tests-295%20passing-brightgreen)
+![License](https://img.shields.io/badge/license-MIT-blue)
 
 **Live demo (AWS):** https://81a5fl8aji.execute-api.eu-west-1.amazonaws.com
 Sign in with `admin` / `admin1234`. It is a public demo on synthetic HR data — there is
@@ -385,4 +387,8 @@ the teardown commands.
 
 ## License
 
-No license file yet — all rights reserved for now.
+MIT — see [LICENSE](LICENSE).
+
+The knowledge base under `knowledge_base/` and the HR database are **synthetic**, written
+for this project. There is no real employee data anywhere in the repository or behind the
+public demo.
