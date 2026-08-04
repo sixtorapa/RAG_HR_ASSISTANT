@@ -34,8 +34,18 @@ class Config:
         os.path.join(basedir, "docs"),
     )
 
-    # ── Project metadata ────────────────────────────────────────────────────
+    # ── Identidad y modelo ──────────────────────────────────────────────────
     UP_PROJECT_NAME = os.environ.get("UP_PROJECT_NAME", "HR Knowledge Base")
+    MODEL_NAME = os.environ.get("MODEL_NAME", "gpt-4o")
+
+    # ── Ajustes del asistente ───────────────────────────────────────────────
+    # Vivían en una columna JSON de la tabla `project`, que no era más que una
+    # copia de la configuración capaz de desincronizarse de ella. Aquí son lo
+    # que siempre fueron: configuración (12-factor, como el resto de la app).
+    #   SYSTEM_INSTRUCTION -> se antepone al prompt de respuesta documental
+    #   SQL_CONTEXT        -> descripción del esquema para el generador de SQL
+    SYSTEM_INSTRUCTION = os.environ.get("SYSTEM_INSTRUCTION", "")
+    SQL_CONTEXT = os.environ.get("SQL_CONTEXT", "")
     UP_ADMIN_TOKEN = os.environ.get("UP_ADMIN_TOKEN", "")
 
     # ── LLM ─────────────────────────────────────────────────────────────────

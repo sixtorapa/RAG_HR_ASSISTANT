@@ -243,7 +243,3 @@ Return between 6 and 12 bullet points:
 
 # ── Legacy alias ──────────────────────────────────────────────────────────────
 
-def summarize_project_documents(vector_store_path: str, model_name: str):
-    """[DEPRECATED] Use resumir_documentos_proyecto() instead. Kept for backwards compatibility."""
-    result = resumir_documentos_proyecto(vector_store_path, model_name)
-    return {"output_text": result["texto_salida"], "source_documents": result["documentos_fuente"]}

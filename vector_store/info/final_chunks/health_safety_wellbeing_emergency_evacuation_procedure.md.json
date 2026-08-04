@@ -3,9 +3,9 @@
   "num_chunks": 3,
   "chunks": [
     {
-      "text": "SOURCE: health_safety_wellbeing/emergency_evacuation_procedure.md\nTITLE: Procedimiento de Evacuación de Emergencia\n\n[PÁGINA ?]\n# Emergency Evacuation Procedure\n\n## 1. Scope\n\nThis procedure applies to all office locations and covers fire, gas leak, structural concern, or any situation requiring immediate evacuation.\n\n## 2. On Hearing the Alarm\n\n1. Stop work immediately, do not finish \"just one more thing\"\n2. Leave personal belongings behind unless they are within immediate reach\n3. Use the nearest marked exit — do not use elevators\n4. Proceed to the designated assembly point (posted on the safety notice near each exit)\n5. Wait for the floor warden to confirm headcount before leaving the assembly point\n\n## 3. Floor Wardens\n\nEach floor has a designated floor warden and a backup, listed on the safety notice board. Wardens are responsible for sweeping their floor (including meeting rooms and restrooms) and confirming evacuation before reporting to the assembly point lead.\n\n## 4. Visitors and Contractors\n\nHosts are responsible for guiding their visitors to the assembly point and including them in the headcount — visitors do not know the building layout and should never be left to find their own way out.\n\n## 5. Employees Requiring Assistance\n\nEmployees who may need assistance evacuating (mobility, temporary injury) should inform Facilities in advance so a personal emergency evacuation plan (PEEP) can be set up; this is confidential and only shared with the relevant floor warden.\n\n## 6. Drills\n\nFire drills are run at least twice a year, unannounced in timing but always during core working hours. Participation is mandatory — treat every drill as if it were real.\n\n## 7. After an Evacuation\n\nDo not re-enter the building until explicitly cleared by emergency services or Facilities. Any real evacuation is logged through the Incident Reporting Procedure regardless of cause.",
+      "text": "SOURCE: health_safety_wellbeing/emergency_evacuation_procedure.md\nTITLE: Procedimiento de evacuación de emergencia en oficinas\nSUMMARY: Este procedimiento establece las pautas para la evacuación en caso de emergencias como incendios o fugas de gas. Los empleados deben dejar pertenencias y usar las salidas marcadas, dirigiéndose al punto de reunión designado. Se realizan simulacros de evacuación al menos dos veces al año para asegurar la preparación de todos los empleados.\n\n[PÁGINA ?]\n# Emergency Evacuation Procedure\n\n## 1. Scope\n\nThis procedure applies to all office locations and covers fire, gas leak, structural concern, or any situation requiring immediate evacuation.\n\n## 2. On Hearing the Alarm\n\n1. Stop work immediately, do not finish \"just one more thing\"\n2. Leave personal belongings behind unless they are within immediate reach\n3. Use the nearest marked exit — do not use elevators\n4. Proceed to the designated assembly point (posted on the safety notice near each exit)\n5. Wait for the floor warden to confirm headcount before leaving the assembly point\n\n## 3. Floor Wardens\n\nEach floor has a designated floor warden and a backup, listed on the safety notice board. Wardens are responsible for sweeping their floor (including meeting rooms and restrooms) and confirming evacuation before reporting to the assembly point lead.\n\n## 4. Visitors and Contractors\n\nHosts are responsible for guiding their visitors to the assembly point and including them in the headcount — visitors do not know the building layout and should never be left to find their own way out.\n\n## 5. Employees Requiring Assistance\n\nEmployees who may need assistance evacuating (mobility, temporary injury) should inform Facilities in advance so a personal emergency evacuation plan (PEEP) can be set up; this is confidential and only shared with the relevant floor warden.\n\n## 6. Drills\n\nFire drills are run at least twice a year, unannounced in timing but always during core working hours. Participation is mandatory — treat every drill as if it were real.\n\n## 7. After an Evacuation\n\nDo not re-enter the building until explicitly cleared by emergency services or Facilities. Any real evacuation is logged through the Incident Reporting Procedure regardless of cause.",
       "metadata": {
-        "source": "/home/sparras/trabajo/RAG_HR_ASSISTANT/knowledge_base/health_safety_wellbeing/emergency_evacuation_procedure.md",
+        "source": "/home/sixtorapa/Aprendizaje/RAG_HR_ASSISTANT/knowledge_base/health_safety_wellbeing/emergency_evacuation_procedure.md",
         "relative_path": "health_safety_wellbeing/emergency_evacuation_procedure.md",
         "folder_context": "health_safety_wellbeing",
         "filename": "emergency_evacuation_procedure.md",
@@ -19,15 +19,15 @@
         "chunk_id": "2f1eaa6a6c7429ff",
         "chunk_type": "macro",
         "has_children": true,
-        "semantic_headline": "Procedimiento de Evacuación de Emergencia",
-        "semantic_summary": "Este procedimiento cubre evacuaciones por incendios, fugas de gas y otros peligros. Los empleados deben dejar pertenencias y usar las salidas marcadas, dirigiéndose al punto de reunión designado. Se realizan simulacros de evacuación al menos dos veces al año.",
+        "semantic_headline": "Procedimiento de evacuación de emergencia en oficinas",
+        "semantic_summary": "Este procedimiento establece las pautas para la evacuación en caso de emergencias como incendios o fugas de gas. Los empleados deben dejar pertenencias y usar las salidas marcadas, dirigiéndose al punto de reunión designado. Se realizan simulacros de evacuación al menos dos veces al año para asegurar la preparación de todos los empleados.",
         "contains_metrics": false,
         "contains_list": true,
         "context_where": "health_safety_wellbeing/emergency_evacuation_procedure.md"
       }
     },
     {
-      "text": "SOURCE: health_safety_wellbeing/emergency_evacuation_procedure.md\nTITLE: Procedimiento de Evacuación de Emergencia\n\n[PÁGINA ?]\n# Emergency Evacuation Procedure\n\n## 1. Scope\n\nThis procedure applies to all office locations and covers fire, gas leak, structural concern, or any situation requiring immediate evacuation.\n\n## 2. On Hearing the Alarm\n\n1. Stop work immediately, do not finish \"just one more thing\"\n2. Leave personal belongings behind unless they are within immediate reach\n3. Use the nearest marked exit — do not use elevators\n4. Proceed to the designated assembly point (posted on the safety notice near each exit)\n5. Wait for the floor warden to confirm headcount before leaving the assembly point\n\n## 3. Floor Wardens\n\nEach floor has a designated floor warden and a backup, listed on the safety notice board. Wardens are responsible for sweeping their floor (including meeting rooms and restrooms) and confirming evacuation before reporting to the assembly point lead.\n\n## 4. Visitors and Contractors\n\nHosts are responsible for guiding their visitors to the assembly point and including them in the headcount — visitors do not know the building layout and should never be left to find their own way out.\n\n## 5. Employees Requiring Assistance",
+      "text": "SOURCE: health_safety_wellbeing/emergency_evacuation_procedure.md\nTITLE: Procedimiento de evacuación de emergencia en oficinas\nSUMMARY: Este procedimiento establece las pautas para la evacuación en caso de emergencias como incendios o fugas de gas. Los empleados deben dejar pertenencias y usar las salidas marcadas, dirigiéndose al punto de reunión designado. Se realizan simulacros de evacuación al menos dos veces al año para asegurar la preparación de todos los empleados.\n\n[PÁGINA ?]\n# Emergency Evacuation Procedure\n\n## 1. Scope\n\nThis procedure applies to all office locations and covers fire, gas leak, structural concern, or any situation requiring immediate evacuation.\n\n## 2. On Hearing the Alarm\n\n1. Stop work immediately, do not finish \"just one more thing\"\n2. Leave personal belongings behind unless they are within immediate reach\n3. Use the nearest marked exit — do not use elevators\n4. Proceed to the designated assembly point (posted on the safety notice near each exit)\n5. Wait for the floor warden to confirm headcount before leaving the assembly point\n\n## 3. Floor Wardens\n\nEach floor has a designated floor warden and a backup, listed on the safety notice board. Wardens are responsible for sweeping their floor (including meeting rooms and restrooms) and confirming evacuation before reporting to the assembly point lead.\n\n## 4. Visitors and Contractors\n\nHosts are responsible for guiding their visitors to the assembly point and including them in the headcount — visitors do not know the building layout and should never be left to find their own way out.\n\n## 5. Employees Requiring Assistance",
       "metadata": {
         "chunk_type": "micro",
         "parent_chunk_id": "2f1eaa6a6c7429ff",
@@ -37,15 +37,15 @@
         "pages_in_chunk": "",
         "chunking": "micro_token_split",
         "semantic_source": "health_safety_wellbeing/emergency_evacuation_procedure.md",
-        "source": "/home/sparras/trabajo/RAG_HR_ASSISTANT/knowledge_base/health_safety_wellbeing/emergency_evacuation_procedure.md",
+        "source": "/home/sixtorapa/Aprendizaje/RAG_HR_ASSISTANT/knowledge_base/health_safety_wellbeing/emergency_evacuation_procedure.md",
         "source_file": "",
         "relative_path": "health_safety_wellbeing/emergency_evacuation_procedure.md",
         "filename": "emergency_evacuation_procedure.md",
         "file_stem": "emergency_evacuation_procedure",
         "file_type": "",
         "folder_context": "health_safety_wellbeing",
-        "semantic_headline": "Procedimiento de Evacuación de Emergencia",
-        "semantic_summary": "Este procedimiento cubre evacuaciones por incendios, fugas de gas y otros peligros. Los empleados deben dejar pertenencias y usar las salidas marcadas, dirigiéndose al punto de reunión designado. Se realizan simulacros de evacuación al menos dos veces al año.",
+        "semantic_headline": "Procedimiento de evacuación de emergencia en oficinas",
+        "semantic_summary": "Este procedimiento establece las pautas para la evacuación en caso de emergencias como incendios o fugas de gas. Los empleados deben dejar pertenencias y usar las salidas marcadas, dirigiéndose al punto de reunión designado. Se realizan simulacros de evacuación al menos dos veces al año para asegurar la preparación de todos los empleados.",
         "word_count": 185,
         "char_count": 1138,
         "contains_metrics": false,
@@ -54,7 +54,7 @@
       }
     },
     {
-      "text": "SOURCE: health_safety_wellbeing/emergency_evacuation_procedure.md\nTITLE: Procedimiento de Evacuación de Emergencia\n\n## 4. Visitors and Contractors\n\nHosts are responsible for guiding their visitors to the assembly point and including them in the headcount — visitors do not know the building layout and should never be left to find their own way out.\n\n## 5. Employees Requiring Assistance\n\nEmployees who may need assistance evacuating (mobility, temporary injury) should inform Facilities in advance so a personal emergency evacuation plan (PEEP) can be set up; this is confidential and only shared with the relevant floor warden.\n\n## 6. Drills\n\nFire drills are run at least twice a year, unannounced in timing but always during core working hours. Participation is mandatory — treat every drill as if it were real.\n\n## 7. After an Evacuation\n\nDo not re-enter the building until explicitly cleared by emergency services or Facilities. Any real evacuation is logged through the Incident Reporting Procedure regardless of cause.",
+      "text": "SOURCE: health_safety_wellbeing/emergency_evacuation_procedure.md\nTITLE: Procedimiento de evacuación de emergencia en oficinas\nSUMMARY: Este procedimiento establece las pautas para la evacuación en caso de emergencias como incendios o fugas de gas. Los empleados deben dejar pertenencias y usar las salidas marcadas, dirigiéndose al punto de reunión designado. Se realizan simulacros de evacuación al menos dos veces al año para asegurar la preparación de todos los empleados.\n\n## 4. Visitors and Contractors\n\nHosts are responsible for guiding their visitors to the assembly point and including them in the headcount — visitors do not know the building layout and should never be left to find their own way out.\n\n## 5. Employees Requiring Assistance\n\nEmployees who may need assistance evacuating (mobility, temporary injury) should inform Facilities in advance so a personal emergency evacuation plan (PEEP) can be set up; this is confidential and only shared with the relevant floor warden.\n\n## 6. Drills\n\nFire drills are run at least twice a year, unannounced in timing but always during core working hours. Participation is mandatory — treat every drill as if it were real.\n\n## 7. After an Evacuation\n\nDo not re-enter the building until explicitly cleared by emergency services or Facilities. Any real evacuation is logged through the Incident Reporting Procedure regardless of cause.",
       "metadata": {
         "chunk_type": "micro",
         "parent_chunk_id": "2f1eaa6a6c7429ff",
@@ -64,15 +64,15 @@
         "pages_in_chunk": "",
         "chunking": "micro_token_split",
         "semantic_source": "health_safety_wellbeing/emergency_evacuation_procedure.md",
-        "source": "/home/sparras/trabajo/RAG_HR_ASSISTANT/knowledge_base/health_safety_wellbeing/emergency_evacuation_procedure.md",
+        "source": "/home/sixtorapa/Aprendizaje/RAG_HR_ASSISTANT/knowledge_base/health_safety_wellbeing/emergency_evacuation_procedure.md",
         "source_file": "",
         "relative_path": "health_safety_wellbeing/emergency_evacuation_procedure.md",
         "filename": "emergency_evacuation_procedure.md",
         "file_stem": "emergency_evacuation_procedure",
         "file_type": "",
         "folder_context": "health_safety_wellbeing",
-        "semantic_headline": "Procedimiento de Evacuación de Emergencia",
-        "semantic_summary": "Este procedimiento cubre evacuaciones por incendios, fugas de gas y otros peligros. Los empleados deben dejar pertenencias y usar las salidas marcadas, dirigiéndose al punto de reunión designado. Se realizan simulacros de evacuación al menos dos veces al año.",
+        "semantic_headline": "Procedimiento de evacuación de emergencia en oficinas",
+        "semantic_summary": "Este procedimiento establece las pautas para la evacuación en caso de emergencias como incendios o fugas de gas. Los empleados deben dejar pertenencias y usar las salidas marcadas, dirigiéndose al punto de reunión designado. Se realizan simulacros de evacuación al menos dos veces al año para asegurar la preparación de todos los empleados.",
         "word_count": 146,
         "char_count": 909,
         "contains_metrics": false,

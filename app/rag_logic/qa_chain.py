@@ -56,6 +56,34 @@ def _combine_filters(*filters: Optional[dict]) -> Optional[dict]:
     return {"$and": present}
 
 
+# ==================== FILTRO DE GRANULARIDAD (macro vs micro) ====================
+# La ingesta indexa DOS tamaños del mismo texto en la misma colección: macro
+# (páginas agrupadas, ~350 palabras) y micro (250 tokens, con parent_chunk_id).
+# Medido el 3-ago-2026 sobre el índice real: **153 de los 154 micro son subcadena
+# literal de su macro**. Es decir, el mismo contenido compite consigo mismo en
+# cada búsqueda, y cuando gana dos veces, el LLM recibe el mismo texto duplicado.
+# En cuatro preguntas del golden set, el 21% de los caracteres recuperados eran
+# repeticiones — y hasta el 56% en las que caen sobre un solo documento.
+#
+# El diseño parent-child dice "busca por el hijo, que es preciso, y cita por el
+# padre, que tiene el contexto". Buscar por los dos es justo lo que ese diseño
+# no dice. Este filtro aplica la mitad que sí se puede aplicar hoy.
+#
+# Se controla por variable de entorno para poder medirlo y revertirlo sin tocar
+# código, igual que FLASHRANK_ENABLED:
+#   RETRIEVAL_CHUNK_TYPE=micro  (por defecto) — solo hijos
+#   RETRIEVAL_CHUNK_TYPE=macro                — solo padres
+#   RETRIEVAL_CHUNK_TYPE=all                  — comportamiento anterior
+def _chunk_type_filter() -> Optional[dict]:
+    valor = (os.environ.get("RETRIEVAL_CHUNK_TYPE") or "micro").strip().lower()
+    if valor in ("all", "any", ""):
+        return None
+    if valor not in ("micro", "macro"):
+        print(f"⚠️ RETRIEVAL_CHUNK_TYPE='{valor}' no reconocido; usando 'micro'.")
+        valor = "micro"
+    return {"chunk_type": valor}
+
+
 def _build_scoped_retriever(
     vector_store: Chroma,
     values: List[str],
@@ -87,7 +115,7 @@ def _build_scoped_retriever(
         ({metadata_field: norm_values[0]} if len(norm_values) == 1 else {metadata_field: {"$in": norm_values}})
         if norm_values else None
     )
-    chroma_filter = _combine_filters(functional_filter, security_filter)
+    chroma_filter = _combine_filters(functional_filter, security_filter, _chunk_type_filter())
 
     if not chroma_filter:
         return vector_store.as_retriever(
@@ -247,6 +275,83 @@ class TwoPassDocShortlistRetriever(BaseRetriever):
 
         scoped_retriever = self.scoped_retriever_factory(winners, self.max_docs)
         return scoped_retriever.get_relevant_documents(query)
+
+
+# ==================== EXPANSIÓN HIJO → PADRE ====================
+
+class ParentExpansionRetriever(BaseRetriever):
+    """
+    Busca por el hijo y devuelve el padre.
+
+    Es la mitad que faltaba de la arquitectura parent-child. La ingesta ya
+    guardaba `parent_chunk_id` en cada micro-chunk, pero nadie lo usaba: la
+    búsqueda iba contra los dos tamaños a la vez y el mismo texto competía
+    consigo mismo (153 de 154 micro son subcadena literal de su macro).
+
+    La tensión del chunking es conocida: el trozo pequeño se RECUPERA mejor
+    —su embedding es específico y tiene menos ruido— pero RESPONDE peor,
+    porque le falta contexto. En vez de buscar el tamaño mágico, se usan los
+    dos para lo que cada uno hace bien: se busca con el hijo y se entrega el
+    padre.
+
+    El efecto sobre la precisión es directo: varios hijos del mismo padre
+    colapsan en UNA sola entrada, así que desaparece la redundancia que
+    medimos (21% de los caracteres recuperados eran texto repetido, hasta un
+    56% en preguntas sobre un solo documento).
+
+    El orden se conserva: la posición del padre la fija su primer hijo, así
+    que el ranking del retriever de abajo no se pierde.
+
+    Se desactiva con PARENT_EXPANSION=0.
+    """
+
+    base_retriever: BaseRetriever
+    vector_store: Chroma
+    max_docs: int = 12
+
+    def _buscar_padre(self, parent_id: str) -> Optional[Document]:
+        try:
+            data = self.vector_store.get(
+                where={"chunk_id": parent_id},
+                include=["documents", "metadatas"],
+                limit=1,
+            )
+            textos = data.get("documents") or []
+            metas = data.get("metadatas") or []
+            if textos:
+                return Document(page_content=textos[0], metadata=(metas[0] if metas else {}) or {})
+        except Exception as e:
+            print(f"⚠️ Expansión al padre falló para {parent_id}: {e}")
+        return None
+
+    def _get_relevant_documents(self, query: str, *, run_manager=None) -> List[Document]:
+        hijos = self.base_retriever.get_relevant_documents(query) or []
+
+        vistos: set = set()
+        salida: List[Document] = []
+
+        for d in hijos:
+            meta = d.metadata or {}
+            parent_id = (meta.get("parent_chunk_id") or "").strip()
+
+            # Sin padre (ya es macro, o viene de un formato sin jerarquía):
+            # se queda tal cual, pero igualmente deduplicado.
+            clave = parent_id or (meta.get("chunk_id") or d.page_content[:120])
+            if clave in vistos:
+                continue
+            vistos.add(clave)
+
+            salida.append(self._buscar_padre(parent_id) or d if parent_id else d)
+            if len(salida) >= self.max_docs:
+                break
+
+        if salida:
+            print(f"👪 Expansión hijo→padre: {len(hijos)} chunks → {len(salida)} documentos únicos")
+        return salida
+
+
+def _parent_expansion_enabled() -> bool:
+    return str(os.environ.get("PARENT_EXPANSION", "1")).strip().lower() in ("1", "true", "yes")
 
 
 # ==================== PROMPTS ====================
@@ -563,9 +668,13 @@ def get_conversational_qa_chain(
     # Crítico: dos usuarios con distinto allowed_departments NUNCA deben compartir
     # chain/retriever cacheados, aunque hagan la misma pregunta.
     security_scope_key = "ADMIN" if allowed_departments is None else ",".join(sorted(allowed_departments)) or "NONE"
+    # La granularidad entra en la clave por el mismo motivo que la ACL: dos
+    # configuraciones distintas no pueden compartir retriever cacheado, o al
+    # cambiar la variable seguirías sirviendo la cadena vieja hasta reiniciar.
+    grano = (_chunk_type_filter() or {}).get("chunk_type", "all")
     cache_key = (
         f"{project_id}::{model_name}::{path_filter or ('DEPT:' + detected_department if detected_department else 'NO_FILTER')}"
-        f"::ACL:{security_scope_key}"
+        f"::ACL:{security_scope_key}::GRANO:{grano}::PAD:{int(_parent_expansion_enabled())}"
     )
     if cache_key in chain_cache:
         return chain_cache[cache_key]
@@ -610,7 +719,12 @@ def get_conversational_qa_chain(
         # el documento correcto) — pero el guardarril de acceso (security_filter) se
         # aplica igual, detectemos departamento o no: es quien decide qué se puede
         # ver, la heurística solo decide qué se mira primero para ir más rápido.
-        if detected_department or security_filter:
+        # El filtro de granularidad obliga a pasar por el retriever con prefiltro
+        # nativo: la pata BM25 persistida se construyó con macro Y micro, así que
+        # filtrar solo la pata vectorial dejaría entrar los macro por la otra
+        # puerta. _build_scoped_retriever reconstruye BM25 con el subconjunto ya
+        # filtrado (son ~150 chunks: milisegundos).
+        if detected_department or security_filter or _chunk_type_filter():
             if detected_department:
                 print(f"🏷️ Departamento detectado: {detected_department}")
             if security_filter:
@@ -664,6 +778,17 @@ def get_conversational_qa_chain(
                 first_pass_k=int(project_settings.get("two_pass_first_pass_k", 14)),
                 max_docs=int(project_settings.get("two_pass_max_docs", 22)),
             )
+
+    # ==================== Expansión hijo → padre ====================
+    # Va DESPUÉS del two-pass y ANTES del rerank: el two-pass trabaja con los
+    # hijos (que es donde está la señal precisa) y el LLM recibe los padres
+    # (que es donde está el contexto completo).
+    if _parent_expansion_enabled() and (_chunk_type_filter() or {}).get("chunk_type") == "micro":
+        final_retriever = ParentExpansionRetriever(
+            base_retriever=final_retriever,
+            vector_store=vector_store,
+            max_docs=int(project_settings.get("parent_expansion_max_docs", 12)),
+        )
 
     # ==================== Rerank / Compression (opt-in) ====================
     flashrank_enabled = str(os.environ.get("FLASHRANK_ENABLED", "0")).strip().lower() in ("1", "true", "yes")

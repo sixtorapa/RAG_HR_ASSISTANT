@@ -1,253 +1,253 @@
 {
   "version": 1,
   "files": {
-    "learning_development/mentorship_program_guide.md": {
-      "mtime": 1781768789,
-      "size": 1719
-    },
-    "learning_development/leadership_development_track.md": {
-      "mtime": 1781768809,
-      "size": 1703
-    },
-    "learning_development/certifications_conference_policy.md": {
-      "mtime": 1781768820,
-      "size": 1779
-    },
-    "learning_development/lms_user_guide.md": {
-      "mtime": 1781768830,
-      "size": 1838
-    },
-    "learning_development/ld_annual_budget_process.md": {
-      "mtime": 1781768779,
-      "size": 1835
-    },
-    "learning_development/external_training_reimbursement_policy.md": {
-      "mtime": 1781768799,
-      "size": 1813
-    },
-    "health_safety_wellbeing/ergonomics_home_office_guidelines.md": {
-      "mtime": 1781768863,
-      "size": 1931
-    },
-    "health_safety_wellbeing/mental_health_eap_program.md": {
-      "mtime": 1781768852,
-      "size": 2116
-    },
-    "health_safety_wellbeing/wellness_program_benefits.md": {
-      "mtime": 1781768884,
-      "size": 1865
-    },
-    "health_safety_wellbeing/incident_reporting_procedure.md": {
-      "mtime": 1781768873,
-      "size": 1957
-    },
-    "health_safety_wellbeing/workplace_health_safety_policy.md": {
-      "mtime": 1781768841,
-      "size": 1950
-    },
-    "health_safety_wellbeing/emergency_evacuation_procedure.md": {
-      "mtime": 1781768894,
-      "size": 1772
-    },
-    "it_workplace_policies/it_security_acceptable_use_policy.md": {
-      "mtime": 1781768999,
-      "size": 2427
-    },
-    "it_workplace_policies/remote_hybrid_work_policy.md": {
-      "mtime": 1781768987,
-      "size": 2010
-    },
-    "it_workplace_policies/software_request_license_policy.md": {
-      "mtime": 1781769048,
-      "size": 1994
-    },
-    "it_workplace_policies/equipment_byod_policy.md": {
-      "mtime": 1781769011,
-      "size": 2106
-    },
-    "it_workplace_policies/password_access_management_guidelines.md": {
-      "mtime": 1781769024,
-      "size": 2007
-    },
-    "it_workplace_policies/office_access_visitor_policy.md": {
-      "mtime": 1781769036,
-      "size": 2020
-    },
-    "recruitment_talent/interview_process_scorecards.md": {
-      "mtime": 1781768631,
-      "size": 2156
-    },
-    "recruitment_talent/hiring_manager_toolkit.md": {
-      "mtime": 1781768663,
+    "diversity_equity_inclusion/parental_leave_policy.md": {
+      "mtime": 1784311266,
       "size": 2041
     },
-    "recruitment_talent/05_recruitment_and_hiring_policy.pdf": {
-      "mtime": 1781369489,
-      "size": 5271
-    },
-    "recruitment_talent/employee_referral_program.md": {
-      "mtime": 1781768641,
-      "size": 1809
-    },
-    "recruitment_talent/background_check_policy.md": {
-      "mtime": 1781768651,
-      "size": 2005
-    },
-    "recruitment_talent/internship_program_guidelines.md": {
-      "mtime": 1781768673,
-      "size": 1786
-    },
-    "performance_management/manager_calibration_guide.md": {
-      "mtime": 1781768722,
-      "size": 1884
-    },
-    "performance_management/goal_setting_okrs_guide.md": {
-      "mtime": 1781768688,
-      "size": 2066
-    },
-    "performance_management/07_performance_dashboard_2024.xlsx": {
-      "mtime": 1781369489,
-      "size": 8149
-    },
-    "performance_management/02_performance_review_guide.pdf": {
-      "mtime": 1781369489,
-      "size": 4990
-    },
-    "performance_management/promotion_career_ladder_framework.md": {
-      "mtime": 1781768711,
-      "size": 1923
-    },
-    "performance_management/performance_improvement_plan_process.md": {
-      "mtime": 1781768699,
-      "size": 2211
-    },
-    "legal_compliance_conduct/conflict_of_interest_policy.md": {
-      "mtime": 1781768950,
-      "size": 2197
-    },
-    "legal_compliance_conduct/code_of_conduct.md": {
-      "mtime": 1781768905,
-      "size": 2117
-    },
-    "legal_compliance_conduct/workplace_investigations_policy.md": {
-      "mtime": 1781768974,
-      "size": 2351
-    },
-    "legal_compliance_conduct/disciplinary_procedure.md": {
-      "mtime": 1781768961,
-      "size": 2394
-    },
-    "legal_compliance_conduct/data_privacy_gdpr_guidelines.md": {
-      "mtime": 1781768939,
-      "size": 2094
-    },
-    "legal_compliance_conduct/whistleblower_policy.md": {
-      "mtime": 1781768928,
-      "size": 1997
-    },
-    "legal_compliance_conduct/anti_harassment_discrimination_policy.md": {
-      "mtime": 1781768915,
-      "size": 2083
-    },
-    "onboarding_people_ops/org_chart_reporting_lines_policy.md": {
-      "mtime": 1781768757,
-      "size": 1668
-    },
-    "onboarding_people_ops/01_employee_handbook.pdf": {
-      "mtime": 1781369489,
-      "size": 5149
-    },
-    "onboarding_people_ops/03_onboarding_guide.pdf": {
-      "mtime": 1781369489,
-      "size": 5199
-    },
-    "onboarding_people_ops/probation_period_policy.md": {
-      "mtime": 1781768746,
-      "size": 1822
-    },
-    "onboarding_people_ops/internal_mobility_transfer_policy.md": {
-      "mtime": 1781768768,
-      "size": 1848
-    },
-    "onboarding_people_ops/new_hire_it_setup_checklist.md": {
-      "mtime": 1781768736,
-      "size": 1947
-    },
-    "compensation_benefits/pay_equity_philosophy.md": {
-      "mtime": 1781768619,
-      "size": 2208
-    },
-    "compensation_benefits/bonus_incentive_plan_faq.md": {
-      "mtime": 1781768583,
-      "size": 1895
-    },
-    "compensation_benefits/salary_review_calendar.md": {
-      "mtime": 1781768573,
-      "size": 1980
-    },
-    "compensation_benefits/04_compensation_and_benefits.pdf": {
-      "mtime": 1781369489,
-      "size": 5001
-    },
-    "compensation_benefits/stock_options_guide.md": {
-      "mtime": 1781768595,
-      "size": 2412
-    },
-    "compensation_benefits/benefits_enrollment_guide.md": {
-      "mtime": 1781768607,
-      "size": 2250
-    },
-    "compensation_benefits/06_headcount_salary_report_2024.xlsx": {
-      "mtime": 1781369489,
-      "size": 7598
-    },
-    "finance_travel_expenses/procurement_vendor_approval_policy.md": {
-      "mtime": 1781769180,
-      "size": 2126
-    },
-    "finance_travel_expenses/expense_reimbursement_guide.md": {
-      "mtime": 1781769141,
-      "size": 1935
-    },
-    "finance_travel_expenses/per_diem_rates_by_region.md": {
-      "mtime": 1781769168,
-      "size": 1941
-    },
-    "finance_travel_expenses/corporate_card_policy.md": {
-      "mtime": 1781769157,
+    "diversity_equity_inclusion/employee_resource_groups_guide.md": {
+      "mtime": 1784311266,
       "size": 1956
     },
-    "finance_travel_expenses/travel_policy.md": {
-      "mtime": 1781769130,
-      "size": 2078
-    },
-    "finance_travel_expenses/budget_request_process.md": {
-      "mtime": 1781769192,
-      "size": 2100
-    },
-    "diversity_equity_inclusion/accessibility_accommodations_policy.md": {
-      "mtime": 1781769095,
-      "size": 2187
+    "diversity_equity_inclusion/inclusive_hiring_guidelines.md": {
+      "mtime": 1784311266,
+      "size": 2273
     },
     "diversity_equity_inclusion/pay_equity_audit_summary.md": {
-      "mtime": 1781769117,
+      "mtime": 1784311266,
       "size": 2161
     },
     "diversity_equity_inclusion/dei_strategy_commitments.md": {
-      "mtime": 1781769060,
+      "mtime": 1784311266,
       "size": 1942
     },
-    "diversity_equity_inclusion/inclusive_hiring_guidelines.md": {
-      "mtime": 1781769084,
-      "size": 2273
+    "diversity_equity_inclusion/accessibility_accommodations_policy.md": {
+      "mtime": 1784311266,
+      "size": 2187
     },
-    "diversity_equity_inclusion/employee_resource_groups_guide.md": {
-      "mtime": 1781769072,
+    "onboarding_people_ops/01_employee_handbook.pdf": {
+      "mtime": 1784311266,
+      "size": 5149
+    },
+    "onboarding_people_ops/internal_mobility_transfer_policy.md": {
+      "mtime": 1784311266,
+      "size": 1848
+    },
+    "onboarding_people_ops/probation_period_policy.md": {
+      "mtime": 1784311266,
+      "size": 1822
+    },
+    "onboarding_people_ops/03_onboarding_guide.pdf": {
+      "mtime": 1784311266,
+      "size": 5199
+    },
+    "onboarding_people_ops/new_hire_it_setup_checklist.md": {
+      "mtime": 1784311266,
+      "size": 1947
+    },
+    "onboarding_people_ops/org_chart_reporting_lines_policy.md": {
+      "mtime": 1784311266,
+      "size": 1668
+    },
+    "health_safety_wellbeing/ergonomics_home_office_guidelines.md": {
+      "mtime": 1784311266,
+      "size": 1931
+    },
+    "health_safety_wellbeing/incident_reporting_procedure.md": {
+      "mtime": 1784311266,
+      "size": 1957
+    },
+    "health_safety_wellbeing/wellness_program_benefits.md": {
+      "mtime": 1784311266,
+      "size": 1865
+    },
+    "health_safety_wellbeing/mental_health_eap_program.md": {
+      "mtime": 1784311266,
+      "size": 2116
+    },
+    "health_safety_wellbeing/emergency_evacuation_procedure.md": {
+      "mtime": 1784311266,
+      "size": 1772
+    },
+    "health_safety_wellbeing/workplace_health_safety_policy.md": {
+      "mtime": 1784311266,
+      "size": 1950
+    },
+    "compensation_benefits/benefits_enrollment_guide.md": {
+      "mtime": 1784311266,
+      "size": 2250
+    },
+    "compensation_benefits/pay_equity_philosophy.md": {
+      "mtime": 1784311266,
+      "size": 2208
+    },
+    "compensation_benefits/salary_review_calendar.md": {
+      "mtime": 1784311266,
+      "size": 1980
+    },
+    "compensation_benefits/04_compensation_and_benefits.pdf": {
+      "mtime": 1784311266,
+      "size": 5001
+    },
+    "compensation_benefits/06_headcount_salary_report_2024.xlsx": {
+      "mtime": 1784311266,
+      "size": 7598
+    },
+    "compensation_benefits/bonus_incentive_plan_faq.md": {
+      "mtime": 1784311266,
+      "size": 1895
+    },
+    "compensation_benefits/stock_options_guide.md": {
+      "mtime": 1784311266,
+      "size": 2412
+    },
+    "performance_management/07_performance_dashboard_2024.xlsx": {
+      "mtime": 1784311266,
+      "size": 8149
+    },
+    "performance_management/manager_calibration_guide.md": {
+      "mtime": 1784311266,
+      "size": 1884
+    },
+    "performance_management/promotion_career_ladder_framework.md": {
+      "mtime": 1784311266,
+      "size": 1923
+    },
+    "performance_management/goal_setting_okrs_guide.md": {
+      "mtime": 1784311266,
+      "size": 2066
+    },
+    "performance_management/02_performance_review_guide.pdf": {
+      "mtime": 1784311266,
+      "size": 4990
+    },
+    "performance_management/performance_improvement_plan_process.md": {
+      "mtime": 1784311266,
+      "size": 2211
+    },
+    "legal_compliance_conduct/whistleblower_policy.md": {
+      "mtime": 1784311266,
+      "size": 1997
+    },
+    "legal_compliance_conduct/data_privacy_gdpr_guidelines.md": {
+      "mtime": 1784311266,
+      "size": 2094
+    },
+    "legal_compliance_conduct/conflict_of_interest_policy.md": {
+      "mtime": 1784311266,
+      "size": 2197
+    },
+    "legal_compliance_conduct/anti_harassment_discrimination_policy.md": {
+      "mtime": 1784311266,
+      "size": 2083
+    },
+    "legal_compliance_conduct/code_of_conduct.md": {
+      "mtime": 1784311266,
+      "size": 2117
+    },
+    "legal_compliance_conduct/disciplinary_procedure.md": {
+      "mtime": 1784311266,
+      "size": 2394
+    },
+    "legal_compliance_conduct/workplace_investigations_policy.md": {
+      "mtime": 1784311266,
+      "size": 2351
+    },
+    "recruitment_talent/hiring_manager_toolkit.md": {
+      "mtime": 1784311266,
+      "size": 2041
+    },
+    "recruitment_talent/interview_process_scorecards.md": {
+      "mtime": 1784311266,
+      "size": 2156
+    },
+    "recruitment_talent/internship_program_guidelines.md": {
+      "mtime": 1784311266,
+      "size": 1786
+    },
+    "recruitment_talent/employee_referral_program.md": {
+      "mtime": 1784311266,
+      "size": 1809
+    },
+    "recruitment_talent/05_recruitment_and_hiring_policy.pdf": {
+      "mtime": 1784311266,
+      "size": 5271
+    },
+    "recruitment_talent/background_check_policy.md": {
+      "mtime": 1784311266,
+      "size": 2005
+    },
+    "learning_development/external_training_reimbursement_policy.md": {
+      "mtime": 1784311266,
+      "size": 1813
+    },
+    "learning_development/ld_annual_budget_process.md": {
+      "mtime": 1784311266,
+      "size": 1835
+    },
+    "learning_development/leadership_development_track.md": {
+      "mtime": 1784311266,
+      "size": 1703
+    },
+    "learning_development/lms_user_guide.md": {
+      "mtime": 1784311266,
+      "size": 1838
+    },
+    "learning_development/certifications_conference_policy.md": {
+      "mtime": 1784311266,
+      "size": 1779
+    },
+    "learning_development/mentorship_program_guide.md": {
+      "mtime": 1784311266,
+      "size": 1719
+    },
+    "it_workplace_policies/it_security_acceptable_use_policy.md": {
+      "mtime": 1784311266,
+      "size": 2427
+    },
+    "it_workplace_policies/software_request_license_policy.md": {
+      "mtime": 1784311266,
+      "size": 1994
+    },
+    "it_workplace_policies/equipment_byod_policy.md": {
+      "mtime": 1784311266,
+      "size": 2106
+    },
+    "it_workplace_policies/password_access_management_guidelines.md": {
+      "mtime": 1784311266,
+      "size": 2007
+    },
+    "it_workplace_policies/remote_hybrid_work_policy.md": {
+      "mtime": 1784311266,
+      "size": 2010
+    },
+    "it_workplace_policies/office_access_visitor_policy.md": {
+      "mtime": 1784311266,
+      "size": 2020
+    },
+    "finance_travel_expenses/expense_reimbursement_guide.md": {
+      "mtime": 1784311266,
+      "size": 1935
+    },
+    "finance_travel_expenses/corporate_card_policy.md": {
+      "mtime": 1784311266,
       "size": 1956
     },
-    "diversity_equity_inclusion/parental_leave_policy.md": {
-      "mtime": 1781769106,
-      "size": 2041
+    "finance_travel_expenses/travel_policy.md": {
+      "mtime": 1784311266,
+      "size": 2078
+    },
+    "finance_travel_expenses/per_diem_rates_by_region.md": {
+      "mtime": 1784311266,
+      "size": 1941
+    },
+    "finance_travel_expenses/budget_request_process.md": {
+      "mtime": 1784311266,
+      "size": 2100
+    },
+    "finance_travel_expenses/procurement_vendor_approval_policy.md": {
+      "mtime": 1784311266,
+      "size": 2126
     }
   }
 }

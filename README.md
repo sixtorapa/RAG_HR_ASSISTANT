@@ -1,7 +1,8 @@
 # HR Knowledge Base Assistant
 
-> A RAG system for HR teams — hybrid retrieval, a deterministic agent router, text-to-SQL
-> with guardrails, and a measured evaluation suite. Runs on two clouds from one codebase.
+> A RAG system for HR teams: hybrid retrieval, a deterministic agent router, text-to-SQL
+> with guardrails, and every design decision backed by a measurement. Runs on two clouds
+> from one codebase.
 
 ![Docker](https://img.shields.io/badge/docker-ready-blue)
 ![AWS](https://img.shields.io/badge/AWS-Lambda%20%2B%20Bedrock-orange)
@@ -31,39 +32,137 @@ they are allowed to see.
 ## Architecture
 
 ```
-User query
-    │
-    ▼
-_settings_with_acl()          ← RBAC injected BEFORE retrieval, never after
-    │
-    ▼
+POST /ask
+   │
+   ├── daily quota  ──────────► 429    both guardrails run before the first LLM call
+   ├── PII detection ─────────► 400    and before anything is written to the database
+   │
+   ├── RBAC injected into the retriever settings — before retrieval, never after
+   │
+   ▼
 AgentRouter — three paths
-    │  1. deterministic fast-path (greetings, smalltalk) → no LLM call at all
-    │  2. clear SQL/Excel intent   → tool forced, no LLM call
-    │  3. ambiguous                → LLM decides via bind_tools
-    │
-    ├─► chat_with_documents ─► native metadata prefilter
-    │                       ─► two-pass document shortlist
-    │                       ─► hybrid retrieval: BM25 + vector (RRF, 0.55/0.45)
-    │                       ─► ConversationalRetrievalChain → answer + sources
-    │
-    ├─► query_hr_database   ─► LLM-generated SQL, SELECT-only, read-only connection
-    │
-    └─► summarise_document  ─► full-document summarisation
+   │  1. deterministic fast-path (greetings, smalltalk)  → answers directly, no LLM
+   │  2. clear SQL / Excel intent                        → tool forced, no LLM
+   │  3. anything ambiguous                              → LLM decides via bind_tools
+   ▼
+one dispatch loop over the chosen tools
+   │
+   ├─► chat_with_documents ─► retrieval (below) ─► answer + sources
+   ├─► query_hr_database   ─► LLM-generated SQL, SELECT-only, read-only connection
+   ├─► analista_de_excel   ─► pandas agent, bounded iterations and timeout
+   └─► summarise_document  ─► full-document summarisation
+   ▼
+ReasoningAgent formats the result  →  persisted  →  JSON with sources
 ```
+
+The router decides and names; the dispatch loop executes. An explicit user override
+(`SQL: …`, `AMBAS - …`, asking for a summary) produces the same list of tool calls the
+router would have returned, so there is one execution path rather than one per mode.
 
 ---
 
-## Two deployments, one codebase
+## Retrieval
 
-The provider and the host are **independent choices**. Either can change without the other.
+### Two chunk sizes, each used for what it is good at
+
+Ingestion produces two granularities of the same document: **macro** chunks built from
+whole pages (~350 words) and **micro** chunks of 250 tokens that carry a
+`parent_chunk_id`.
+
+Search runs against the micro chunks, whose embeddings are specific and undiluted. What
+reaches the model is the **parent**, which carries the full page. Several matching
+children of one document collapse into a single entry, and each parent takes the rank of
+its first matching child.
+
+```
+RETRIEVAL_CHUNK_TYPE=micro   (default; also accepts macro or all)
+PARENT_EXPANSION=1           (default)
+```
+
+Both are part of the chain cache key, so changing either does not serve a stale chain.
+
+### Hybrid search, fused by rank
+
+`EnsembleRetriever` combines BM25 and vector search with weights 0.55 / 0.45. It fuses by
+**rank**, not by score — weighted Reciprocal Rank Fusion, `w/(60+rank)`. Cosine similarity
+is bounded and BM25 is not, so their magnitudes are not comparable; their ranks are. The
+vector leg uses MMR (`lambda_mult=0.55`) for diversity, and the BM25 index is built during
+ingestion and persisted, not rebuilt per query.
+
+### Two-pass document shortlist
+
+The first pass searches broadly and counts chunk votes per document; the second re-searches
+scoped to the winners using a native metadata prefilter. On a generic question — *"how many
+days of sick leave do I get?"* — flat retrieval blends fragments of five documents and the
+model synthesises an answer that exists in none of them.
+
+### Access control, fail-closed
+
+A user's allowed departments are ANDed with any functional filter, in both retrieval
+passes. An empty department list becomes `{"department": "__no_access__"}` — zero results,
+not full access. Default deny is the point: treating "empty" as "unrestricted" passes tests
+and leaks in production. The ACL is part of the chain cache key, so two users with
+different permissions can never share a cached retriever.
+
+---
+
+## Guardrails
+
+**PII detection without ML.** IBAN, card and DNI/NIE are validated by checksum — mod-97,
+Luhn, and the Spanish control letter — before the input reaches the model or the database.
+A checksum has no random false positives and never needs retraining. The policy is to
+block, not to redact and continue: if a redactor misses one field the data still escapes.
+
+**Text-to-SQL that cannot write.** Single `SELECT`/`WITH` statements only, on a connection
+opened `mode=ro` so SQLite itself refuses a write even if the syntax check is fooled.
+Columns tied to departments the user cannot access are blocked deterministically, not by
+asking the model nicely in the prompt. Failed queries are retried up to three times with
+the real SQLite error fed back.
+
+**A daily question quota.** Bedrock is pay-per-use with no automatic ceiling and AWS budget
+alarms warn rather than stop, so the public demo caps questions per day. The counter lives
+in the database, not in process memory: in Lambda each container has its own memory, so a
+RAM counter would apply the cap per container and N containers would multiply it.
+
+---
+
+## Evaluation
+
+`evaluation/evaluate_pipeline.py` runs the **deployed chain** — two-pass, ACL, hybrid
+retrieval, parent expansion — over a golden dataset of 21 RAG questions written against
+the real documents, and scores it with RAGAS.
+
+| Metric | Score | What it measures |
+|---|---|---|
+| Context precision | **0.871** | Of what was retrieved, how much is relevant |
+| Context recall | 0.762 | Whether the context holds everything the answer needs |
+| **Faithfulness** | **0.958** | Whether the answer is anchored in the context |
+| Answer relevancy | 0.841 | Whether it answers what was asked |
+
+A query costs about **$0.0005** and 2,600 prompt tokens. Prompt tokens dominate in RAG —
+the retrieved chunks are large and the answer is short — which makes retrieval breadth a
+cost decision, not only a quality one.
+
+Twenty-one questions is directional signal for comparing configurations, not a fine
+estimate. Recall is coarse at that size: one question is worth 4.8 points.
+
+`evaluation/evaluate_rag.py` is a separate harness that compares three retrieval
+configurations on its own retriever. It is what established that FlashRank reranking took
+context precision from 0.86 to 0.64 on that setup, which is why the reranker stays behind
+`FLASHRANK_ENABLED`, off, with the numbers committed.
+
+---
+
+## Running on two clouds
+
+The provider and the host are independent choices. Either can change without the other.
 
 | | Railway | AWS |
 |---|---|---|
 | Compute | Container, always on | Lambda container behind API Gateway |
 | Generation | OpenAI `gpt-4o` / `gpt-4o-mini` | **Bedrock** — Claude Sonnet 4.6 / Haiku 4.5 |
 | Embeddings | OpenAI `text-embedding-3-small` | OpenAI (unchanged — see below) |
-| App database | PostgreSQL | RDS PostgreSQL |
+| Application database | PostgreSQL | RDS PostgreSQL |
 | Entry point | gunicorn (`startup.sh`) | `lambda_handler.py` via `apig-wsgi` |
 
 Switching provider is one environment variable:
@@ -73,98 +172,53 @@ LLM_PROVIDER=openai    # default
 LLM_PROVIDER=bedrock
 ```
 
-Before this existed, `ChatOpenAI` and `OpenAIEmbeddings` were instantiated inline in
-**19 places across 10 modules**. They now all go through `app/rag_logic/llm_factory.py`,
-which is the only file in the repo that names a provider.
+`app/rag_logic/llm_factory.py` is the only file in the repository that names a provider.
+Everything else asks for a model and does not know who serves it.
 
 **Embeddings deliberately stay on OpenAI.** The vectors in Chroma were built with
-`text-embedding-3-small`; changing the embedding model invalidates the whole index and
-forces a full re-ingest, and would also invalidate the evaluation numbers below. The
-migration is incremental, not a big bang.
+`text-embedding-3-small`; changing the embedding model invalidates the whole index, forces
+a full re-ingest, and invalidates the evaluation numbers above.
 
----
+### What Lambda demands that a container host does not
 
-## What running this on Lambda actually taught me
+Three failures share one root: `/var/task` is read-only and only `/tmp` can be written.
 
-Three failures that only appear once it is deployed. All have the same root: in Lambda
-`/var/task` is read-only and only `/tmp` can be written.
-
-1. **A Chroma vector store cannot be served read-only from the image.** The common advice
-   is to bake it in and read it in place. Chroma opens its SQLite read-write even for
-   queries because it needs its journal, so retrieval fails with
-   `attempt to write a readonly database (code: 8)` while the index sits right there.
-   It is copied to `/tmp` during the init phase — 8.7 MB, once per container.
-2. **Flask's `instance_path` lives next to the code.** The conversational memory store
-   writes there, so `/ask` returned 500 until it was pointed at `/tmp`.
+1. **A Chroma vector store cannot be served read-only from the image.** The usual advice is
+   to bake it in and read it in place. Chroma opens its SQLite read-write even for queries
+   because it needs its journal, so retrieval fails with `attempt to write a readonly
+   database (code: 8)` while the index sits right there. It is copied to `/tmp` during the
+   init phase — 8.7 MB, once per container.
+2. **Flask's `instance_path` lives next to the code**, so anything writing there returns 500
+   until it is pointed at `/tmp`.
 3. **Lambda rejects OCI image manifests.** It needs Docker v2 schema 2, and
    `--provenance=false` alone is not enough — the push must set `oci-mediatypes=false`.
 
-Measured on the deployed function:
-
-| | |
-|---|---|
-| Cold start (image already cached on the host) | 4.7 s init |
-| Warm request | 0.06 s |
-| Memory used / allocated | 308 MB / 3008 MB |
-
-Memory is over-allocated on purpose: in Lambda, CPU scales with memory, and lowering it
-lengthens the cold start.
-
-**Known limit:** a `/ask` round trip takes ~27 s, against API Gateway's 29 s ceiling. The
-first query on a cold container exceeds it and returns 503. The fixes are known and not
-yet applied — skipping the reasoning agent when there is a single result, and truncating
-after RRF fusion, which currently lets ~50 chunks through instead of 28.
+Measured on the deployed function: cold start 4.7 s of init once the image is cached on the
+host, warm request 0.06 s, 308 MB used of 3008 allocated. Memory is over-allocated on
+purpose — in Lambda CPU scales with memory, and lowering it lengthens the cold start.
 
 ---
 
-## Design decisions worth defending
+## Honest limitations
 
-**RBAC, fail-closed.** A user's allowed departments are ANDed with any functional filter,
-in both retrieval passes. An empty department list becomes
-`{"department": "__no_access__"}` — zero results, not full access. Default deny is the
-whole point: treating "empty" as "unrestricted" passes tests and leaks in production.
-The ACL is also part of the chain cache key, so two users with different permissions can
-never share a cached retriever.
-
-**A router where two of three paths never reach the LLM.** A "hello" should not cost a
-model call. Less cost, less latency, and the same input always takes the same route.
-
-**Hybrid retrieval, measured rather than assumed.** `EnsembleRetriever` fuses BM25 and
-vector search by **rank** (weighted Reciprocal Rank Fusion, `w/(60+rank)`), not by score —
-cosine and BM25 are not comparable in magnitude, but rank is.
-
-**The reranker is off, and that is the interesting part.** FlashRank was added, measured,
-and dropped: it took context precision from 0.86 to 0.64 and caused OOM on the production
-tier. It stays opt-in behind `FLASHRANK_ENABLED`, off by default, with the numbers
-committed so nobody "fixes" it back on.
-
-**Text-to-SQL that cannot write.** Single `SELECT`/`WITH` statements only, read-only
-connection, sensitive columns blocked, with a self-correction retry loop.
-
-**PII detection without ML.** IBAN, card and DNI/NIE are validated by checksum, before the
-input reaches the model or the database. A checksum has no random false positives and
-never needs retraining.
-
----
-
-## Evaluation
-
-`evaluation/evaluate_rag.py` — a golden dataset of 25 questions (21 RAG, 4 SQL) over the
-real documents, three pipeline configurations, four RAGAS metrics, results committed as
-JSON and CSV.
-
-| Config | Context precision | Context recall | Faithfulness | Answer relevancy |
-|---|---|---|---|---|
-| `vector_only` | 0.858 | 0.881 | 0.857 | 0.763 |
-| **`bm25_vector`** ← shipped | **0.861** | **0.937** | 0.857 | **0.812** |
-| `full_pipeline` (FlashRank) | 0.638 | 0.818 | 0.865 | 0.767 |
-
-Adding BM25 buys **+5.6 points of recall** and **+4.9 of answer relevancy** at no cost to
-precision. It does not retrieve better things; it stops losing the ones semantic search
-missed.
-
-25 questions is directional signal for comparing configurations, not a fine estimate.
-The harness is the expensive part and it is already built.
+- **API Gateway cuts requests at 29 s**, and a full `/ask` on a cold container has exceeded
+  it. End-to-end latency on Lambda has not been re-measured since the retrieval changes;
+  the figure to trust is the one you measure, and this one is stale.
+- **CI, not CD.** `.github/workflows/ci.yml` runs ruff, pytest and a Docker build with
+  `push: false`. There is no deploy job; Railway deploys from its own git integration,
+  gated on Actions passing.
+- **Test coverage is the weakest part of the repository.** 61 tests cover the models, the
+  routes and the SQL tool. The router, the retrieval chain and the PII guard have none, and
+  they are the components the design leans on hardest.
+- **The router's fast-path matches substrings without word boundaries**, so `"suma"` matches
+  inside `"consumar"`. Since the forced path skips the LLM, a false positive routes without
+  a safety net.
+- **BM25 tokenises on whitespace only** — no stemming, no accent normalisation. In Spanish
+  `"política"` and `"politica"` are different terms.
+- Chunking is **recursive by tokens**, not semantic. The semantic part is an LLM enrichment
+  pass at ingest time that prepends a headline and a summary before embedding.
+- `evaluate_rag.py` builds its own retriever, so its numbers describe that configuration
+  rather than the deployed chain. `evaluate_pipeline.py` exists for the deployed chain.
 
 ---
 
@@ -179,9 +233,10 @@ pip install -r requirements-prod.txt
 
 printf 'OPENAI_API_KEY=your-key\n' > .env
 
-python seed_hr_db.py     # toy HR SQLite database
-pytest                   # 61 tests; OpenAI is mocked, no key needed
-python run.py            # http://localhost:5001
+python seed_hr_db.py                                    # toy HR SQLite database
+KNOWLEDGE_BASE_PATH=$PWD/knowledge_base python ingest.py --force
+pytest                                                  # 61 tests; OpenAI is mocked
+python run.py                                           # http://localhost:5001
 ```
 
 Or with Docker:
@@ -202,26 +257,23 @@ AWS_SECRET_ACCESS_KEY=...
 AWS_DEFAULT_REGION=eu-west-1
 ```
 
-Model IDs are **inference profiles** (`eu.anthropic.claude-sonnet-4-6`), not bare model
-IDs. The `eu.` prefix keeps inference inside the EU, which matters for a system holding
-employee data. A bare `anthropic.claude-…` returns `ValidationException`.
+Model IDs are **inference profiles** (`eu.anthropic.claude-sonnet-4-6`), not bare model IDs.
+The `eu.` prefix keeps inference inside the EU, which matters for a system holding employee
+data. A bare `anthropic.claude-…` returns `ValidationException`.
 
 ---
 
 ## Observability
 
 `observability.py` enables LangSmith tracing from environment variables and is called at
-startup:
+startup. `cost_calculator.py` computes per-query cost from token usage, and reports an
+unpriced model as an error rather than silently counting it as free.
 
 ```env
 LANGCHAIN_TRACING_V2=true
 LANGCHAIN_API_KEY=ls__your_key
 LANGCHAIN_PROJECT=hr-kb-assistant
 ```
-
-`cost_calculator.py` computes per-query cost from token usage. Prompt tokens dominate in
-RAG — the retrieved chunks are large and the answer is short — which makes `k_base` a
-cost decision, not only a quality one.
 
 ---
 
@@ -234,56 +286,43 @@ cost decision, not only a quality one.
 ├── Dockerfile                  # Railway image
 ├── Dockerfile.lambda           # Lambda image (AWS base, vector store baked in)
 │
-├── app/
-│   ├── models.py               # SQLAlchemy: User, Project, ChatSession, Message
-│   ├── main/routes.py          # Endpoints; /ask orchestrates router → tools → chain
-│   └── rag_logic/
-│       ├── llm_factory.py      # ← the only file that names a provider
-│       ├── agent_router.py     # Three-path routing
-│       ├── qa_chain.py         # RBAC, prefilter, two-pass, hybrid retrieval, cache
-│       ├── ingester.py         # Ingestion: loaders, chunking, enrichment, indexing
-│       ├── custom_loaders.py   # PDF/PPTX loaders with table extraction and OCR
-│       ├── bm25_index.py       # BM25 built at ingest, persisted, loaded at query
-│       ├── sql_tool.py         # Text-to-SQL with guardrails
-│       ├── pii_guard.py        # Checksum-based PII detection
-│       └── cost_calculator.py  # Per-query cost from token usage
+├── app/main/
+│   ├── routes.py               # The chat endpoints
+│   ├── pipeline.py             # Toolbox, dispatch loop, answer flow
+│   ├── guards.py               # Daily quota and input-side DLP
+│   ├── views.py                # HTML screens
+│   ├── projects.py             # Project and session management
+│   ├── auth.py                 # Login / logout
+│   └── admin.py                # Activity panel and CSV export
 │
-├── evaluation/evaluate_rag.py  # RAGAS suite, golden dataset, 3 configurations
-├── infra/                      # how the AWS side was built, in order
+├── app/rag_logic/
+│   ├── llm_factory.py          # ← the only file that names a provider
+│   ├── agent_router.py         # Three-path routing
+│   ├── qa_chain.py             # RBAC, prefilter, two-pass, hybrid, parent expansion
+│   ├── ingester.py             # Loaders, chunking, LLM enrichment, indexing
+│   ├── custom_loaders.py       # PDF/PPTX loaders with table extraction and OCR
+│   ├── bm25_index.py           # BM25 built at ingest, persisted, loaded at query
+│   ├── sql_tool.py             # Text-to-SQL with guardrails
+│   ├── pii_guard.py            # Checksum-based PII detection
+│   └── cost_calculator.py      # Per-query cost from token usage
+│
+├── evaluation/
+│   ├── evaluate_pipeline.py    # RAGAS over the deployed chain
+│   └── evaluate_rag.py         # RAGAS over three retrieval configurations
+├── infra/                      # How the AWS side was built, in order
 └── tests/                      # 61 tests, OpenAI mocked
 ```
 
 ### infra/
 
-The seven scripts that created the AWS deployment, numbered in the order they were
-run: the IAM execution role, the ECR repository and image push, the Lambda function,
-the API Gateway endpoint, the RDS instance, and the schema initialisation.
+The seven scripts that created the AWS deployment, numbered in the order they were run:
+the IAM execution role, the ECR repository and image push, the Lambda function, the API
+Gateway endpoint, the RDS instance, and the schema initialisation.
 
-They are honest about what they are: **imperative scripts, not infrastructure as
-code**. There is no state file, no plan, and nothing detects drift. Turning them into
-Terraform is mechanical — every resource and parameter is already written down — and
-has not been done. `infra/README.md` says so explicitly, along with the security
-trade-off behind keeping the Lambda outside the VPC and the teardown commands.
-
----
-
-## Honest limitations
-
-- **CI, not CD.** `.github/workflows/ci.yml` runs ruff, pytest and a Docker build with
-  `push: false`. There is no deploy job; Railway deploys from its own git integration.
-  Its `docker-build` job also only `needs: lint`, so it can build with tests red.
-- The Lambda deployment has the ~27 s / 29 s ceiling described above.
-- Chunking is **recursive by tokens**, not semantic. The semantic part is an LLM
-  enrichment pass at ingest time that prepends a headline and summary before embedding.
-- Parent/child chunk metadata exists (`parent_chunk_id`) but child→parent expansion is
-  not wired up yet.
-- BM25 tokenises on whitespace only — no stemming, no accent normalisation. In Spanish
-  that costs more than in English.
-- The router's fast-path matches substrings without word boundaries, so `"suma"` matches
-  inside `"consumar"`. Since the forced path skips the LLM, a false positive routes
-  without a safety net.
-- `evaluate_rag.py` reimplements retrieval instead of calling the production chain, so
-  its numbers do not measure the shipped pipeline exactly.
+They are honest about what they are: **imperative scripts, not infrastructure as code**.
+There is no state file, no plan, and nothing detects drift. `infra/README.md` says so
+explicitly, along with the security trade-off behind keeping the Lambda outside the VPC and
+the teardown commands.
 
 ---
 

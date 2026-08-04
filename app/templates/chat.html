@@ -444,7 +444,7 @@
 
             <div class="text-center">
                 <h6 class="mb-0 fw-bold">{{ session.name }}</h6>
-                <span class="badge bg-light text-dark border">{{ project.name }}</span>
+                <span class="badge bg-light text-dark border">{{ kb_name }}</span>
             </div>
 
             <form id="deleteChatForm" action="{{ url_for('main.delete_chat', session_id=session.id) }}" method="POST">
@@ -529,8 +529,8 @@
                 </button>
 
                 <select class="form-select bg-light" id="model-select" style="max-width: 130px; border-right: 0;">
-                    <option value="gpt-4o" {% if project.model_name == 'gpt-4o' %}selected{% endif %}>GPT-4o</option>
-                    <option value="gpt-4o-mini" {% if project.model_name == 'gpt-4o-mini' %}selected{% endif %}>GPT-4o Mini</option>
+                    <option value="gpt-4o" {% if model_name == 'gpt-4o' %}selected{% endif %}>GPT-4o</option>
+                    <option value="gpt-4o-mini" {% if model_name == 'gpt-4o-mini' %}selected{% endif %}>GPT-4o Mini</option>
                 </select>
 
                 <textarea
@@ -551,7 +551,7 @@
             </div>
 
             <div class="text-center mt-2 d-flex justify-content-center gap-3">
-                <small class="text-muted" style="font-size: 0.7rem;"><i class="bi bi-cpu"></i> Modelo: {{ project.model_name or 'Default' }}</small>
+                <small class="text-muted" style="font-size: 0.7rem;"><i class="bi bi-cpu"></i> Modelo: {{ model_name or 'Default' }}</small>
                 <small class="text-muted" id="web-status" style="font-size: 0.7rem; display: none;"><i class="bi bi-globe-americas text-primary"></i> Internet Activo</small>
             </div>
         </div>

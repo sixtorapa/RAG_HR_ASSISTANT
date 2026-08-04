@@ -22,7 +22,7 @@ from langchain_community.document_loaders import (
 from langchain.docstore.document import Document
 from pydantic import BaseModel, Field
 
-from .custom_loaders import BetterPDFLoader, BetterPowerPointLoader, OcrConfig
+from .custom_loaders import BetterPDFLoader, BetterPowerPointLoader, LoaderConfig
 from .path_utils import norm_path
 from .bm25_index import persist_bm25_index
 
@@ -59,9 +59,7 @@ def load_documents_from_path(data_path: str) -> List[Document]:
     documents: List[Document] = []
     print(f"Escaneando directorio raíz: {data_path}")
 
-    ocr_cfg = OcrConfig(
-        enabled=str(os.environ.get("OCR_ENABLED", "1")).strip() in ("1", "true", "True", "yes", "YES")
-    )
+    loader_cfg = LoaderConfig()
 
     for root, dirs, files in os.walk(data_path):
         dirs[:] = [d for d in dirs if not d.startswith(".")]
@@ -80,7 +78,7 @@ def load_documents_from_path(data_path: str) -> List[Document]:
                 new_docs: Optional[List[Document]] = None
 
                 if ext == "pdf":
-                    loader = BetterPDFLoader(file_path, ocr_cfg=ocr_cfg)
+                    loader = BetterPDFLoader(file_path, loader_cfg=loader_cfg)
                 elif ext in ["txt", "md", "html", "htm"]:
                     loader = TextLoader(file_path, encoding="utf-8")
                 elif ext == "docx":
@@ -88,7 +86,7 @@ def load_documents_from_path(data_path: str) -> List[Document]:
                 elif ext == "csv":
                     loader = CSVLoader(file_path, encoding="utf-8")
                 elif ext in ["pptx", "ppt"]:
-                    loader = BetterPowerPointLoader(file_path, ocr_cfg=ocr_cfg)
+                    loader = BetterPowerPointLoader(file_path, loader_cfg=loader_cfg)
                 elif ext in ["xlsx", "xls"]:
                     try:
                         excel_sheets = pd.read_excel(file_path, sheet_name=None)
@@ -370,8 +368,18 @@ def inject_context_to_chunks(chunks: List[Document]) -> List[Document]:
 
         text = (chunk.page_content or "").lstrip()
         headline = (meta.get("semantic_headline") or "").strip()
-        headline_line = f"TITLE: {headline}\n" if headline else ""
-        chunk.page_content = f"SOURCE: {where}\n{headline_line}\n{text}"
+        # El resumen se generaba en la fase 2, se pagaba, se guardaba en metadata
+        # y NO se anteponía al texto — así que no llegaba al embedding y no servía
+        # para nada. Se inyecta junto al titular: una pregunta de usuario se
+        # parece más a un titular y a un resumen que al cuerpo del documento, y
+        # es justo eso lo que acerca el vector del chunk al de la pregunta.
+        summary = (meta.get("semantic_summary") or "").strip()
+        cabecera = f"SOURCE: {where}\n"
+        if headline:
+            cabecera += f"TITLE: {headline}\n"
+        if summary:
+            cabecera += f"SUMMARY: {summary}\n"
+        chunk.page_content = f"{cabecera}\n{text}"
 
     return chunks
 
@@ -1055,7 +1063,7 @@ def process_and_store_documents(data_path: str, vector_store_path: str) -> bool:
                 m["relative_path_norm"] = norm_path(rel)
                 changed = True
             if not m.get("department") and rel:
-                m["department"] = (os.path.dirname(_safe_norm(rel)) or "general").lower()
+                m["department"] = (_safe_norm(rel).split("/")[0] if "/" in _safe_norm(rel) else "general").lower()
                 changed = True
             if changed:
                 update_ids.append(_id)
@@ -1243,8 +1251,10 @@ def process_and_store_documents(data_path: str, vector_store_path: str) -> bool:
             meta["source_file"] = rel
             meta["relative_path"] = rel
             meta["relative_path_norm"] = norm_path(rel)  # clave estable para prefiltro nativo en Chroma
-            # department = primer segmento de carpeta (knowledge_base/<department>/archivo.ext)
-            meta["department"] = (os.path.dirname(rel) or "general").lower()
+            # department = PRIMER segmento de carpeta. os.path.dirname devuelve la
+            # ruta entera, así que con subcarpetas daba "compensation/2026" en vez
+            # de "compensation" y el filtro de acceso dejaba de casar.
+            meta["department"] = (_safe_norm(rel).split("/")[0] if "/" in _safe_norm(rel) else "general").lower()
             # ChromaDB no soporta listas — ya son strings desde _merge_pages_into_chunk
             ch.metadata = meta
 

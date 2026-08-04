@@ -3,9 +3,9 @@
   "num_chunks": 3,
   "chunks": [
     {
-      "text": "SOURCE: onboarding_people_ops/internal_mobility_transfer_policy.md\nTITLE: Política de Movilidad Interna y Transferencias\n\n[PÁGINA ?]\n# Internal Mobility & Transfer Policy\n\n## 1. Eligibility\n\nEmployees become eligible to apply for internal roles after **6 months** in their current role, except in the case of a team-initiated move (e.g., your team is being restructured), which has no minimum tenure requirement.\n\n## 2. How to Apply\n\nInternal roles are posted on the internal careers page alongside external postings, clearly marked \"internal.\" Apply directly through the ATS; you do not need your current manager's permission to apply, though they will be notified once you reach the interview stage.\n\n## 3. Process Differences vs External Candidates\n\nInternal candidates skip the recruiter screen and background check (already on file) but go through the same skills assessment and values interview as external candidates, to keep the bar consistent.\n\n## 4. Notifying Your Current Manager\n\nTalent Acquisition notifies your current manager when you reach the interview stage, not at application. This is to protect your ability to explore opportunities without an awkward early conversation if it doesn't go further.\n\n## 5. Transition Timeline\n\nIf selected, the standard transition window is **2-4 weeks**, agreed between your current and future manager, to allow for knowledge handover. Critical-path projects may extend this to a maximum of 6 weeks, but should not be used to indefinitely delay a transfer.\n\n## 6. Compensation on Transfer\n\nA lateral transfer (same level) does not automatically change salary. A transfer to a higher level follows the same band rules as the Promotion & Career Ladder Framework.\n\n## 7. Returning to Your Original Team\n\nIf an internal transfer doesn't work out within the first 3 months, the employee can request to return to their original team if a suitable role is available; this is handled case-by-case with People Ops and is not guaranteed.",
+      "text": "SOURCE: onboarding_people_ops/internal_mobility_transfer_policy.md\nTITLE: Política de Movilidad Interna y Transferencias\nSUMMARY: Los empleados son elegibles para aplicar a roles internos tras 6 meses en su puesto actual. El proceso de transferencia incluye un período de transición de 2-4 semanas y permite a los empleados regresar a su equipo original si la transferencia no resulta exitosa.\n\n[PÁGINA ?]\n# Internal Mobility & Transfer Policy\n\n## 1. Eligibility\n\nEmployees become eligible to apply for internal roles after **6 months** in their current role, except in the case of a team-initiated move (e.g., your team is being restructured), which has no minimum tenure requirement.\n\n## 2. How to Apply\n\nInternal roles are posted on the internal careers page alongside external postings, clearly marked \"internal.\" Apply directly through the ATS; you do not need your current manager's permission to apply, though they will be notified once you reach the interview stage.\n\n## 3. Process Differences vs External Candidates\n\nInternal candidates skip the recruiter screen and background check (already on file) but go through the same skills assessment and values interview as external candidates, to keep the bar consistent.\n\n## 4. Notifying Your Current Manager\n\nTalent Acquisition notifies your current manager when you reach the interview stage, not at application. This is to protect your ability to explore opportunities without an awkward early conversation if it doesn't go further.\n\n## 5. Transition Timeline\n\nIf selected, the standard transition window is **2-4 weeks**, agreed between your current and future manager, to allow for knowledge handover. Critical-path projects may extend this to a maximum of 6 weeks, but should not be used to indefinitely delay a transfer.\n\n## 6. Compensation on Transfer\n\nA lateral transfer (same level) does not automatically change salary. A transfer to a higher level follows the same band rules as the Promotion & Career Ladder Framework.\n\n## 7. Returning to Your Original Team\n\nIf an internal transfer doesn't work out within the first 3 months, the employee can request to return to their original team if a suitable role is available; this is handled case-by-case with People Ops and is not guaranteed.",
       "metadata": {
-        "source": "/home/sparras/trabajo/RAG_HR_ASSISTANT/knowledge_base/onboarding_people_ops/internal_mobility_transfer_policy.md",
+        "source": "/home/sixtorapa/Aprendizaje/RAG_HR_ASSISTANT/knowledge_base/onboarding_people_ops/internal_mobility_transfer_policy.md",
         "relative_path": "onboarding_people_ops/internal_mobility_transfer_policy.md",
         "folder_context": "onboarding_people_ops",
         "filename": "internal_mobility_transfer_policy.md",
@@ -20,14 +20,14 @@
         "chunk_type": "macro",
         "has_children": true,
         "semantic_headline": "Política de Movilidad Interna y Transferencias",
-        "semantic_summary": "Los empleados pueden solicitar roles internos tras 6 meses en su puesto actual, con un proceso que omite la verificación de antecedentes. Se detalla el tiempo de transición y la política de compensación en transferencias. Esta política fomenta el crecimiento profesional y la retención de talento dentro de la empresa.",
+        "semantic_summary": "Los empleados son elegibles para aplicar a roles internos tras 6 meses en su puesto actual. El proceso de transferencia incluye un período de transición de 2-4 semanas y permite a los empleados regresar a su equipo original si la transferencia no resulta exitosa.",
         "contains_metrics": false,
         "contains_list": false,
         "context_where": "onboarding_people_ops/internal_mobility_transfer_policy.md"
       }
     },
     {
-      "text": "SOURCE: onboarding_people_ops/internal_mobility_transfer_policy.md\nTITLE: Política de Movilidad Interna y Transferencias\n\n[PÁGINA ?]\n# Internal Mobility & Transfer Policy\n\n## 1. Eligibility\n\nEmployees become eligible to apply for internal roles after **6 months** in their current role, except in the case of a team-initiated move (e.g., your team is being restructured), which has no minimum tenure requirement.\n\n## 2. How to Apply\n\nInternal roles are posted on the internal careers page alongside external postings, clearly marked \"internal.\" Apply directly through the ATS; you do not need your current manager's permission to apply, though they will be notified once you reach the interview stage.\n\n## 3. Process Differences vs External Candidates\n\nInternal candidates skip the recruiter screen and background check (already on file) but go through the same skills assessment and values interview as external candidates, to keep the bar consistent.\n\n## 4. Notifying Your Current Manager\n\nTalent Acquisition notifies your current manager when you reach the interview stage, not at application. This is to protect your ability to explore opportunities without an awkward early conversation if it doesn't go further.\n\n## 5. Transition Timeline",
+      "text": "SOURCE: onboarding_people_ops/internal_mobility_transfer_policy.md\nTITLE: Política de Movilidad Interna y Transferencias\nSUMMARY: Los empleados son elegibles para aplicar a roles internos tras 6 meses en su puesto actual. El proceso de transferencia incluye un período de transición de 2-4 semanas y permite a los empleados regresar a su equipo original si la transferencia no resulta exitosa.\n\n[PÁGINA ?]\n# Internal Mobility & Transfer Policy\n\n## 1. Eligibility\n\nEmployees become eligible to apply for internal roles after **6 months** in their current role, except in the case of a team-initiated move (e.g., your team is being restructured), which has no minimum tenure requirement.\n\n## 2. How to Apply\n\nInternal roles are posted on the internal careers page alongside external postings, clearly marked \"internal.\" Apply directly through the ATS; you do not need your current manager's permission to apply, though they will be notified once you reach the interview stage.\n\n## 3. Process Differences vs External Candidates\n\nInternal candidates skip the recruiter screen and background check (already on file) but go through the same skills assessment and values interview as external candidates, to keep the bar consistent.\n\n## 4. Notifying Your Current Manager\n\nTalent Acquisition notifies your current manager when you reach the interview stage, not at application. This is to protect your ability to explore opportunities without an awkward early conversation if it doesn't go further.\n\n## 5. Transition Timeline",
       "metadata": {
         "chunk_type": "micro",
         "parent_chunk_id": "32ba7924163a5900",
@@ -37,7 +37,7 @@
         "pages_in_chunk": "",
         "chunking": "micro_token_split",
         "semantic_source": "onboarding_people_ops/internal_mobility_transfer_policy.md",
-        "source": "/home/sparras/trabajo/RAG_HR_ASSISTANT/knowledge_base/onboarding_people_ops/internal_mobility_transfer_policy.md",
+        "source": "/home/sixtorapa/Aprendizaje/RAG_HR_ASSISTANT/knowledge_base/onboarding_people_ops/internal_mobility_transfer_policy.md",
         "source_file": "",
         "relative_path": "onboarding_people_ops/internal_mobility_transfer_policy.md",
         "filename": "internal_mobility_transfer_policy.md",
@@ -45,7 +45,7 @@
         "file_type": "",
         "folder_context": "onboarding_people_ops",
         "semantic_headline": "Política de Movilidad Interna y Transferencias",
-        "semantic_summary": "Los empleados pueden solicitar roles internos tras 6 meses en su puesto actual, con un proceso que omite la verificación de antecedentes. Se detalla el tiempo de transición y la política de compensación en transferencias. Esta política fomenta el crecimiento profesional y la retención de talento dentro de la empresa.",
+        "semantic_summary": "Los empleados son elegibles para aplicar a roles internos tras 6 meses en su puesto actual. El proceso de transferencia incluye un período de transición de 2-4 semanas y permite a los empleados regresar a su equipo original si la transferencia no resulta exitosa.",
         "word_count": 173,
         "char_count": 1122,
         "contains_metrics": false,
@@ -54,7 +54,7 @@
       }
     },
     {
-      "text": "SOURCE: onboarding_people_ops/internal_mobility_transfer_policy.md\nTITLE: Política de Movilidad Interna y Transferencias\n\n## 4. Notifying Your Current Manager\n\nTalent Acquisition notifies your current manager when you reach the interview stage, not at application. This is to protect your ability to explore opportunities without an awkward early conversation if it doesn't go further.\n\n## 5. Transition Timeline\n\nIf selected, the standard transition window is **2-4 weeks**, agreed between your current and future manager, to allow for knowledge handover. Critical-path projects may extend this to a maximum of 6 weeks, but should not be used to indefinitely delay a transfer.\n\n## 6. Compensation on Transfer\n\nA lateral transfer (same level) does not automatically change salary. A transfer to a higher level follows the same band rules as the Promotion & Career Ladder Framework.\n\n## 7. Returning to Your Original Team\n\nIf an internal transfer doesn't work out within the first 3 months, the employee can request to return to their original team if a suitable role is available; this is handled case-by-case with People Ops and is not guaranteed.",
+      "text": "SOURCE: onboarding_people_ops/internal_mobility_transfer_policy.md\nTITLE: Política de Movilidad Interna y Transferencias\nSUMMARY: Los empleados son elegibles para aplicar a roles internos tras 6 meses en su puesto actual. El proceso de transferencia incluye un período de transición de 2-4 semanas y permite a los empleados regresar a su equipo original si la transferencia no resulta exitosa.\n\n## 4. Notifying Your Current Manager\n\nTalent Acquisition notifies your current manager when you reach the interview stage, not at application. This is to protect your ability to explore opportunities without an awkward early conversation if it doesn't go further.\n\n## 5. Transition Timeline\n\nIf selected, the standard transition window is **2-4 weeks**, agreed between your current and future manager, to allow for knowledge handover. Critical-path projects may extend this to a maximum of 6 weeks, but should not be used to indefinitely delay a transfer.\n\n## 6. Compensation on Transfer\n\nA lateral transfer (same level) does not automatically change salary. A transfer to a higher level follows the same band rules as the Promotion & Career Ladder Framework.\n\n## 7. Returning to Your Original Team\n\nIf an internal transfer doesn't work out within the first 3 months, the employee can request to return to their original team if a suitable role is available; this is handled case-by-case with People Ops and is not guaranteed.",
       "metadata": {
         "chunk_type": "micro",
         "parent_chunk_id": "32ba7924163a5900",
@@ -64,7 +64,7 @@
         "pages_in_chunk": "",
         "chunking": "micro_token_split",
         "semantic_source": "onboarding_people_ops/internal_mobility_transfer_policy.md",
-        "source": "/home/sparras/trabajo/RAG_HR_ASSISTANT/knowledge_base/onboarding_people_ops/internal_mobility_transfer_policy.md",
+        "source": "/home/sixtorapa/Aprendizaje/RAG_HR_ASSISTANT/knowledge_base/onboarding_people_ops/internal_mobility_transfer_policy.md",
         "source_file": "",
         "relative_path": "onboarding_people_ops/internal_mobility_transfer_policy.md",
         "filename": "internal_mobility_transfer_policy.md",
@@ -72,7 +72,7 @@
         "file_type": "",
         "folder_context": "onboarding_people_ops",
         "semantic_headline": "Política de Movilidad Interna y Transferencias",
-        "semantic_summary": "Los empleados pueden solicitar roles internos tras 6 meses en su puesto actual, con un proceso que omite la verificación de antecedentes. Se detalla el tiempo de transición y la política de compensación en transferencias. Esta política fomenta el crecimiento profesional y la retención de talento dentro de la empresa.",
+        "semantic_summary": "Los empleados son elegibles para aplicar a roles internos tras 6 meses en su puesto actual. El proceso de transferencia incluye un período de transición de 2-4 semanas y permite a los empleados regresar a su equipo original si la transferencia no resulta exitosa.",
         "word_count": 165,
         "char_count": 1026,
         "contains_metrics": false,

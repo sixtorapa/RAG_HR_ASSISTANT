@@ -1,0 +1,22 @@
+{
+  "fecha": "2026-08-04T10:24:54.775967",
+  "modelo": "gpt-4o-mini",
+  "n_preguntas": 21,
+  "max_contextos_para_el_juez": 10,
+  "segundos_generacion": 54.3,
+  "coste_generacion_usd": 0.0054,
+  "granularidad": "micro",
+  "resultados": {
+    "context_precision": 0.8155,
+    "context_recall": 0.7619,
+    "faithfulness": 0.9385,
+    "answer_relevancy": 0.8681
+  },
+  "linea_base_all": {
+    "context_precision": 0.722,
+    "context_recall": 0.8095,
+    "faithfulness": 0.9382,
+    "answer_relevancy": 0.8327
+  },
+  "nota": "Pipeline real (get_conversational_qa_chain con two-pass, ACL e hibrido). La linea base es la tirada del 3-ago-2026 sin filtro de granularidad."
+}

@@ -54,7 +54,8 @@ class TestAskEndpoint:
     """
     Tests del endpoint /ask/<session_id>.
 
-    Se mockea todo el stack de LLM: AgentRouter, DocumentQAAgent, SQLAgent.
+    Se mockea todo el stack de LLM en app.main.pipeline, que es donde se
+    construyen el router y las herramientas.
     Lo que validamos:
       - El contrato HTTP (status codes, JSON response shape)
       - Que se rechaza correctamente si falta la pregunta
@@ -70,31 +71,38 @@ class TestAskEndpoint:
             "origin": "chat_with_documents",
         }
 
-        with patch("app.main.routes.AgentRouter") as mock_router, \
-            patch("app.main.routes.DocumentQAAgent") as mock_doc_agent, \
-            patch("app.main.routes.SQLAgent") as mock_sql_agent, \
-            patch("app.main.routes.ReasoningAgent") as mock_reasoning, \
-            patch("app.main.routes.ChatMemoryStore") as mock_memory:
+        # La costura se movió DOS veces el 3-ago-2026: primero de DocumentQAAgent
+        # a la tool (el envoltorio se eliminó tras medir que su aportación caía
+        # dentro del ruido del juez), y luego de routes.py a pipeline.py al
+        # partir el fichero. Ahí es donde se construyen las herramientas ahora.
+        # Igual que pasó con ChatOpenAI al introducir la factoría: el mock en
+        # rojo es la señal de que el desacoplamiento ocurrió de verdad.
+        with patch("app.main.pipeline.AgentRouter") as mock_router, \
+            patch("app.main.pipeline.ChatWithDocumentTool") as mock_doc_tool, \
+            patch("app.main.pipeline.SummarizeDocumentTool"), \
+            patch("app.main.pipeline.SQLDatabaseTool"), \
+            patch("app.main.pipeline.ExcelAnalysisTool"), \
+            patch("app.main.pipeline.SQLAgent"), \
+            patch("app.main.pipeline.ReasoningAgent") as mock_reasoning:
 
-            # Configurar el router para que devuelva una tool call de documentos
+            # El router devuelve una tool call de documentos
             mock_router_instance = MagicMock()
             mock_router_instance.route.return_value = MagicMock(
                 tool_calls=[{"name": "chat_with_documents", "args": {}}]
             )
             mock_router.return_value = mock_router_instance
 
-            # Configurar el doc_agent
+            # La tool de documentos: su .name debe coincidir con el del tool_call,
+            # porque _run_tools despacha comparando nombres.
             mock_doc_instance = MagicMock()
+            mock_doc_instance.name = "chat_with_documents"
             mock_doc_instance.run.return_value = mock_result
-            mock_doc_agent.return_value = mock_doc_instance
+            mock_doc_tool.return_value = mock_doc_instance
 
-            # Configurar el reasoning agent
+            # El agente de formato final
             mock_reasoning_instance = MagicMock()
             mock_reasoning_instance.run.return_value = mock_result
             mock_reasoning.return_value = mock_reasoning_instance
-
-            # Memory store
-            mock_memory.return_value = MagicMock(recall=lambda q, k: [])
 
             yield mock_result
 
@@ -130,7 +138,7 @@ class TestAskEndpoint:
         self, auth_client, test_chat_session, mock_llm_stack, app
     ):
         with app.app_context():
-            with patch("app.main.routes.get_openai_callback") as mock_cb:
+            with patch("app.main.pipeline.get_openai_callback") as mock_cb:
                 mock_cb.return_value.__enter__ = MagicMock(return_value=MagicMock(
                     prompt_tokens=100, completion_tokens=50
                 ))

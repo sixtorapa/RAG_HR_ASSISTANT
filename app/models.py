@@ -5,27 +5,17 @@ from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 
 
-class Project(db.Model):
-    """
-    Representa la Base de Conocimiento (La carpeta indexada).
-    """
-    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    name = db.Column(db.String(100), index=True, unique=True, nullable=False)
-    document_path = db.Column(db.String(255), nullable=False)
-    vector_store_path = db.Column(db.String(255), unique=True, nullable=False)
-    status = db.Column(db.String(20), nullable=False, default='PENDING')
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    
-    # Configuraciones globales del proyecto
-    model_name = db.Column(db.String(50), nullable=True)
-    settings = db.Column(db.JSON, nullable=True)
-    cost = db.Column(db.Float, nullable=False, default=0.0)
-
-    # Relación: Un Proyecto tiene muchas sesiones de chat
-    sessions = db.relationship('ChatSession', backref='project', lazy='dynamic', cascade="all, delete-orphan")
-
-    def __repr__(self):
-        return f'<Project {self.name}>'
+# La tabla `project` se eliminó el 4-ago-2026. De sus ocho columnas, cinco eran
+# una copia de variables de entorno (nombre, rutas, modelo), `status` valía
+# siempre "READY", `id` solo existía para una clave foránea, y `cost` se
+# acumulaba en una columna que no se mostraba en ninguna pantalla. Lo único con
+# estado real —la instrucción de sistema y el contexto SQL— es configuración y
+# vive en config.py.
+#
+# No era código de más: era una fuente de verdad duplicada. Cambiar
+# UP_VECTOR_STORE_PATH no movía un proyecto ya creado, porque la ruta estaba
+# congelada en la fila — uno de los tres fallos que solo aparecieron al
+# desplegar en Lambda.
 
 
 class ChatSession(db.Model):
@@ -35,7 +25,6 @@ class ChatSession(db.Model):
     id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     name = db.Column(db.String(100), nullable=False, default="Nuevo Chat")
 
-    project_id = db.Column(db.String(36), db.ForeignKey('project.id'), nullable=False)
     user_id = db.Column(db.String(36), db.ForeignKey('user.id'), nullable=False)
 
     created_at = db.Column(db.DateTime, default=datetime.utcnow)

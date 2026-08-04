@@ -1,6 +1,7 @@
 # app/rag_logic/agent_router.py
 
 import re
+import unicodedata
 from typing import List, Optional, Any, Dict
 
 from .llm_factory import get_llm
@@ -10,7 +11,53 @@ from langchain.schema import AIMessage
 
 
 def _norm(s: str) -> str:
-    return (s or "").strip().lower()
+    """Minúsculas, sin acentos y sin espacios sobrantes."""
+    s = (s or "").strip().lower()
+    s = unicodedata.normalize("NFD", s)
+    return "".join(c for c in s if unicodedata.category(c) != "Mn")
+
+
+def _contiene_palabra(texto_norm: str, clave: str) -> bool:
+    """
+    ¿Aparece `clave` como palabra completa en `texto_norm`?
+
+    `clave in texto` es SUBCADENA, y ese era el defecto: "suma" casaba dentro
+    de "consumar", "file" dentro de "filete", "hoja" dentro de "hojalata".
+    Peligroso justo aquí porque el camino forzado del router se salta el LLM:
+    un falso positivo desvía la pregunta a la herramienta equivocada sin que
+    nada lo revise.
+
+    Se usan `(?<!\\w)` y `(?!\\w)` en vez de `\\b` porque hay claves que
+    empiezan por punto —".xlsx"— y `\\b` no se comporta igual delante de un
+    carácter que no es de palabra.
+
+    Las claves de varias palabras admiten espacios variables: "hoja de calculo"
+    casa también con "hoja  de   calculo".
+
+    ⚠️ Contrapartida asumida: al exigir palabra completa se pierden las
+    variantes morfológicas. "empleado" ya no casa con "empleados". Por eso las
+    listas de abajo enumeran las formas que interesan —"cobra"/"cobran",
+    "empleados"— en vez de confiar en la coincidencia parcial. Es la decisión
+    correcta: un falso negativo manda la pregunta al LLM, que decide bien; un
+    falso positivo la manda a la herramienta equivocada sin red.
+    """
+    clave_norm = _norm(clave)
+    if not clave_norm:
+        return False
+
+    # La guarda solo se pone donde hay frontera de palabra que proteger. Una
+    # clave como ".xlsx" va pegada al nombre del fichero ("ventas.xlsx"), así
+    # que exigir que no la preceda un carácter de palabra la haría imposible
+    # de encontrar. Se mira el primer y el último carácter de la clave.
+    inicio = r"(?<!\w)" if clave_norm[0].isalnum() or clave_norm[0] == "_" else ""
+    fin = r"(?!\w)" if clave_norm[-1].isalnum() or clave_norm[-1] == "_" else ""
+
+    patron = inicio + re.escape(clave_norm).replace(r"\ ", r"\s+") + fin
+    return re.search(patron, texto_norm) is not None
+
+
+def _alguna_palabra(texto_norm: str, claves: List[str]) -> bool:
+    return any(_contiene_palabra(texto_norm, k) for k in claves)
 
 
 def _is_greeting(q: str) -> bool:
@@ -32,7 +79,7 @@ def _looks_like_sql_intent(q: str) -> bool:
         "performance score", "rating", "top performers", "attrition", "turnover", "job postings",
         "cobra", "cobran", "gana", "ganan", "nomina", "nómina", "antiguedad", "antigüedad"
     ]
-    return any(k in qn for k in sql_signals)
+    return _alguna_palabra(qn, sql_signals)
 
 
 def _looks_like_docs_intent(q: str) -> bool:
@@ -42,14 +89,14 @@ def _looks_like_docs_intent(q: str) -> bool:
         "manual", "onboarding", "benefits", "beneficios", "normativa", "reglamento",
         "vacaciones", "permiso", "baja", "licencia"
     ]
-    return any(k in qn for k in docs_signals)
+    return _alguna_palabra(qn, docs_signals)
 
 
 def _looks_like_excel_intent(q: str) -> bool:
     qn = _norm(q)
     # Señales fuertes: el usuario habla explícitamente de un fichero Excel/spreadsheet.
     strong_signals = ["excel", ".xlsx", ".xls", "spreadsheet", "hoja de calculo", "hoja de cálculo"]
-    if any(k in qn for k in strong_signals):
+    if _alguna_palabra(qn, strong_signals):
         return True
 
     # Señales débiles ("tabla", "hoja", "dashboard", "celdas") son demasiado genéricas:
@@ -59,9 +106,9 @@ def _looks_like_excel_intent(q: str) -> bool:
     calc_signals = ["sum", "suma", "total", "promedio", "average", "median", "percent", "porcentaje"]
     file_signals = ["archivo", "fichero", "file"]
 
-    has_weak = any(k in qn for k in weak_signals)
-    has_calc = any(k in qn for k in calc_signals)
-    has_file = any(k in qn for k in file_signals)
+    has_weak = _alguna_palabra(qn, weak_signals)
+    has_calc = _alguna_palabra(qn, calc_signals)
+    has_file = _alguna_palabra(qn, file_signals)
 
     return (has_weak and has_file) or (has_calc and has_file)
 
@@ -147,7 +194,8 @@ ROUTE: <route> — <reason in 8-15 words>
             return AIMessage(content="ROUTE: DIRECT — Acknowledgement.\nYou're welcome! What else can I help you with?")
 
         # 2) Meta / ayuda
-        if any(k in qn for k in ["help", "ayuda", "what can you do", "que puedes hacer", "qué puedes hacer", "who are you", "quien eres", "quién eres"]):
+        if _alguna_palabra(qn, ["help", "ayuda", "what can you do", "que puedes hacer",
+                                "who are you", "quien eres"]):
             return AIMessage(
                 content="ROUTE: DIRECT — Meta/help request.\nI can answer HR policy questions from internal docs, and HR metrics (salary, headcount, performance) from the HR database. What do you need?"
             )

@@ -3,9 +3,9 @@
   "num_chunks": 4,
   "chunks": [
     {
-      "text": "SOURCE: recruitment_talent/background_check_policy.md\nTITLE: Política de Verificación de Antecedentes y Empleo\n\n[PÁGINA ?]\n# Background Check & Pre-Employment Policy\n\n## 1. When Checks Happen\n\nBackground checks are run only **after** a verbal offer has been accepted, never before, and are a condition of final employment. The offer letter explicitly states that the position is contingent on a satisfactory result.\n\n## 2. What Is Checked\n\n| Check Type | Applies To |\n| --- | --- |\n| Identity verification | All roles |\n| Right-to-work verification | All roles |\n| Employment history (last 2 employers) | All roles |\n| Education verification | Roles requiring a specific degree |\n| Criminal record check | Finance, Legal, and roles with system admin access |\n| Credit check | Finance roles handling payments only |\n\n## 3. Provider and Consent\n\nChecks are performed by an accredited third-party provider. Candidates must give explicit written consent before any check is initiated; refusal to consent means the offer cannot proceed, since the check is a condition of employment.\n\n## 4. Handling Adverse Findings\n\nIf a check returns an adverse finding, the candidate is given the opportunity to explain or dispute it before any decision is made. The decision to withdraw an offer based on a finding is made jointly by the Hiring Manager, People Director, and Legal — never by a single individual.\n\n## 5. Data Retention\n\nBackground check results are retained for 12 months after the hiring decision, then deleted, in line with the Data Privacy & GDPR Guidelines. Results are never shared outside the hiring team and Legal.\n\n## 6. International Hires\n\nFor candidates outside the company's primary country of operation, checks are adapted to what is legally permissible in that jurisdiction; some check types (e.g., credit checks) are not available or not legal in all countries and are skipped accordingly.\n\n## 7. Re-checks for Internal Moves\n\nInternal employees moving into a role with a higher check requirement (e.g., moving into Finance) undergo the additional check relevant to the new role before the transfer is finalized.",
+      "text": "SOURCE: recruitment_talent/background_check_policy.md\nTITLE: Política de Verificación de Antecedentes y Empleo\nSUMMARY: Las verificaciones de antecedentes se realizan solo después de aceptar una oferta verbal y son un requisito para la contratación final. Se verifica la identidad, el derecho a trabajar y el historial laboral, con un enfoque especial en roles de finanzas y legales. Los resultados se retienen por 12 meses y se adaptan a las normativas locales para contrataciones internacionales.\n\n[PÁGINA ?]\n# Background Check & Pre-Employment Policy\n\n## 1. When Checks Happen\n\nBackground checks are run only **after** a verbal offer has been accepted, never before, and are a condition of final employment. The offer letter explicitly states that the position is contingent on a satisfactory result.\n\n## 2. What Is Checked\n\n| Check Type | Applies To |\n| --- | --- |\n| Identity verification | All roles |\n| Right-to-work verification | All roles |\n| Employment history (last 2 employers) | All roles |\n| Education verification | Roles requiring a specific degree |\n| Criminal record check | Finance, Legal, and roles with system admin access |\n| Credit check | Finance roles handling payments only |\n\n## 3. Provider and Consent\n\nChecks are performed by an accredited third-party provider. Candidates must give explicit written consent before any check is initiated; refusal to consent means the offer cannot proceed, since the check is a condition of employment.\n\n## 4. Handling Adverse Findings\n\nIf a check returns an adverse finding, the candidate is given the opportunity to explain or dispute it before any decision is made. The decision to withdraw an offer based on a finding is made jointly by the Hiring Manager, People Director, and Legal — never by a single individual.\n\n## 5. Data Retention\n\nBackground check results are retained for 12 months after the hiring decision, then deleted, in line with the Data Privacy & GDPR Guidelines. Results are never shared outside the hiring team and Legal.\n\n## 6. International Hires\n\nFor candidates outside the company's primary country of operation, checks are adapted to what is legally permissible in that jurisdiction; some check types (e.g., credit checks) are not available or not legal in all countries and are skipped accordingly.\n\n## 7. Re-checks for Internal Moves\n\nInternal employees moving into a role with a higher check requirement (e.g., moving into Finance) undergo the additional check relevant to the new role before the transfer is finalized.",
       "metadata": {
-        "source": "/home/sparras/trabajo/RAG_HR_ASSISTANT/knowledge_base/recruitment_talent/background_check_policy.md",
+        "source": "/home/sixtorapa/Aprendizaje/RAG_HR_ASSISTANT/knowledge_base/recruitment_talent/background_check_policy.md",
         "relative_path": "recruitment_talent/background_check_policy.md",
         "folder_context": "recruitment_talent",
         "filename": "background_check_policy.md",
@@ -20,14 +20,14 @@
         "chunk_type": "macro",
         "has_children": true,
         "semantic_headline": "Política de Verificación de Antecedentes y Empleo",
-        "semantic_summary": "Las verificaciones de antecedentes se realizan solo después de aceptar una oferta verbal. Se revisan aspectos como la identidad y el historial laboral, y se requiere el consentimiento del candidato. Los hallazgos adversos se manejan con la oportunidad de disputa antes de tomar decisiones finales.",
+        "semantic_summary": "Las verificaciones de antecedentes se realizan solo después de aceptar una oferta verbal y son un requisito para la contratación final. Se verifica la identidad, el derecho a trabajar y el historial laboral, con un enfoque especial en roles de finanzas y legales. Los resultados se retienen por 12 meses y se adaptan a las normativas locales para contrataciones internacionales.",
         "contains_metrics": false,
         "contains_list": false,
         "context_where": "recruitment_talent/background_check_policy.md"
       }
     },
     {
-      "text": "SOURCE: recruitment_talent/background_check_policy.md\nTITLE: Política de Verificación de Antecedentes y Empleo\n\n[PÁGINA ?]\n# Background Check & Pre-Employment Policy\n\n## 1. When Checks Happen\n\nBackground checks are run only **after** a verbal offer has been accepted, never before, and are a condition of final employment. The offer letter explicitly states that the position is contingent on a satisfactory result.\n\n## 2. What Is Checked\n\n| Check Type | Applies To |\n| --- | --- |\n| Identity verification | All roles |\n| Right-to-work verification | All roles |\n| Employment history (last 2 employers) | All roles |\n| Education verification | Roles requiring a specific degree |\n| Criminal record check | Finance, Legal, and roles with system admin access |\n| Credit check | Finance roles handling payments only |\n\n## 3. Provider and Consent\n\nChecks are performed by an accredited third-party provider. Candidates must give explicit written consent before any check is initiated; refusal to consent means the offer cannot proceed, since the check is a condition of employment.\n\n## 4. Handling Adverse Findings",
+      "text": "SOURCE: recruitment_talent/background_check_policy.md\nTITLE: Política de Verificación de Antecedentes y Empleo\nSUMMARY: Las verificaciones de antecedentes se realizan solo después de aceptar una oferta verbal y son un requisito para la contratación final. Se verifica la identidad, el derecho a trabajar y el historial laboral, con un enfoque especial en roles de finanzas y legales. Los resultados se retienen por 12 meses y se adaptan a las normativas locales para contrataciones internacionales.\n\n[PÁGINA ?]\n# Background Check & Pre-Employment Policy\n\n## 1. When Checks Happen\n\nBackground checks are run only **after** a verbal offer has been accepted, never before, and are a condition of final employment. The offer letter explicitly states that the position is contingent on a satisfactory result.\n\n## 2. What Is Checked\n\n| Check Type | Applies To |\n| --- | --- |\n| Identity verification | All roles |\n| Right-to-work verification | All roles |\n| Employment history (last 2 employers) | All roles |\n| Education verification | Roles requiring a specific degree |\n| Criminal record check | Finance, Legal, and roles with system admin access |\n| Credit check | Finance roles handling payments only |\n\n## 3. Provider and Consent\n\nChecks are performed by an accredited third-party provider. Candidates must give explicit written consent before any check is initiated; refusal to consent means the offer cannot proceed, since the check is a condition of employment.\n\n## 4. Handling Adverse Findings",
       "metadata": {
         "chunk_type": "micro",
         "parent_chunk_id": "3fde6b1ce7720cd7",
@@ -37,7 +37,7 @@
         "pages_in_chunk": "",
         "chunking": "micro_token_split",
         "semantic_source": "recruitment_talent/background_check_policy.md",
-        "source": "/home/sparras/trabajo/RAG_HR_ASSISTANT/knowledge_base/recruitment_talent/background_check_policy.md",
+        "source": "/home/sixtorapa/Aprendizaje/RAG_HR_ASSISTANT/knowledge_base/recruitment_talent/background_check_policy.md",
         "source_file": "",
         "relative_path": "recruitment_talent/background_check_policy.md",
         "filename": "background_check_policy.md",
@@ -45,7 +45,7 @@
         "file_type": "",
         "folder_context": "recruitment_talent",
         "semantic_headline": "Política de Verificación de Antecedentes y Empleo",
-        "semantic_summary": "Las verificaciones de antecedentes se realizan solo después de aceptar una oferta verbal. Se revisan aspectos como la identidad y el historial laboral, y se requiere el consentimiento del candidato. Los hallazgos adversos se manejan con la oportunidad de disputa antes de tomar decisiones finales.",
+        "semantic_summary": "Las verificaciones de antecedentes se realizan solo después de aceptar una oferta verbal y son un requisito para la contratación final. Se verifica la identidad, el derecho a trabajar y el historial laboral, con un enfoque especial en roles de finanzas y legales. Los resultados se retienen por 12 meses y se adaptan a las normativas locales para contrataciones internacionales.",
         "word_count": 168,
         "char_count": 998,
         "contains_metrics": false,
@@ -54,7 +54,7 @@
       }
     },
     {
-      "text": "SOURCE: recruitment_talent/background_check_policy.md\nTITLE: Política de Verificación de Antecedentes y Empleo\n\n## 3. Provider and Consent\n\nChecks are performed by an accredited third-party provider. Candidates must give explicit written consent before any check is initiated; refusal to consent means the offer cannot proceed, since the check is a condition of employment.\n\n## 4. Handling Adverse Findings\n\nIf a check returns an adverse finding, the candidate is given the opportunity to explain or dispute it before any decision is made. The decision to withdraw an offer based on a finding is made jointly by the Hiring Manager, People Director, and Legal — never by a single individual.\n\n## 5. Data Retention\n\nBackground check results are retained for 12 months after the hiring decision, then deleted, in line with the Data Privacy & GDPR Guidelines. Results are never shared outside the hiring team and Legal.\n\n## 6. International Hires\n\nFor candidates outside the company's primary country of operation, checks are adapted to what is legally permissible in that jurisdiction; some check types (e.g., credit checks) are not available or not legal in all countries and are skipped accordingly.\n\n## 7. Re-checks for Internal Moves",
+      "text": "SOURCE: recruitment_talent/background_check_policy.md\nTITLE: Política de Verificación de Antecedentes y Empleo\nSUMMARY: Las verificaciones de antecedentes se realizan solo después de aceptar una oferta verbal y son un requisito para la contratación final. Se verifica la identidad, el derecho a trabajar y el historial laboral, con un enfoque especial en roles de finanzas y legales. Los resultados se retienen por 12 meses y se adaptan a las normativas locales para contrataciones internacionales.\n\n## 3. Provider and Consent\n\nChecks are performed by an accredited third-party provider. Candidates must give explicit written consent before any check is initiated; refusal to consent means the offer cannot proceed, since the check is a condition of employment.\n\n## 4. Handling Adverse Findings\n\nIf a check returns an adverse finding, the candidate is given the opportunity to explain or dispute it before any decision is made. The decision to withdraw an offer based on a finding is made jointly by the Hiring Manager, People Director, and Legal — never by a single individual.\n\n## 5. Data Retention\n\nBackground check results are retained for 12 months after the hiring decision, then deleted, in line with the Data Privacy & GDPR Guidelines. Results are never shared outside the hiring team and Legal.\n\n## 6. International Hires\n\nFor candidates outside the company's primary country of operation, checks are adapted to what is legally permissible in that jurisdiction; some check types (e.g., credit checks) are not available or not legal in all countries and are skipped accordingly.\n\n## 7. Re-checks for Internal Moves",
       "metadata": {
         "chunk_type": "micro",
         "parent_chunk_id": "3fde6b1ce7720cd7",
@@ -64,7 +64,7 @@
         "pages_in_chunk": "",
         "chunking": "micro_token_split",
         "semantic_source": "recruitment_talent/background_check_policy.md",
-        "source": "/home/sparras/trabajo/RAG_HR_ASSISTANT/knowledge_base/recruitment_talent/background_check_policy.md",
+        "source": "/home/sixtorapa/Aprendizaje/RAG_HR_ASSISTANT/knowledge_base/recruitment_talent/background_check_policy.md",
         "source_file": "",
         "relative_path": "recruitment_talent/background_check_policy.md",
         "filename": "background_check_policy.md",
@@ -72,7 +72,7 @@
         "file_type": "",
         "folder_context": "recruitment_talent",
         "semantic_headline": "Política de Verificación de Antecedentes y Empleo",
-        "semantic_summary": "Las verificaciones de antecedentes se realizan solo después de aceptar una oferta verbal. Se revisan aspectos como la identidad y el historial laboral, y se requiere el consentimiento del candidato. Los hallazgos adversos se manejan con la oportunidad de disputa antes de tomar decisiones finales.",
+        "semantic_summary": "Las verificaciones de antecedentes se realizan solo después de aceptar una oferta verbal y son un requisito para la contratación final. Se verifica la identidad, el derecho a trabajar y el historial laboral, con un enfoque especial en roles de finanzas y legales. Los resultados se retienen por 12 meses y se adaptan a las normativas locales para contrataciones internacionales.",
         "word_count": 181,
         "char_count": 1122,
         "contains_metrics": false,
@@ -81,7 +81,7 @@
       }
     },
     {
-      "text": "SOURCE: recruitment_talent/background_check_policy.md\nTITLE: Política de Verificación de Antecedentes y Empleo\n\nFor candidates outside the company's primary country of operation, checks are adapted to what is legally permissible in that jurisdiction; some check types (e.g., credit checks) are not available or not legal in all countries and are skipped accordingly.\n\n## 7. Re-checks for Internal Moves\n\nInternal employees moving into a role with a higher check requirement (e.g., moving into Finance) undergo the additional check relevant to the new role before the transfer is finalized.",
+      "text": "SOURCE: recruitment_talent/background_check_policy.md\nTITLE: Política de Verificación de Antecedentes y Empleo\nSUMMARY: Las verificaciones de antecedentes se realizan solo después de aceptar una oferta verbal y son un requisito para la contratación final. Se verifica la identidad, el derecho a trabajar y el historial laboral, con un enfoque especial en roles de finanzas y legales. Los resultados se retienen por 12 meses y se adaptan a las normativas locales para contrataciones internacionales.\n\nFor candidates outside the company's primary country of operation, checks are adapted to what is legally permissible in that jurisdiction; some check types (e.g., credit checks) are not available or not legal in all countries and are skipped accordingly.\n\n## 7. Re-checks for Internal Moves\n\nInternal employees moving into a role with a higher check requirement (e.g., moving into Finance) undergo the additional check relevant to the new role before the transfer is finalized.",
       "metadata": {
         "chunk_type": "micro",
         "parent_chunk_id": "3fde6b1ce7720cd7",
@@ -91,7 +91,7 @@
         "pages_in_chunk": "",
         "chunking": "micro_token_split",
         "semantic_source": "recruitment_talent/background_check_policy.md",
-        "source": "/home/sparras/trabajo/RAG_HR_ASSISTANT/knowledge_base/recruitment_talent/background_check_policy.md",
+        "source": "/home/sixtorapa/Aprendizaje/RAG_HR_ASSISTANT/knowledge_base/recruitment_talent/background_check_policy.md",
         "source_file": "",
         "relative_path": "recruitment_talent/background_check_policy.md",
         "filename": "background_check_policy.md",
@@ -99,7 +99,7 @@
         "file_type": "",
         "folder_context": "recruitment_talent",
         "semantic_headline": "Política de Verificación de Antecedentes y Empleo",
-        "semantic_summary": "Las verificaciones de antecedentes se realizan solo después de aceptar una oferta verbal. Se revisan aspectos como la identidad y el historial laboral, y se requiere el consentimiento del candidato. Los hallazgos adversos se manejan con la oportunidad de disputa antes de tomar decisiones finales.",
+        "semantic_summary": "Las verificaciones de antecedentes se realizan solo después de aceptar una oferta verbal y son un requisito para la contratación final. Se verifica la identidad, el derecho a trabajar y el historial laboral, con un enfoque especial en roles de finanzas y legales. Los resultados se retienen por 12 meses y se adaptan a las normativas locales para contrataciones internacionales.",
         "word_count": 74,
         "char_count": 477,
         "contains_metrics": false,
