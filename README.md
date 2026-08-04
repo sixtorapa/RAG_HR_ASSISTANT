@@ -206,23 +206,26 @@ lengthens the cold start.
 
 | | Railway | AWS Lambda |
 |---|---|---|
-| Generation model | `gpt-4o-mini` | Claude Sonnet 4.6 |
+| Generation model | `gpt-4o-mini` | Claude Haiku 4.5 |
 | `/health`, warm | 0.46 s | 0.21 s |
-| First `/ask` on a cold container | 21.4 s → 200 | 30.2 s → **503** |
-| `/ask`, warm | **6.3 s** | 17.7 s |
+| First `/ask` on a cold container | 21.4 s | 17.1 s |
+| `/ask`, warm | 6.3 s | 8.6 - 10.1 s |
 | Request ceiling | none | 29 s (API Gateway) |
 
-The gap between 6.3 s and 17.7 s is the model, not the code: Sonnet answers a heavier
-pipeline than the mini model does. Setting `MODEL_NAME=gpt-4o-mini` on the function maps
-it to Claude Haiku and should close most of it.
+The function had been answering with Claude Sonnet, because `MODEL_NAME` was never set on
+it and `config.py` defaults to `gpt-4o`, which the factory maps to Sonnet. Three to four
+sequential calls to a large model took a cold request past 35 s, and API Gateway returned
+503 at its ceiling — the function itself always completed. Declaring the model in
+`Dockerfile.lambda` fixed it: the default in `config.py` is written for Railway, where no
+such ceiling exists.
 
 ---
 
 ## Honest limitations
 
-- **The first query on a cold Lambda container returns 503.** A warm `/ask` takes 17.7 s
-  against API Gateway's 29 s ceiling, but building the chain on a fresh container does not
-  fit in the window. Railway has no such ceiling and answers the same first query in 21 s.
+- **API Gateway still caps a request at 29 s**, and a cold `/ask` uses 17 s of that. The
+  margin is real but it is not large, and a heavier question on a cold container would
+  narrow it. Streaming is what removes the ceiling rather than widening it.
 - **CI, not CD.** `.github/workflows/ci.yml` runs ruff, pytest and a Docker build with
   `push: false`. There is no deploy job; Railway deploys from its own git integration,
   gated on Actions passing.

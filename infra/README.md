@@ -69,14 +69,17 @@ Lambda, CPU scales with memory, and lowering it lengthens the cold start.
 
 ## Known ceiling
 
-A warm `/ask` takes 17.7 s against API Gateway's 29 s limit. The first query on a cold
-container still exceeds it and returns 503: building the chain — opening Chroma, loading
-the BM25 index, assembling the ensemble — does not fit in the window.
+API Gateway caps a request at 29 s. A cold `/ask` uses about 17 s of that and a warm one
+8 to 10 s, so the margin holds — but it is a margin, not headroom.
 
-The function itself completes well past 29 s, so this is a gateway limit rather than a
-Lambda one. Two levers are untried: the function runs Claude Sonnet because MODEL_NAME is
-unset and defaults to gpt-4o, and setting it to gpt-4o-mini maps to Haiku; and streaming
-would remove the ceiling entirely, since the connection opens on the first token.
+It did not always. The function ran Claude Sonnet, because `MODEL_NAME` was never set and
+`config.py` defaults to `gpt-4o`, which the factory maps to Sonnet. A cold request took
+35 s and the gateway returned 503 at its ceiling; the function itself completed every
+time, which is why the logs showed `Duration: 35654 ms` next to a failed request. The
+model is now declared in `Dockerfile.lambda`.
+
+Streaming is what would remove the ceiling rather than widen it: the connection opens on
+the first token.
 
 A Lambda Function URL, which has no 29 s ceiling, returned 403 despite `AuthType: NONE`
 and a `Principal: "*"` policy — AWS blocks public function URLs by default on new

@@ -36,6 +36,14 @@ COPY config.py observability.py lambda_handler.py ${LAMBDA_TASK_ROOT}/
 COPY hr_data.db ${LAMBDA_TASK_ROOT}/
 
 # ── Entorno ──────────────────────────────────────────────────────────────────
+# MODEL_NAME explícito y no heredado del defecto de config.py. Ese defecto es
+# "gpt-4o", que la factoría traduce a Claude Sonnet 4.6, y con 3-4 llamadas en
+# serie la primera consulta de un contenedor frío tardaba 35 s: API Gateway
+# cortaba a los 29 y devolvía 503. Con Haiku la misma cadena baja a 8-10 s en
+# caliente y 17 s en frío.
+#
+# El defecto de config.py está pensado para Railway, donde no hay techo de
+# petición. Aquí lo hay, así que la elección de modelo se declara.
 # El vector store se lee desde la imagen: es de solo lectura y no se reingesta
 # en Lambda. persist_bm25_index() escribe en disco y por tanto NO puede
 # ejecutarse aquí; load_bm25_index() solo lee y sí puede.
@@ -44,6 +52,7 @@ ENV PYTHONUNBUFFERED=1 \
     UP_VECTOR_STORE_PATH=/var/task/vector_store/info \
     HR_DB_URI=sqlite:////var/task/hr_data.db \
     LLM_PROVIDER=bedrock \
+    MODEL_NAME=gpt-4o-mini \
     HOME=/tmp
 
 # ── Handler ──────────────────────────────────────────────────────────────────
