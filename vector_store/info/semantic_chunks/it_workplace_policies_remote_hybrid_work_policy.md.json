@@ -1,0 +1,14 @@
+{
+  "source_file": "it_workplace_policies/remote_hybrid_work_policy.md",
+  "num_chunks": 1,
+  "chunks": [
+    {
+      "headline": "Política de Trabajo Remoto e Híbrido",
+      "summary": "Los empleados pueden trabajar de forma remota hasta 3 días a la semana, con horas centrales de 10:00 a 16:00. Algunos roles son completamente remotos desde la contratación, y se permite trabajar desde el extranjero temporalmente con aprobación. Se espera que los empleados mantengan la misma seguridad que en la oficina.",
+      "text": "[PÁGINA ?]\n# Remote & Hybrid Work Policy\n\n## 1. Standard Arrangement\n\nEmployees may work remotely up to 3 days per week, with core hours of 10:00-16:00 expected regardless of location. Teams agree their specific in-office days together, coordinated by the manager, rather than fully individual schedules.\n\n## 2. Fully Remote Roles\n\nSome roles are designated fully remote at the time of hiring, with no expectation of regular office attendance beyond occasional team gatherings (typically 2-4 times per year, travel-funded under the Travel Policy).\n\n## 3. Working From Abroad\n\nEmployees may work from another country temporarily (up to 20 working days per year) with manager approval, subject to confirming there are no tax, legal, or right-to-work complications for that specific country — check with People Ops before booking travel for this purpose.\n\n## 4. Equipment for Remote Work\n\nStandard equipment (laptop, basic peripherals) is provided by IT; the home office stipend (see Benefits Enrollment Guide) covers additional setup. See the Equipment & BYOD Policy for what can be requested.\n\n## 5. Expectations While Remote\n\n- Be reachable during core hours via Slack/calendar status\n- Attend scheduled meetings with video on, where the meeting culture expects it\n- Maintain the same security practices as in-office (see IT Security & Acceptable Use Policy), including not working on unsecured public Wi-Fi for sensitive tasks without VPN\n\n## 6. Changing Your Arrangement\n\nIf you want to move from hybrid to fully remote (or vice versa) on an ongoing basis, discuss with your manager — this is a role/team fit conversation, not an automatic right, since some roles genuinely require more in-person collaboration.\n\n## 7. Underperformance and Remote Work\n\nRemote work privileges are not automatically restricted for performance reasons, but a manager may, as part of a Performance Improvement Plan, require more in-office time if that's identified as a relevant support measure — not used as an implicit punishment.",
+      "pages_in_chunk": "",
+      "word_count": 314,
+      "char_count": 2014
+    }
+  ]
+}

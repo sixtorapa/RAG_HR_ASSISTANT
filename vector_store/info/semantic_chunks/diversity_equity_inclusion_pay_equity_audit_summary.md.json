@@ -1,0 +1,14 @@
+{
+  "source_file": "diversity_equity_inclusion/pay_equity_audit_summary.md",
+  "num_chunks": 1,
+  "chunks": [
+    {
+      "headline": "Resumen de Auditoría de Equidad Salarial",
+      "summary": "La auditoría anual de equidad salarial compara salarios base por género y etnicidad, identificando brechas significativas. Cualquier brecha mayor al 3% se corrige en el siguiente ciclo de revisión salarial, asegurando que las correcciones se realicen sin que el empleado lo solicite.",
+      "text": "[PÁGINA ?]\n# Pay Equity Audit Summary\n\n## 1. What This Audit Covers\n\nOur annual statistical pay equity audit compares base salary across gender (and ethnicity, where legally permitted to collect) within the same level and role family, controlling for tenure and most recent performance score, run by People Analytics in partnership with an external statistician.\n\n## 2. Methodology\n\nWe use a regression-based approach: salary is modeled as a function of level, role family, tenure, performance score, and location, with gender/ethnicity added afterward to see whether it has any remaining statistically significant effect once those legitimate factors are accounted for.\n\n## 3. Threshold for Action\n\nAny gap larger than **3%** that cannot be explained by the legitimate factors above is flagged for correction in the next Salary Review Calendar cycle, funded by a dedicated pay equity remediation budget separate from the standard merit increase budget.\n\n## 4. Most Recent Result (Illustrative)\n\n| Level | Unexplained Gap (latest audit) | Action |\n| --- | --- | --- |\n| Junior/Mid | 0.8% | No action needed |\n| Senior | 2.1% | Monitor |\n| Lead | 3.4% | Corrected in next cycle |\n| Manager | 1.2% | No action needed |\n\n## 5. Governance\n\nResults are reviewed by the DEI Council and the People Director before any individual corrections are made; corrections are applied without the affected employee needing to request or even be aware a gap was found.\n\n## 6. What This Audit Does Not Cover\n\nThis audit looks at base salary only; bonus and equity (ESOP) equity analysis is run as a separate, complementary exercise given their different structure, and is published alongside this summary when complete.\n\n## 7. Confidentiality\n\nIndividual-level results are never published or discussed outside the audit team; only aggregate, level-based results (as shown above) are shared company-wide as part of the DEI Strategy & Commitments reporting cycle.\n\n## 8. Relationship to Hiring\n\nFindings from this audit also inform the Pay Equity & Compensation Philosophy's band-ceiling negotiation rule, which exists specifically to prevent new gaps from being created at the point of hire.",
+      "pages_in_chunk": "",
+      "word_count": 350,
+      "char_count": 2171
+    }
+  ]
+}

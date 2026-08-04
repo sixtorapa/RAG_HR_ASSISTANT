@@ -1,0 +1,14 @@
+{
+  "source_file": "compensation_benefits/bonus_incentive_plan_faq.md",
+  "num_chunks": 1,
+  "chunks": [
+    {
+      "headline": "Preguntas frecuentes sobre el plan de bonificaciones e incentivos",
+      "summary": "El plan de bonificaciones establece un objetivo de bonificación basado en el nivel del empleado, con pagos anuales en marzo. La bonificación se determina por el rendimiento de la empresa y el individuo, y los empleados en PIP no son elegibles. Se permite la opción de diferir bonificaciones en acciones para niveles superiores.",
+      "text": "[PÁGINA ?]\n# Bonus & Incentive Plan — FAQ\n\n## What is the target bonus for my level?\n\n| Level | Target Bonus (% of base salary) |\n| --- | --- |\n| Junior / Mid | 5% |\n| Senior | 10% |\n| Lead | 15% |\n| Manager | 20% |\n\n## When is the bonus paid?\n\nAnnual performance bonuses are paid in March, based on the prior calendar year's results. You must be employed on 31 December of the relevant year to be eligible — there is no pro-rata payment for partial years unless your contract states otherwise.\n\n## How is the final payout determined?\n\nThe actual payout ranges from 0% to 2x your target bonus, depending on two factors combined:\n\n- **Company performance multiplier** (0.5x–1.5x), set by the board based on annual revenue and EBITDA targets\n- **Individual performance score** from your most recent Annual Performance Review\n\n## I joined mid-year. Am I eligible?\n\nEmployees who joined before 1 July of the bonus year receive a pro-rated bonus based on months employed. Employees who joined after 1 July are not eligible for that year's bonus cycle.\n\n## Does the bonus affect my pension contribution?\n\nNo. Pension contributions (5% employer match) are calculated on base salary only, not on bonus or commission payments.\n\n## Can the bonus be deferred or paid in stock?\n\nEmployees at Lead level and above may elect to defer up to 50% of their bonus into additional stock options (ESOP) at the December grant price, instead of a cash payout. Elections must be submitted by 30 November.\n\n## What if I'm on a Performance Improvement Plan (PIP)?\n\nEmployees on an active PIP at the bonus payout date are not eligible for that cycle's bonus, regardless of prior-year performance score. Bonus eligibility resumes once the PIP is closed successfully.\n\n## Who do I contact with questions?\n\nBonus calculation questions go to your manager first; payroll timing or payment errors go to People Ops via the HR portal.",
+      "pages_in_chunk": "",
+      "word_count": 335,
+      "char_count": 1899
+    }
+  ]
+}

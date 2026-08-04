@@ -1,0 +1,84 @@
+{
+  "source_file": "finance_travel_expenses/travel_policy.md",
+  "num_chunks": 3,
+  "chunks": [
+    {
+      "text": "SOURCE: finance_travel_expenses/travel_policy.md\nTITLE: Política de Viajes: Reservas y Aprobaciones\nSUMMARY: La política de viajes exige que todas las reservas se realicen a través de una plataforma aprobada, con umbrales de aprobación que varían según el costo del viaje. Se permite clase económica para vuelos cortos y se requiere justificación para tarifas superiores. Los gastos de viaje deben ser reportados según la Guía de Reembolso de Gastos.\n\n[PÁGINA ?]\n# Travel Policy\n\n## 1. Booking Travel\n\nAll business travel is booked through the approved travel platform, which applies pre-negotiated rates. Booking outside the platform is only allowed when the platform genuinely cannot accommodate the trip, and requires manager approval in advance.\n\n## 2. Approval Thresholds\n\n| Trip Type | Approval Needed |\n| --- | --- |\n| Domestic, under €500 total | Self-booked, manager notified |\n| International, or over €500 total | Manager pre-approval |\n| Any trip for a non-employee (candidate, contractor) | Manager + Finance pre-approval |\n\n## 3. Flight Class\n\nEconomy class for flights under 6 hours. Premium economy is permitted for flights over 6 hours; business class requires Department Head approval and is reserved for flights over 9 hours or specific medical accommodation needs (see Accessibility & Accommodations Policy).\n\n## 4. Accommodation\n\nBook within the platform's recommended rate for the destination city; exceeding the recommended rate by more than 20% requires a brief justification note (e.g., conference venue pricing) attached to the booking.\n\n## 5. Ground Transportation\n\nPublic transport or ride-share is preferred over rental cars where practical. Rental cars are reimbursable when public transport genuinely isn't a reasonable option (e.g., visiting multiple sites in one day in an area with poor transit).\n\n## 6. High-Risk Destinations\n\nTravel to destinations flagged as higher risk by our travel security provider requires additional sign-off from the People Director and a check-in arrangement with your manager for the duration of the trip (see Workplace Health & Safety Policy).\n\n## 7. Combining Business and Personal Travel\n\nYou may extend a business trip for personal travel at your own cost; the company only covers the cost that would have been incurred for the business portion alone (e.g., the cheaper of the business-only fare vs. the actual booked fare).\n\n## 8. Expensing the Trip\n\nAll trip-related costs are submitted through the Expense Reimbursement Guide, referencing the original trip approval.",
+      "metadata": {
+        "source": "/home/sixtorapa/Aprendizaje/RAG_HR_ASSISTANT/knowledge_base/finance_travel_expenses/travel_policy.md",
+        "relative_path": "finance_travel_expenses/travel_policy.md",
+        "folder_context": "finance_travel_expenses",
+        "filename": "travel_policy.md",
+        "file_stem": "travel_policy",
+        "pages_in_chunk": "",
+        "chunking": "page_based_hybrid",
+        "word_count": 322,
+        "char_count": 2084,
+        "has_table": false,
+        "semantic_source": "finance_travel_expenses/travel_policy.md",
+        "chunk_id": "14c33f94bdf7a0ed",
+        "chunk_type": "macro",
+        "has_children": true,
+        "semantic_headline": "Política de Viajes: Reservas y Aprobaciones",
+        "semantic_summary": "La política de viajes exige que todas las reservas se realicen a través de una plataforma aprobada, con umbrales de aprobación que varían según el costo del viaje. Se permite clase económica para vuelos cortos y se requiere justificación para tarifas superiores. Los gastos de viaje deben ser reportados según la Guía de Reembolso de Gastos.",
+        "contains_metrics": true,
+        "contains_list": false,
+        "context_where": "finance_travel_expenses/travel_policy.md"
+      }
+    },
+    {
+      "text": "SOURCE: finance_travel_expenses/travel_policy.md\nTITLE: Política de Viajes: Reservas y Aprobaciones\nSUMMARY: La política de viajes exige que todas las reservas se realicen a través de una plataforma aprobada, con umbrales de aprobación que varían según el costo del viaje. Se permite clase económica para vuelos cortos y se requiere justificación para tarifas superiores. Los gastos de viaje deben ser reportados según la Guía de Reembolso de Gastos.\n\n[PÁGINA ?]\n# Travel Policy\n\n## 1. Booking Travel\n\nAll business travel is booked through the approved travel platform, which applies pre-negotiated rates. Booking outside the platform is only allowed when the platform genuinely cannot accommodate the trip, and requires manager approval in advance.\n\n## 2. Approval Thresholds\n\n| Trip Type | Approval Needed |\n| --- | --- |\n| Domestic, under €500 total | Self-booked, manager notified |\n| International, or over €500 total | Manager pre-approval |\n| Any trip for a non-employee (candidate, contractor) | Manager + Finance pre-approval |\n\n## 3. Flight Class\n\nEconomy class for flights under 6 hours. Premium economy is permitted for flights over 6 hours; business class requires Department Head approval and is reserved for flights over 9 hours or specific medical accommodation needs (see Accessibility & Accommodations Policy).\n\n## 4. Accommodation\n\nBook within the platform's recommended rate for the destination city; exceeding the recommended rate by more than 20% requires a brief justification note (e.g., conference venue pricing) attached to the booking.\n\n## 5. Ground Transportation",
+      "metadata": {
+        "chunk_type": "micro",
+        "parent_chunk_id": "14c33f94bdf7a0ed",
+        "parent_pages": "",
+        "chunk_id": "00c4981b71c97b55",
+        "micro_chunk_index": 1,
+        "pages_in_chunk": "",
+        "chunking": "micro_token_split",
+        "semantic_source": "finance_travel_expenses/travel_policy.md",
+        "source": "/home/sixtorapa/Aprendizaje/RAG_HR_ASSISTANT/knowledge_base/finance_travel_expenses/travel_policy.md",
+        "source_file": "",
+        "relative_path": "finance_travel_expenses/travel_policy.md",
+        "filename": "travel_policy.md",
+        "file_stem": "travel_policy",
+        "file_type": "",
+        "folder_context": "finance_travel_expenses",
+        "semantic_headline": "Política de Viajes: Reservas y Aprobaciones",
+        "semantic_summary": "La política de viajes exige que todas las reservas se realicen a través de una plataforma aprobada, con umbrales de aprobación que varían según el costo del viaje. Se permite clase económica para vuelos cortos y se requiere justificación para tarifas superiores. Los gastos de viaje deben ser reportados según la Guía de Reembolso de Gastos.",
+        "word_count": 176,
+        "char_count": 1139,
+        "contains_metrics": true,
+        "contains_list": false,
+        "context_where": "finance_travel_expenses/travel_policy.md"
+      }
+    },
+    {
+      "text": "SOURCE: finance_travel_expenses/travel_policy.md\nTITLE: Política de Viajes: Reservas y Aprobaciones\nSUMMARY: La política de viajes exige que todas las reservas se realicen a través de una plataforma aprobada, con umbrales de aprobación que varían según el costo del viaje. Se permite clase económica para vuelos cortos y se requiere justificación para tarifas superiores. Los gastos de viaje deben ser reportados según la Guía de Reembolso de Gastos.\n\n## 4. Accommodation\n\nBook within the platform's recommended rate for the destination city; exceeding the recommended rate by more than 20% requires a brief justification note (e.g., conference venue pricing) attached to the booking.\n\n## 5. Ground Transportation\n\nPublic transport or ride-share is preferred over rental cars where practical. Rental cars are reimbursable when public transport genuinely isn't a reasonable option (e.g., visiting multiple sites in one day in an area with poor transit).\n\n## 6. High-Risk Destinations\n\nTravel to destinations flagged as higher risk by our travel security provider requires additional sign-off from the People Director and a check-in arrangement with your manager for the duration of the trip (see Workplace Health & Safety Policy).\n\n## 7. Combining Business and Personal Travel\n\nYou may extend a business trip for personal travel at your own cost; the company only covers the cost that would have been incurred for the business portion alone (e.g., the cheaper of the business-only fare vs. the actual booked fare).\n\n## 8. Expensing the Trip\n\nAll trip-related costs are submitted through the Expense Reimbursement Guide, referencing the original trip approval.",
+      "metadata": {
+        "chunk_type": "micro",
+        "parent_chunk_id": "14c33f94bdf7a0ed",
+        "parent_pages": "",
+        "chunk_id": "3b8934698346cf82",
+        "micro_chunk_index": 2,
+        "pages_in_chunk": "",
+        "chunking": "micro_token_split",
+        "semantic_source": "finance_travel_expenses/travel_policy.md",
+        "source": "/home/sixtorapa/Aprendizaje/RAG_HR_ASSISTANT/knowledge_base/finance_travel_expenses/travel_policy.md",
+        "source_file": "",
+        "relative_path": "finance_travel_expenses/travel_policy.md",
+        "filename": "travel_policy.md",
+        "file_stem": "travel_policy",
+        "file_type": "",
+        "folder_context": "finance_travel_expenses",
+        "semantic_headline": "Política de Viajes: Reservas y Aprobaciones",
+        "semantic_summary": "La política de viajes exige que todas las reservas se realicen a través de una plataforma aprobada, con umbrales de aprobación que varían según el costo del viaje. Se permite clase económica para vuelos cortos y se requiere justificación para tarifas superiores. Los gastos de viaje deben ser reportados según la Guía de Reembolso de Gastos.",
+        "word_count": 184,
+        "char_count": 1206,
+        "contains_metrics": true,
+        "contains_list": false,
+        "context_where": "finance_travel_expenses/travel_policy.md"
+      }
+    }
+  ]
+}

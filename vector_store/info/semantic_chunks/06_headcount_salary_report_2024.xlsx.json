@@ -1,0 +1,14 @@
+{
+  "source_file": "06_headcount_salary_report_2024.xlsx",
+  "num_chunks": 1,
+  "chunks": [
+    {
+      "headline": "Informe de personal y salarios 2024 por departamento",
+      "summary": "El informe de personal y salarios de 2024 muestra la distribución de empleados y salarios por departamento. La ingeniería tiene 18 empleados, mientras que el departamento de ventas cuenta con 10. El promedio de salario en ingeniería es de 850,000 EUR, y el porcentaje de rotación es del 5.56% en ventas. Este análisis es crucial para la planificación presupuestaria y la gestión de recursos humanos.",
+      "text": "[PÁGINA ?]\nArchivo Excel: 06_headcount_salary_report_2024.xlsx\nHoja: Headcount by Department\n\nHeadcount & Salary Report 2024,Unnamed: 1,Unnamed: 2,Unnamed: 3,Unnamed: 4,Unnamed: 5,Unnamed: 6\nDepartment,Total Employees,Active,Terminated,Attrition %,Avg Salary (EUR),Dept Budget (EUR)\nEngineering,18,17,1,,,850000\nHR,7,6,1,,,210000\nSales,10,9,1,,,620000\nFinance,6,6,0,,,300000\nMarketing,6,5,1,,,380000\nProduct,5,5,0,,,430000\nTOTAL,,,,,,\n\n[PÁGINA ?]\nArchivo Excel: 06_headcount_salary_report_2024.xlsx\nHoja: Salary by Level\n\nSalary Analysis by Level — 2024,Unnamed: 1,Unnamed: 2,Unnamed: 3,Unnamed: 4,Unnamed: 5\nLevel,Headcount,Min Salary,Avg Salary,Max Salary,Band (Policy)\nJunior,14,29500,33200,37800,\"28,000 – 38,000\"\nMid,18,39000,46700,54500,\"38,000 – 55,000\"\nSenior,10,56000,67300,79200,\"55,000 – 80,000\"\nLead,4,76000,87500,98000,\"75,000 – 100,000\"\nManager,6,86000,97800,118000,\"85,000 – 120,000\"\n\n[PÁGINA ?]\nArchivo Excel: 06_headcount_salary_report_2024.xlsx\nHoja: Location Breakdown\n\nHeadcount by Location — Active Employees,Unnamed: 1,Unnamed: 2,Unnamed: 3\nLocation,Headcount,% of Total,Avg Salary\nMadrid,22,,58400\nBarcelona,11,,61200\nRemote,10,,55800\nLondon,5,,74300\nTOTAL,,,",
+      "pages_in_chunk": "",
+      "word_count": 100,
+      "char_count": 1182
+    }
+  ]
+}

@@ -1,0 +1,84 @@
+{
+  "source_file": "learning_development/external_training_reimbursement_policy.md",
+  "num_chunks": 3,
+  "chunks": [
+    {
+      "text": "SOURCE: learning_development/external_training_reimbursement_policy.md\nTITLE: Política de Reembolso por Capacitación Externa\nSUMMARY: Esta política cubre el reembolso de cursos externos relevantes para el rol actual del empleado, con un límite de €300 para aprobación automática. Se requiere pre-aprobación para cursos que superen este monto. La finalización del 80% del curso es necesaria para el reembolso, y si un empleado deja la empresa dentro de 12 meses, puede tener que reembolsar parte del costo.\n\n[PÁGINA ?]\n# External Training Reimbursement Policy\n\n## 1. Scope\n\nThis policy covers reimbursement for external courses, bootcamps, and structured training programs that are not covered by your standard L&D budget process for smaller purchases (see L&D Annual Budget & Process for the €300 self-approval threshold).\n\n## 2. Eligible Training\n\nTraining must be clearly relevant to your current role or a documented next-level competency gap (see Promotion & Career Ladder Framework). Purely personal-interest courses unrelated to your role are not eligible, even if within your individual L&D budget.\n\n## 3. Pre-Approval Requirement\n\nAny course costing more than €300, or requiring time off during working hours, requires written pre-approval from your manager before enrollment. Retroactive reimbursement requests for unapproved training are reviewed case-by-case and are not guaranteed.\n\n## 4. Reimbursement Process\n\nSubmit the receipt and approval reference through the Expense Reimbursement Guide within 60 days of completing the course. Reimbursement is processed in the next payroll cycle after approval.\n\n## 5. Completion Requirement\n\nFor multi-week courses or bootcamps, reimbursement is contingent on completing at least 80% of the program. If you do not complete the course, the company may recover the cost from your final payslip if you also leave the company within 6 months of the training.\n\n## 6. Repayment on Early Departure\n\nIf a single training investment exceeds €2,000 and you resign within 12 months of completing it, a pro-rated portion of the cost is repayable to the company, as set out in your training agreement signed at the time of approval.\n\n## 7. Time Off for Training\n\nTraining during working hours counts as working time, not annual leave, provided it was pre-approved under this policy.",
+      "metadata": {
+        "source": "/home/sixtorapa/Aprendizaje/RAG_HR_ASSISTANT/knowledge_base/learning_development/external_training_reimbursement_policy.md",
+        "relative_path": "learning_development/external_training_reimbursement_policy.md",
+        "folder_context": "learning_development",
+        "filename": "external_training_reimbursement_policy.md",
+        "file_stem": "external_training_reimbursement_policy",
+        "pages_in_chunk": "",
+        "chunking": "page_based_hybrid",
+        "word_count": 277,
+        "char_count": 1817,
+        "has_table": false,
+        "semantic_source": "learning_development/external_training_reimbursement_policy.md",
+        "chunk_id": "68553fee111c7b2a",
+        "chunk_type": "macro",
+        "has_children": true,
+        "semantic_headline": "Política de Reembolso por Capacitación Externa",
+        "semantic_summary": "Esta política cubre el reembolso de cursos externos relevantes para el rol actual del empleado, con un límite de €300 para aprobación automática. Se requiere pre-aprobación para cursos que superen este monto. La finalización del 80% del curso es necesaria para el reembolso, y si un empleado deja la empresa dentro de 12 meses, puede tener que reembolsar parte del costo.",
+        "contains_metrics": true,
+        "contains_list": false,
+        "context_where": "learning_development/external_training_reimbursement_policy.md"
+      }
+    },
+    {
+      "text": "SOURCE: learning_development/external_training_reimbursement_policy.md\nTITLE: Política de Reembolso por Capacitación Externa\nSUMMARY: Esta política cubre el reembolso de cursos externos relevantes para el rol actual del empleado, con un límite de €300 para aprobación automática. Se requiere pre-aprobación para cursos que superen este monto. La finalización del 80% del curso es necesaria para el reembolso, y si un empleado deja la empresa dentro de 12 meses, puede tener que reembolsar parte del costo.\n\n[PÁGINA ?]\n# External Training Reimbursement Policy\n\n## 1. Scope\n\nThis policy covers reimbursement for external courses, bootcamps, and structured training programs that are not covered by your standard L&D budget process for smaller purchases (see L&D Annual Budget & Process for the €300 self-approval threshold).\n\n## 2. Eligible Training\n\nTraining must be clearly relevant to your current role or a documented next-level competency gap (see Promotion & Career Ladder Framework). Purely personal-interest courses unrelated to your role are not eligible, even if within your individual L&D budget.\n\n## 3. Pre-Approval Requirement\n\nAny course costing more than €300, or requiring time off during working hours, requires written pre-approval from your manager before enrollment. Retroactive reimbursement requests for unapproved training are reviewed case-by-case and are not guaranteed.\n\n## 4. Reimbursement Process\n\nSubmit the receipt and approval reference through the Expense Reimbursement Guide within 60 days of completing the course. Reimbursement is processed in the next payroll cycle after approval.\n\n## 5. Completion Requirement",
+      "metadata": {
+        "chunk_type": "micro",
+        "parent_chunk_id": "68553fee111c7b2a",
+        "parent_pages": "",
+        "chunk_id": "76b14e3d6ae35201",
+        "micro_chunk_index": 1,
+        "pages_in_chunk": "",
+        "chunking": "micro_token_split",
+        "semantic_source": "learning_development/external_training_reimbursement_policy.md",
+        "source": "/home/sixtorapa/Aprendizaje/RAG_HR_ASSISTANT/knowledge_base/learning_development/external_training_reimbursement_policy.md",
+        "source_file": "",
+        "relative_path": "learning_development/external_training_reimbursement_policy.md",
+        "filename": "external_training_reimbursement_policy.md",
+        "file_stem": "external_training_reimbursement_policy",
+        "file_type": "",
+        "folder_context": "learning_development",
+        "semantic_headline": "Política de Reembolso por Capacitación Externa",
+        "semantic_summary": "Esta política cubre el reembolso de cursos externos relevantes para el rol actual del empleado, con un límite de €300 para aprobación automática. Se requiere pre-aprobación para cursos que superen este monto. La finalización del 80% del curso es necesaria para el reembolso, y si un empleado deja la empresa dentro de 12 meses, puede tener que reembolsar parte del costo.",
+        "word_count": 162,
+        "char_count": 1138,
+        "contains_metrics": true,
+        "contains_list": false,
+        "context_where": "learning_development/external_training_reimbursement_policy.md"
+      }
+    },
+    {
+      "text": "SOURCE: learning_development/external_training_reimbursement_policy.md\nTITLE: Política de Reembolso por Capacitación Externa\nSUMMARY: Esta política cubre el reembolso de cursos externos relevantes para el rol actual del empleado, con un límite de €300 para aprobación automática. Se requiere pre-aprobación para cursos que superen este monto. La finalización del 80% del curso es necesaria para el reembolso, y si un empleado deja la empresa dentro de 12 meses, puede tener que reembolsar parte del costo.\n\n## 4. Reimbursement Process\n\nSubmit the receipt and approval reference through the Expense Reimbursement Guide within 60 days of completing the course. Reimbursement is processed in the next payroll cycle after approval.\n\n## 5. Completion Requirement\n\nFor multi-week courses or bootcamps, reimbursement is contingent on completing at least 80% of the program. If you do not complete the course, the company may recover the cost from your final payslip if you also leave the company within 6 months of the training.\n\n## 6. Repayment on Early Departure\n\nIf a single training investment exceeds €2,000 and you resign within 12 months of completing it, a pro-rated portion of the cost is repayable to the company, as set out in your training agreement signed at the time of approval.\n\n## 7. Time Off for Training\n\nTraining during working hours counts as working time, not annual leave, provided it was pre-approved under this policy.",
+      "metadata": {
+        "chunk_type": "micro",
+        "parent_chunk_id": "68553fee111c7b2a",
+        "parent_pages": "",
+        "chunk_id": "a02f978ceece30f9",
+        "micro_chunk_index": 2,
+        "pages_in_chunk": "",
+        "chunking": "micro_token_split",
+        "semantic_source": "learning_development/external_training_reimbursement_policy.md",
+        "source": "/home/sixtorapa/Aprendizaje/RAG_HR_ASSISTANT/knowledge_base/learning_development/external_training_reimbursement_policy.md",
+        "source_file": "",
+        "relative_path": "learning_development/external_training_reimbursement_policy.md",
+        "filename": "external_training_reimbursement_policy.md",
+        "file_stem": "external_training_reimbursement_policy",
+        "file_type": "",
+        "folder_context": "learning_development",
+        "semantic_headline": "Política de Reembolso por Capacitación Externa",
+        "semantic_summary": "Esta política cubre el reembolso de cursos externos relevantes para el rol actual del empleado, con un límite de €300 para aprobación automática. Se requiere pre-aprobación para cursos que superen este monto. La finalización del 80% del curso es necesaria para el reembolso, y si un empleado deja la empresa dentro de 12 meses, puede tener que reembolsar parte del costo.",
+        "word_count": 151,
+        "char_count": 929,
+        "contains_metrics": true,
+        "contains_list": false,
+        "context_where": "learning_development/external_training_reimbursement_policy.md"
+      }
+    }
+  ]
+}

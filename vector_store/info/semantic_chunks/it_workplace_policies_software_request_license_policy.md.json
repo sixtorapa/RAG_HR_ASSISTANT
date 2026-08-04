@@ -1,0 +1,14 @@
+{
+  "source_file": "it_workplace_policies/software_request_license_policy.md",
+  "num_chunks": 1,
+  "chunks": [
+    {
+      "headline": "Política de Solicitud de Software y Licencias",
+      "summary": "La política establece que todo software no estándar debe ser solicitado a través del Portal de Solicitudes de TI para evitar riesgos de seguridad. Los tiempos de aprobación varían según el tipo de herramienta, y el uso de software no aprobado se considera una violación de la política de seguridad. Se requiere cumplimiento de licencias y auditorías periódicas.",
+      "text": "[PÁGINA ?]\n# Software Request & License Policy\n\n## 1. Why This Policy Exists\n\nUnmanaged software installs create security risk and license compliance exposure. All software beyond the standard company build must go through this process, even if it's free.\n\n## 2. Requesting New Software\n\nSubmit a request through the IT Request Portal with: tool name, business justification, and estimated number of users. IT Security reviews the tool's data handling practices before approval, particularly for any tool that would touch personal or customer data.\n\n## 3. Approval Timeline\n\n| Request Type | Typical Turnaround |\n| --- | --- |\n| Free tool, individual use, no sensitive data | 2-3 business days |\n| Paid tool, individual use | 5 business days (requires budget approval) |\n| Team-wide tool, any data sensitivity | 10 business days (Legal + IT Security review) |\n\n## 4. Budget Ownership\n\nPaid software is charged to the requesting team's budget unless it's a company-wide tool (e.g., the HRIS, the LMS), which is owned centrally by IT or People Ops. Renewals are reviewed annually for actual usage before automatic renewal.\n\n## 5. Shadow IT\n\nUsing unapproved software for company work (e.g., a personal note-taking app syncing company data to a personal account) is a violation of the IT Security & Acceptable Use Policy, even if convenient — request it properly instead.\n\n## 6. Browser Extensions\n\nBrowser extensions on company devices require the same approval process as other software, since many extensions have broad access to everything you view in the browser, including sensitive internal tools.\n\n## 7. License Compliance\n\nDo not share individual licenses across multiple people, and do not exceed the licensed user count for a team tool — IT periodically audits usage against license counts and will flag departments that need to true up.\n\n## 8. Decommissioning\n\nIf your team stops using a tool, notify IT so the license can be reclaimed and reallocated rather than silently renewed each year.",
+      "pages_in_chunk": "",
+      "word_count": 326,
+      "char_count": 2000
+    }
+  ]
+}

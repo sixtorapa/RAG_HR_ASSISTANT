@@ -1,0 +1,84 @@
+{
+  "source_file": "health_safety_wellbeing/workplace_health_safety_policy.md",
+  "num_chunks": 3,
+  "chunks": [
+    {
+      "text": "SOURCE: health_safety_wellbeing/workplace_health_safety_policy.md\nTITLE: Política de salud y seguridad en el trabajo\nSUMMARY: La empresa se compromete a proporcionar un entorno laboral seguro, aplicando normativas locales de salud y seguridad. Se realizan capacitaciones de seguridad y se deben reportar inmediatamente los peligros. Los empleados remotos deben mantener un espacio de trabajo seguro y se les ofrece un estipendio para equipamiento adecuado.\n\n[PÁGINA ?]\n# Workplace Health & Safety Policy\n\n## 1. Our Commitment\n\nThe company is committed to providing a safe working environment, whether you work from an office, remotely, or a hybrid arrangement, in line with applicable local health and safety law in each country of operation.\n\n## 2. Office Safety\n\n- Fire safety briefings are mandatory for all office-based employees within their first week\n- Office first-aid kits and a trained first-aider are present on every floor; their location and name are posted near the entrance\n- Any safety hazard (spill, broken equipment, blocked exit) should be reported immediately via the Incident Reporting Procedure\n\n## 3. Remote and Home Office Safety\n\nRemote employees are responsible for maintaining a reasonably safe home workspace. The Ergonomics & Home Office Guidelines provide a self-assessment checklist; the home office stipend (see Benefits Enrollment Guide) can be used toward safety-relevant equipment such as a proper chair.\n\n## 4. Reporting an Incident\n\nAll workplace incidents — injuries, near-misses, and hazards — must be reported within 24 hours using the Incident Reporting Procedure, regardless of severity. Near-miss reporting is encouraged and never penalized; it is how we prevent future incidents.\n\n## 5. Health and Safety Representatives\n\nEach office location has a nominated Health & Safety Representative, who sits on the quarterly Health & Safety Committee review alongside People Ops and Facilities.\n\n## 6. Travel Safety\n\nBusiness travel safety guidance (including high-risk destination protocols) is covered in the Travel Policy; employees traveling to a destination flagged as higher risk must check in with their manager on arrival and departure.\n\n## 7. Right to Refuse Unsafe Work\n\nAny employee can refuse a task they reasonably believe to be unsafe without fear of retaliation, and should report the situation immediately to their manager and the Health & Safety Representative.",
+      "metadata": {
+        "source": "/home/sixtorapa/Aprendizaje/RAG_HR_ASSISTANT/knowledge_base/health_safety_wellbeing/workplace_health_safety_policy.md",
+        "relative_path": "health_safety_wellbeing/workplace_health_safety_policy.md",
+        "folder_context": "health_safety_wellbeing",
+        "filename": "workplace_health_safety_policy.md",
+        "file_stem": "workplace_health_safety_policy",
+        "pages_in_chunk": "",
+        "chunking": "page_based_hybrid",
+        "word_count": 300,
+        "char_count": 1956,
+        "has_table": false,
+        "semantic_source": "health_safety_wellbeing/workplace_health_safety_policy.md",
+        "chunk_id": "0e94bb6011d1096a",
+        "chunk_type": "macro",
+        "has_children": true,
+        "semantic_headline": "Política de salud y seguridad en el trabajo",
+        "semantic_summary": "La empresa se compromete a proporcionar un entorno laboral seguro, aplicando normativas locales de salud y seguridad. Se realizan capacitaciones de seguridad y se deben reportar inmediatamente los peligros. Los empleados remotos deben mantener un espacio de trabajo seguro y se les ofrece un estipendio para equipamiento adecuado.",
+        "contains_metrics": false,
+        "contains_list": true,
+        "context_where": "health_safety_wellbeing/workplace_health_safety_policy.md"
+      }
+    },
+    {
+      "text": "SOURCE: health_safety_wellbeing/workplace_health_safety_policy.md\nTITLE: Política de salud y seguridad en el trabajo\nSUMMARY: La empresa se compromete a proporcionar un entorno laboral seguro, aplicando normativas locales de salud y seguridad. Se realizan capacitaciones de seguridad y se deben reportar inmediatamente los peligros. Los empleados remotos deben mantener un espacio de trabajo seguro y se les ofrece un estipendio para equipamiento adecuado.\n\n[PÁGINA ?]\n# Workplace Health & Safety Policy\n\n## 1. Our Commitment\n\nThe company is committed to providing a safe working environment, whether you work from an office, remotely, or a hybrid arrangement, in line with applicable local health and safety law in each country of operation.\n\n## 2. Office Safety\n\n- Fire safety briefings are mandatory for all office-based employees within their first week\n- Office first-aid kits and a trained first-aider are present on every floor; their location and name are posted near the entrance\n- Any safety hazard (spill, broken equipment, blocked exit) should be reported immediately via the Incident Reporting Procedure\n\n## 3. Remote and Home Office Safety\n\nRemote employees are responsible for maintaining a reasonably safe home workspace. The Ergonomics & Home Office Guidelines provide a self-assessment checklist; the home office stipend (see Benefits Enrollment Guide) can be used toward safety-relevant equipment such as a proper chair.\n\n## 4. Reporting an Incident",
+      "metadata": {
+        "chunk_type": "micro",
+        "parent_chunk_id": "0e94bb6011d1096a",
+        "parent_pages": "",
+        "chunk_id": "d2b8ab6a2e00b1fb",
+        "micro_chunk_index": 1,
+        "pages_in_chunk": "",
+        "chunking": "micro_token_split",
+        "semantic_source": "health_safety_wellbeing/workplace_health_safety_policy.md",
+        "source": "/home/sixtorapa/Aprendizaje/RAG_HR_ASSISTANT/knowledge_base/health_safety_wellbeing/workplace_health_safety_policy.md",
+        "source_file": "",
+        "relative_path": "health_safety_wellbeing/workplace_health_safety_policy.md",
+        "filename": "workplace_health_safety_policy.md",
+        "file_stem": "workplace_health_safety_policy",
+        "file_type": "",
+        "folder_context": "health_safety_wellbeing",
+        "semantic_headline": "Política de salud y seguridad en el trabajo",
+        "semantic_summary": "La empresa se compromete a proporcionar un entorno laboral seguro, aplicando normativas locales de salud y seguridad. Se realizan capacitaciones de seguridad y se deben reportar inmediatamente los peligros. Los empleados remotos deben mantener un espacio de trabajo seguro y se les ofrece un estipendio para equipamiento adecuado.",
+        "word_count": 157,
+        "char_count": 1010,
+        "contains_metrics": false,
+        "contains_list": true,
+        "context_where": "health_safety_wellbeing/workplace_health_safety_policy.md"
+      }
+    },
+    {
+      "text": "SOURCE: health_safety_wellbeing/workplace_health_safety_policy.md\nTITLE: Política de salud y seguridad en el trabajo\nSUMMARY: La empresa se compromete a proporcionar un entorno laboral seguro, aplicando normativas locales de salud y seguridad. Se realizan capacitaciones de seguridad y se deben reportar inmediatamente los peligros. Los empleados remotos deben mantener un espacio de trabajo seguro y se les ofrece un estipendio para equipamiento adecuado.\n\nRemote employees are responsible for maintaining a reasonably safe home workspace. The Ergonomics & Home Office Guidelines provide a self-assessment checklist; the home office stipend (see Benefits Enrollment Guide) can be used toward safety-relevant equipment such as a proper chair.\n\n## 4. Reporting an Incident\n\nAll workplace incidents — injuries, near-misses, and hazards — must be reported within 24 hours using the Incident Reporting Procedure, regardless of severity. Near-miss reporting is encouraged and never penalized; it is how we prevent future incidents.\n\n## 5. Health and Safety Representatives\n\nEach office location has a nominated Health & Safety Representative, who sits on the quarterly Health & Safety Committee review alongside People Ops and Facilities.\n\n## 6. Travel Safety\n\nBusiness travel safety guidance (including high-risk destination protocols) is covered in the Travel Policy; employees traveling to a destination flagged as higher risk must check in with their manager on arrival and departure.\n\n## 7. Right to Refuse Unsafe Work\n\nAny employee can refuse a task they reasonably believe to be unsafe without fear of retaliation, and should report the situation immediately to their manager and the Health & Safety Representative.",
+      "metadata": {
+        "chunk_type": "micro",
+        "parent_chunk_id": "0e94bb6011d1096a",
+        "parent_pages": "",
+        "chunk_id": "3d018c70b559cf94",
+        "micro_chunk_index": 2,
+        "pages_in_chunk": "",
+        "chunking": "micro_token_split",
+        "semantic_source": "health_safety_wellbeing/workplace_health_safety_policy.md",
+        "source": "/home/sixtorapa/Aprendizaje/RAG_HR_ASSISTANT/knowledge_base/health_safety_wellbeing/workplace_health_safety_policy.md",
+        "source_file": "",
+        "relative_path": "health_safety_wellbeing/workplace_health_safety_policy.md",
+        "filename": "workplace_health_safety_policy.md",
+        "file_stem": "workplace_health_safety_policy",
+        "file_type": "",
+        "folder_context": "health_safety_wellbeing",
+        "semantic_headline": "Política de salud y seguridad en el trabajo",
+        "semantic_summary": "La empresa se compromete a proporcionar un entorno laboral seguro, aplicando normativas locales de salud y seguridad. Se realizan capacitaciones de seguridad y se deben reportar inmediatamente los peligros. Los empleados remotos deben mantener un espacio de trabajo seguro y se les ofrece un estipendio para equipamiento adecuado.",
+        "word_count": 188,
+        "char_count": 1259,
+        "contains_metrics": false,
+        "contains_list": false,
+        "context_where": "health_safety_wellbeing/workplace_health_safety_policy.md"
+      }
+    }
+  ]
+}
