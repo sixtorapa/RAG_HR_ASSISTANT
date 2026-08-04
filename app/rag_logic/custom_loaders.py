@@ -773,7 +773,9 @@ class BetterPDFLoader(BaseLoader):
                     prohibidas.add(norm(c))
 
         conservadas = [ln for ln in base_text.splitlines() if norm(ln) not in prohibidas]
-        return "\n".join(conservadas).strip()
+        # Cada línea borrada deja un hueco. Sin colapsarlos, quitar tres filas
+        # seguidas deja seis saltos de línea que se pagan en tokens de prompt.
+        return re.sub(r"\n{3,}", "\n\n", "\n".join(conservadas)).strip()
 
     def _build_page_document(self, pidx, page_count, base_text, ocr_text, table_text,
                              fname, any_ocr_used, ocr_map):
