@@ -51,10 +51,10 @@ login = subprocess.run(
 )
 if login.returncode != 0:
     sys.exit(f"  ✗ docker login failed: {login.stderr.strip()}")
-print("  docker autenticado")
+print("  docker authenticated")
 
 # ── Build and push with a Docker v2 manifest ─────────────────────────────────
-print("  construyendo y subiendo (unos minutos)...")
+print("  building and pushing (a few minutes)...")
 build = subprocess.run(
     [
         "docker", "buildx", "build",
