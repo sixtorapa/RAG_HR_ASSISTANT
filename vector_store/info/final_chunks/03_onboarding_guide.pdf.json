@@ -3,7 +3,7 @@
   "num_chunks": 5,
   "chunks": [
     {
-      "text": "SOURCE: 03_onboarding_guide.pdf | págs. 1-2\nTITLE: Guía de Onboarding para Nuevos Empleados\nSUMMARY: El proceso de onboarding incluye actividades estructuradas durante los primeros 90 días, con metas específicas para cada fase. Se proporciona un cronograma detallado para el primer día y se establecen objetivos de aprendizaje, contribución y entrega. Los nuevos empleados reciben un paquete de bienvenida antes de su inicio.\n\n[PÁGINA 1]\n--- DATOS TABULARES (Pág 1) ---\n| Time | Activity | Owner |\n| --- | --- | --- |\n| 09:00 | Welcome meeting with HR | HR |\n| 10:00 | IT setup & security training | IT |\n| 11:00 | Meet your manager and team | Manager |\n| 12:30 | Team lunch | Team |\n| 14:00 | Company values & culture session | HR |\n| 15:30 | Benefits enrolment walkthrough | HR |\n| 16:30 | Wrap-up & Q&A | Manager |\n-----------------------------\n\nNew Employee Onboarding Guide\n\nWelcome aboard! Your first 90 days.\n\nBefore Your First Day\nHR will send you a welcome pack 5 business days before your start date. It includes:\n\n • Employment contract and GDPR consent form (please sign and return)\n • IT equipment delivery confirmation\n • Access credentials for HR portal and Slack\n • Your first-week schedule\n\nDay 1 Checklist\n\n30 / 60 / 90 Day Goals\n\nFirst 30 Days — Learn\n • Complete all mandatory training (GDPR, Security, Anti-bribery)\n • Shadow at least 3 different team members\n • Set up 1:1s with key stakeholders\n • Understand your team's OKRs for the current quarter\n\nDays 31–60 — Contribute\n • Take ownership of at least one small project or task\n • Present a 'learnings so far' to your manager\n • Join at least one cross-functional meeting\n\nDays 61–90 — Deliver\n • Complete your first formal goal-setting with manager\n • Deliver your first independent piece of work\n • Complete the 90-day survey (sent automatically by HR)\n\n[PÁGINA 2]\n--- DATOS TABULARES (Pág 2) ---\n| System | Purpose | Access |\n| --- | --- | --- |\n| Slack | Internal communication | IT Day 1 |\n| Notion | Documentation & wikis | IT Day 1 |\n| JIRA | Project & task tracking | Manager request |\n| Bamboo HR | HR portal (leave, payslips) | HR Day 1 |\n| Google Workspace | Email, Docs, Calendar | IT Day 1 |\n| Lattice | Performance & OKRs | HR Week 1 |\n\n| Need | Contact |\n| --- | --- |\n| IT issues | it-support@hrkb.internal | Slack: #it-help |\n| HR questions | hr@hrkb.internal | Slack: #hr-team |\n| Payroll & expenses | finance@hrkb.internal |\n| Mental health support | wellbeing@hrkb.internal (confidential) |\n| Ethics concerns | ethics-hotline@hrkb.internal (anonymous) |\n-----------------------------\n\nKey Systems & Tools\n\nProbation Period\nThe probation period lasts 90 days. During this time you will have structured check-ins with your\nmanager at day 30, 60, and 90. At the end of probation, your manager will confirm your employment\nin writing. Remote working and stock options are not available during probation.\n\nWho to Contact\n\nIT issues it-support@hrkb.internal | Slack: #it-help\n\nHR questions hr@hrkb.internal | Slack: #hr-team",
+      "text": "SOURCE: 03_onboarding_guide.pdf | pp. 1-2\nTITLE: New Employee Onboarding Schedule and Goals\nSUMMARY: The onboarding process for new employees spans the first 90 days, with structured activities including a welcome meeting, IT setup, and team introductions. Key goals are set for the first 30, 60, and 90 days, focusing on learning, contributing, and delivering results. Essential systems and contacts for support are also outlined.\n\n[PAGE 1]\n--- TABLE DATA (p. 1) ---\n| Time | Activity | Owner |\n| --- | --- | --- |\n| 09:00 | Welcome meeting with HR | HR |\n| 10:00 | IT setup & security training | IT |\n| 11:00 | Meet your manager and team | Manager |\n| 12:30 | Team lunch | Team |\n| 14:00 | Company values & culture session | HR |\n| 15:30 | Benefits enrolment walkthrough | HR |\n| 16:30 | Wrap-up & Q&A | Manager |\n-----------------------------\n\nNew Employee Onboarding Guide\n\nWelcome aboard! Your first 90 days.\n\nBefore Your First Day\nHR will send you a welcome pack 5 business days before your start date. It includes:\n\n • Employment contract and GDPR consent form (please sign and return)\n • IT equipment delivery confirmation\n • Access credentials for HR portal and Slack\n • Your first-week schedule\n\nDay 1 Checklist\n\n30 / 60 / 90 Day Goals\n\nFirst 30 Days — Learn\n • Complete all mandatory training (GDPR, Security, Anti-bribery)\n • Shadow at least 3 different team members\n • Set up 1:1s with key stakeholders\n • Understand your team's OKRs for the current quarter\n\nDays 31–60 — Contribute\n • Take ownership of at least one small project or task\n • Present a 'learnings so far' to your manager\n • Join at least one cross-functional meeting\n\nDays 61–90 — Deliver\n • Complete your first formal goal-setting with manager\n • Deliver your first independent piece of work\n • Complete the 90-day survey (sent automatically by HR)\n\n[PAGE 2]\n--- TABLE DATA (p. 2) ---\n| System | Purpose | Access |\n| --- | --- | --- |\n| Slack | Internal communication | IT Day 1 |\n| Notion | Documentation & wikis | IT Day 1 |\n| JIRA | Project & task tracking | Manager request |\n| Bamboo HR | HR portal (leave, payslips) | HR Day 1 |\n| Google Workspace | Email, Docs, Calendar | IT Day 1 |\n| Lattice | Performance & OKRs | HR Week 1 |\n\n| Need | Contact |\n| --- | --- |\n| IT issues | it-support@hrkb.internal | Slack: #it-help |\n| HR questions | hr@hrkb.internal | Slack: #hr-team |\n| Payroll & expenses | finance@hrkb.internal |\n| Mental health support | wellbeing@hrkb.internal (confidential) |\n| Ethics concerns | ethics-hotline@hrkb.internal (anonymous) |\n-----------------------------\n\nKey Systems & Tools\n\nProbation Period\nThe probation period lasts 90 days. During this time you will have structured check-ins with your\nmanager at day 30, 60, and 90. At the end of probation, your manager will confirm your employment\nin writing. Remote working and stock options are not available during probation.\n\nWho to Contact\n\nIT issues it-support@hrkb.internal | Slack: #it-help\n\nHR questions hr@hrkb.internal | Slack: #hr-team",
       "metadata": {
         "source": "/home/sixtorapa/Aprendizaje/RAG_HR_ASSISTANT/knowledge_base/onboarding_people_ops/03_onboarding_guide.pdf",
         "file_type": "pdf",
@@ -11,32 +11,31 @@
         "source_file": "03_onboarding_guide.pdf",
         "relative_path": "03_onboarding_guide.pdf",
         "page_count": 2,
-        "ocr_used": false,
         "has_table": false,
         "folder_context": "onboarding_people_ops",
         "file_stem": "03_onboarding_guide",
         "pages_in_chunk": "1, 2",
         "chunking": "page_based_hybrid",
         "word_count": 465,
-        "char_count": 2587,
+        "char_count": 2571,
         "semantic_source": "03_onboarding_guide.pdf",
-        "chunk_id": "a9d559729d88b45f",
+        "chunk_id": "2cae75fe4eec2953",
         "chunk_type": "macro",
         "has_children": true,
-        "semantic_headline": "Guía de Onboarding para Nuevos Empleados",
-        "semantic_summary": "El proceso de onboarding incluye actividades estructuradas durante los primeros 90 días, con metas específicas para cada fase. Se proporciona un cronograma detallado para el primer día y se establecen objetivos de aprendizaje, contribución y entrega. Los nuevos empleados reciben un paquete de bienvenida antes de su inicio.",
+        "semantic_headline": "New Employee Onboarding Schedule and Goals",
+        "semantic_summary": "The onboarding process for new employees spans the first 90 days, with structured activities including a welcome meeting, IT setup, and team introductions. Key goals are set for the first 30, 60, and 90 days, focusing on learning, contributing, and delivering results. Essential systems and contacts for support are also outlined.",
         "contains_metrics": false,
         "contains_list": true,
-        "context_where": "03_onboarding_guide.pdf | págs. 1-2"
+        "context_where": "03_onboarding_guide.pdf | pp. 1-2"
       }
     },
     {
-      "text": "SOURCE: 03_onboarding_guide.pdf | pág. 1\nTITLE: Guía de Onboarding para Nuevos Empleados\nSUMMARY: El proceso de onboarding incluye actividades estructuradas durante los primeros 90 días, con metas específicas para cada fase. Se proporciona un cronograma detallado para el primer día y se establecen objetivos de aprendizaje, contribución y entrega. Los nuevos empleados reciben un paquete de bienvenida antes de su inicio.\n\n[PÁGINA 1]\n--- DATOS TABULARES (Pág 1) ---\n| Time | Activity | Owner |\n| --- | --- | --- |\n| 09:00 | Welcome meeting with HR | HR |\n| 10:00 | IT setup & security training | IT |\n| 11:00 | Meet your manager and team | Manager |\n| 12:30 | Team lunch | Team |\n| 14:00 | Company values & culture session | HR |\n| 15:30 | Benefits enrolment walkthrough | HR |\n| 16:30 | Wrap-up & Q&A | Manager |\n-----------------------------\n\nNew Employee Onboarding Guide\n\nWelcome aboard! Your first 90 days.\n\nBefore Your First Day\nHR will send you a welcome pack 5 business days before your start date. It includes:\n\n • Employment contract and GDPR consent form (please sign and return)\n • IT equipment delivery confirmation\n • Access credentials for HR portal and Slack\n • Your first-week schedule\n\nDay 1 Checklist\n\n30 / 60 / 90 Day Goals",
+      "text": "SOURCE: 03_onboarding_guide.pdf | p. 1\nTITLE: New Employee Onboarding Schedule and Goals\nSUMMARY: The onboarding process for new employees spans the first 90 days, with structured activities including a welcome meeting, IT setup, and team introductions. Key goals are set for the first 30, 60, and 90 days, focusing on learning, contributing, and delivering results. Essential systems and contacts for support are also outlined.\n\n[PAGE 1]\n--- TABLE DATA (p. 1) ---\n| Time | Activity | Owner |\n| --- | --- | --- |\n| 09:00 | Welcome meeting with HR | HR |\n| 10:00 | IT setup & security training | IT |\n| 11:00 | Meet your manager and team | Manager |\n| 12:30 | Team lunch | Team |\n| 14:00 | Company values & culture session | HR |\n| 15:30 | Benefits enrolment walkthrough | HR |\n| 16:30 | Wrap-up & Q&A | Manager |\n-----------------------------\n\nNew Employee Onboarding Guide\n\nWelcome aboard! Your first 90 days.\n\nBefore Your First Day\nHR will send you a welcome pack 5 business days before your start date. It includes:\n\n • Employment contract and GDPR consent form (please sign and return)\n • IT equipment delivery confirmation\n • Access credentials for HR portal and Slack\n • Your first-week schedule\n\nDay 1 Checklist\n\n30 / 60 / 90 Day Goals",
       "metadata": {
         "chunk_type": "micro",
-        "parent_chunk_id": "a9d559729d88b45f",
+        "parent_chunk_id": "2cae75fe4eec2953",
         "parent_pages": "1, 2",
-        "chunk_id": "6a8b30cb1bb352fa",
+        "chunk_id": "e4b5f914247e60db",
         "micro_chunk_index": 1,
         "pages_in_chunk": "1",
         "chunking": "micro_token_split",
@@ -48,22 +47,22 @@
         "file_stem": "03_onboarding_guide",
         "file_type": "pdf",
         "folder_context": "onboarding_people_ops",
-        "semantic_headline": "Guía de Onboarding para Nuevos Empleados",
-        "semantic_summary": "El proceso de onboarding incluye actividades estructuradas durante los primeros 90 días, con metas específicas para cada fase. Se proporciona un cronograma detallado para el primer día y se establecen objetivos de aprendizaje, contribución y entrega. Los nuevos empleados reciben un paquete de bienvenida antes de su inicio.",
+        "semantic_headline": "New Employee Onboarding Schedule and Goals",
+        "semantic_summary": "The onboarding process for new employees spans the first 90 days, with structured activities including a welcome meeting, IT setup, and team introductions. Key goals are set for the first 30, 60, and 90 days, focusing on learning, contributing, and delivering results. Essential systems and contacts for support are also outlined.",
         "word_count": 160,
-        "char_count": 820,
+        "char_count": 812,
         "contains_metrics": false,
         "contains_list": true,
-        "context_where": "03_onboarding_guide.pdf | pág. 1"
+        "context_where": "03_onboarding_guide.pdf | p. 1"
       }
     },
     {
-      "text": "SOURCE: 03_onboarding_guide.pdf | págs. 1-2\nTITLE: Guía de Onboarding para Nuevos Empleados\nSUMMARY: El proceso de onboarding incluye actividades estructuradas durante los primeros 90 días, con metas específicas para cada fase. Se proporciona un cronograma detallado para el primer día y se establecen objetivos de aprendizaje, contribución y entrega. Los nuevos empleados reciben un paquete de bienvenida antes de su inicio.\n\n• Employment contract and GDPR consent form (please sign and return)\n • IT equipment delivery confirmation\n • Access credentials for HR portal and Slack\n • Your first-week schedule\n\nDay 1 Checklist\n\n30 / 60 / 90 Day Goals\n\nFirst 30 Days — Learn\n • Complete all mandatory training (GDPR, Security, Anti-bribery)\n • Shadow at least 3 different team members\n • Set up 1:1s with key stakeholders\n • Understand your team's OKRs for the current quarter\n\nDays 31–60 — Contribute\n • Take ownership of at least one small project or task\n • Present a 'learnings so far' to your manager\n • Join at least one cross-functional meeting\n\nDays 61–90 — Deliver\n • Complete your first formal goal-setting with manager\n • Deliver your first independent piece of work\n • Complete the 90-day survey (sent automatically by HR)",
+      "text": "SOURCE: 03_onboarding_guide.pdf | pp. 1-2\nTITLE: New Employee Onboarding Schedule and Goals\nSUMMARY: The onboarding process for new employees spans the first 90 days, with structured activities including a welcome meeting, IT setup, and team introductions. Key goals are set for the first 30, 60, and 90 days, focusing on learning, contributing, and delivering results. Essential systems and contacts for support are also outlined.\n\n• Employment contract and GDPR consent form (please sign and return)\n • IT equipment delivery confirmation\n • Access credentials for HR portal and Slack\n • Your first-week schedule\n\nDay 1 Checklist\n\n30 / 60 / 90 Day Goals\n\nFirst 30 Days — Learn\n • Complete all mandatory training (GDPR, Security, Anti-bribery)\n • Shadow at least 3 different team members\n • Set up 1:1s with key stakeholders\n • Understand your team's OKRs for the current quarter\n\nDays 31–60 — Contribute\n • Take ownership of at least one small project or task\n • Present a 'learnings so far' to your manager\n • Join at least one cross-functional meeting\n\nDays 61–90 — Deliver\n • Complete your first formal goal-setting with manager\n • Deliver your first independent piece of work\n • Complete the 90-day survey (sent automatically by HR)",
       "metadata": {
         "chunk_type": "micro",
-        "parent_chunk_id": "a9d559729d88b45f",
+        "parent_chunk_id": "2cae75fe4eec2953",
         "parent_pages": "1, 2",
-        "chunk_id": "cdce65ded92b8c0e",
+        "chunk_id": "2d3c4cbda53dbe0e",
         "micro_chunk_index": 2,
         "pages_in_chunk": "1, 2",
         "chunking": "micro_token_split",
@@ -75,22 +74,22 @@
         "file_stem": "03_onboarding_guide",
         "file_type": "pdf",
         "folder_context": "onboarding_people_ops",
-        "semantic_headline": "Guía de Onboarding para Nuevos Empleados",
-        "semantic_summary": "El proceso de onboarding incluye actividades estructuradas durante los primeros 90 días, con metas específicas para cada fase. Se proporciona un cronograma detallado para el primer día y se establecen objetivos de aprendizaje, contribución y entrega. Los nuevos empleados reciben un paquete de bienvenida antes de su inicio.",
+        "semantic_headline": "New Employee Onboarding Schedule and Goals",
+        "semantic_summary": "The onboarding process for new employees spans the first 90 days, with structured activities including a welcome meeting, IT setup, and team introductions. Key goals are set for the first 30, 60, and 90 days, focusing on learning, contributing, and delivering results. Essential systems and contacts for support are also outlined.",
         "word_count": 135,
         "char_count": 804,
         "contains_metrics": false,
         "contains_list": true,
-        "context_where": "03_onboarding_guide.pdf | págs. 1-2"
+        "context_where": "03_onboarding_guide.pdf | pp. 1-2"
       }
     },
     {
-      "text": "SOURCE: 03_onboarding_guide.pdf | pág. 2\nTITLE: Guía de Onboarding para Nuevos Empleados\nSUMMARY: El proceso de onboarding incluye actividades estructuradas durante los primeros 90 días, con metas específicas para cada fase. Se proporciona un cronograma detallado para el primer día y se establecen objetivos de aprendizaje, contribución y entrega. Los nuevos empleados reciben un paquete de bienvenida antes de su inicio.\n\n[PÁGINA 2]\n--- DATOS TABULARES (Pág 2) ---\n| System | Purpose | Access |\n| --- | --- | --- |\n| Slack | Internal communication | IT Day 1 |\n| Notion | Documentation & wikis | IT Day 1 |\n| JIRA | Project & task tracking | Manager request |\n| Bamboo HR | HR portal (leave, payslips) | HR Day 1 |\n| Google Workspace | Email, Docs, Calendar | IT Day 1 |\n| Lattice | Performance & OKRs | HR Week 1 |\n\n| Need | Contact |\n| --- | --- |\n| IT issues | it-support@hrkb.internal | Slack: #it-help |\n| HR questions | hr@hrkb.internal | Slack: #hr-team |\n| Payroll & expenses | finance@hrkb.internal |\n| Mental health support | wellbeing@hrkb.internal (confidential) |\n| Ethics concerns | ethics-hotline@hrkb.internal (anonymous) |\n-----------------------------\n\nKey Systems & Tools",
+      "text": "SOURCE: 03_onboarding_guide.pdf | p. 2\nTITLE: New Employee Onboarding Schedule and Goals\nSUMMARY: The onboarding process for new employees spans the first 90 days, with structured activities including a welcome meeting, IT setup, and team introductions. Key goals are set for the first 30, 60, and 90 days, focusing on learning, contributing, and delivering results. Essential systems and contacts for support are also outlined.\n\n[PAGE 2]\n--- TABLE DATA (p. 2) ---\n| System | Purpose | Access |\n| --- | --- | --- |\n| Slack | Internal communication | IT Day 1 |\n| Notion | Documentation & wikis | IT Day 1 |\n| JIRA | Project & task tracking | Manager request |\n| Bamboo HR | HR portal (leave, payslips) | HR Day 1 |\n| Google Workspace | Email, Docs, Calendar | IT Day 1 |\n| Lattice | Performance & OKRs | HR Week 1 |\n\n| Need | Contact |\n| --- | --- |\n| IT issues | it-support@hrkb.internal | Slack: #it-help |\n| HR questions | hr@hrkb.internal | Slack: #hr-team |\n| Payroll & expenses | finance@hrkb.internal |\n| Mental health support | wellbeing@hrkb.internal (confidential) |\n| Ethics concerns | ethics-hotline@hrkb.internal (anonymous) |\n-----------------------------\n\nKey Systems & Tools",
       "metadata": {
         "chunk_type": "micro",
-        "parent_chunk_id": "a9d559729d88b45f",
+        "parent_chunk_id": "2cae75fe4eec2953",
         "parent_pages": "1, 2",
-        "chunk_id": "8a7068c09d34093e",
+        "chunk_id": "825d359ffb7631ae",
         "micro_chunk_index": 3,
         "pages_in_chunk": "2",
         "chunking": "micro_token_split",
@@ -102,22 +101,22 @@
         "file_stem": "03_onboarding_guide",
         "file_type": "pdf",
         "folder_context": "onboarding_people_ops",
-        "semantic_headline": "Guía de Onboarding para Nuevos Empleados",
-        "semantic_summary": "El proceso de onboarding incluye actividades estructuradas durante los primeros 90 días, con metas específicas para cada fase. Se proporciona un cronograma detallado para el primer día y se establecen objetivos de aprendizaje, contribución y entrega. Los nuevos empleados reciben un paquete de bienvenida antes de su inicio.",
+        "semantic_headline": "New Employee Onboarding Schedule and Goals",
+        "semantic_summary": "The onboarding process for new employees spans the first 90 days, with structured activities including a welcome meeting, IT setup, and team introductions. Key goals are set for the first 30, 60, and 90 days, focusing on learning, contributing, and delivering results. Essential systems and contacts for support are also outlined.",
         "word_count": 145,
-        "char_count": 768,
+        "char_count": 760,
         "contains_metrics": false,
         "contains_list": false,
-        "context_where": "03_onboarding_guide.pdf | pág. 2"
+        "context_where": "03_onboarding_guide.pdf | p. 2"
       }
     },
     {
-      "text": "SOURCE: 03_onboarding_guide.pdf | págs. 1-2\nTITLE: Guía de Onboarding para Nuevos Empleados\nSUMMARY: El proceso de onboarding incluye actividades estructuradas durante los primeros 90 días, con metas específicas para cada fase. Se proporciona un cronograma detallado para el primer día y se establecen objetivos de aprendizaje, contribución y entrega. Los nuevos empleados reciben un paquete de bienvenida antes de su inicio.\n\nKey Systems & Tools\n\nProbation Period\nThe probation period lasts 90 days. During this time you will have structured check-ins with your\nmanager at day 30, 60, and 90. At the end of probation, your manager will confirm your employment\nin writing. Remote working and stock options are not available during probation.\n\nWho to Contact\n\nIT issues it-support@hrkb.internal | Slack: #it-help\n\nHR questions hr@hrkb.internal | Slack: #hr-team",
+      "text": "SOURCE: 03_onboarding_guide.pdf | pp. 1-2\nTITLE: New Employee Onboarding Schedule and Goals\nSUMMARY: The onboarding process for new employees spans the first 90 days, with structured activities including a welcome meeting, IT setup, and team introductions. Key goals are set for the first 30, 60, and 90 days, focusing on learning, contributing, and delivering results. Essential systems and contacts for support are also outlined.\n\nKey Systems & Tools\n\nProbation Period\nThe probation period lasts 90 days. During this time you will have structured check-ins with your\nmanager at day 30, 60, and 90. At the end of probation, your manager will confirm your employment\nin writing. Remote working and stock options are not available during probation.\n\nWho to Contact\n\nIT issues it-support@hrkb.internal | Slack: #it-help\n\nHR questions hr@hrkb.internal | Slack: #hr-team",
       "metadata": {
         "chunk_type": "micro",
-        "parent_chunk_id": "a9d559729d88b45f",
+        "parent_chunk_id": "2cae75fe4eec2953",
         "parent_pages": "1, 2",
-        "chunk_id": "fa201247e61bfe95",
+        "chunk_id": "af906b28ea5e451f",
         "micro_chunk_index": 4,
         "pages_in_chunk": "1, 2",
         "chunking": "micro_token_split",
@@ -129,13 +128,13 @@
         "file_stem": "03_onboarding_guide",
         "file_type": "pdf",
         "folder_context": "onboarding_people_ops",
-        "semantic_headline": "Guía de Onboarding para Nuevos Empleados",
-        "semantic_summary": "El proceso de onboarding incluye actividades estructuradas durante los primeros 90 días, con metas específicas para cada fase. Se proporciona un cronograma detallado para el primer día y se establecen objetivos de aprendizaje, contribución y entrega. Los nuevos empleados reciben un paquete de bienvenida antes de su inicio.",
+        "semantic_headline": "New Employee Onboarding Schedule and Goals",
+        "semantic_summary": "The onboarding process for new employees spans the first 90 days, with structured activities including a welcome meeting, IT setup, and team introductions. Key goals are set for the first 30, 60, and 90 days, focusing on learning, contributing, and delivering results. Essential systems and contacts for support are also outlined.",
         "word_count": 67,
         "char_count": 433,
         "contains_metrics": false,
         "contains_list": false,
-        "context_where": "03_onboarding_guide.pdf | págs. 1-2"
+        "context_where": "03_onboarding_guide.pdf | pp. 1-2"
       }
     }
   ]

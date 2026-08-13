@@ -3,7 +3,7 @@
   "num_chunks": 5,
   "chunks": [
     {
-      "text": "SOURCE: 05_recruitment_and_hiring_policy.pdf | págs. 1-2\nTITLE: Política de Reclutamiento y Proceso de Entrevista\nSUMMARY: La política de reclutamiento establece un proceso estructurado que incluye la revisión de CV, entrevistas y pruebas técnicas, con un tiempo de respuesta de 16 a 18 días para la oferta. Se enfatiza la diversidad en los paneles de entrevistas y se prohíben preguntas sobre edad, estado civil y nacionalidad. Las referencias de empleados son incentivadas con un bono de €1,000.\n\n[PÁGINA 1]\n--- DATOS TABULARES (Pág 1) ---\n| Stage | Format | Owner | SLA |\n| --- | --- | --- | --- |\n| CV screening | Async review | Recruiter | 2 days |\n| Recruiter call | 30 min video | Recruiter | Day 3–5 |\n| Hiring mgr screen | 45 min video | Hiring Manager | Day 5–8 |\n| Technical / task | Take-home or live coding | Team | Day 8–12 |\n| Final panel | 2x45 min (values + depth) | Senior + HR | Day 12–16 |\n| Offer | Verbal then written | HR | Day 16–18 |\n-----------------------------\n\nRecruitment & Hiring Policy\n\nVersion 2.4 | Applies to all hiring managers and recruiters\n\n1. Opening a Role\nTo open a new or backfill position, the hiring manager must submit a Job Requisition (JR) via the\nHR portal. The JR requires:\n\n • Approved headcount in current budget (Finance sign-off required for new headcount)\n • Job description approved by HR\n • Target start date and budget range\n • VP approval for Manager-level roles and above\nTypical time from JR approval to first candidate presented: 5–10 business days.\n\n2. Interview Process\n\n3. Interview Best Practices\n\nStructured Interviews\nAll interviews must use pre-agreed structured questions from the HR question bank. Interviewers\nmust complete the scorecard in Lever within 24 hours.\n\nDiversity & Inclusion\n • Panels must include at least one interviewer of a different gender than the hiring manager\n • Job descriptions reviewed by HR for inclusive language before posting\n • Blind CV screening available on request\n\nProhibited Questions\nThe following topics must never be raised in interviews:\n\n • Age, date of birth, or graduation year (unless relevant to eligibility)\n • Marital status or family plans\n • Nationality or country of origin\n\n[PÁGINA 2]\n• Religious beliefs or political views\n • Disability or health conditions (pre-offer)\n\n4. Making an Offer\nVerbal offers can be made by the hiring manager after recruiter confirmation. Written offers are\nprepared by HR and must include:\n\n • Role title, level, and department\n • Base salary and bonus target\n • Start date and probation period\n • Equity grant (if applicable)\nOffers must remain within the approved salary band. Exceptions require VP and HR Director\nsign-off.\n\n5. Referral Programme\nEmployees can refer candidates via the HR portal. If the referred candidate is hired and completes 3\nmonths, the referring employee receives a €1,000 cash bonus in the next payroll. Referrals cannot\nbe made for roles within the same reporting line.\n\n6. Background Checks\nAll offers are conditional on satisfactory background checks:\n\n • Identity verification (passport / ID)\n • Right to work in Spain (or relevant jurisdiction)\n • Employment history verification (last 3 employers)\n • Criminal record check (roles with access to financial data or vulnerable populations)\nChecks are completed by our partner (Sterling) within 5 business days.",
+      "text": "SOURCE: 05_recruitment_and_hiring_policy.pdf | pp. 1-2\nTITLE: Recruitment Process Timeline and Best Practices\nSUMMARY: The recruitment process includes several stages, from CV screening to final offer, typically taking 16-18 days. Structured interviews and diversity considerations are emphasized, with specific prohibited questions outlined to ensure fairness and compliance.\n\n[PAGE 1]\n--- TABLE DATA (p. 1) ---\n| Stage | Format | Owner | SLA |\n| --- | --- | --- | --- |\n| CV screening | Async review | Recruiter | 2 days |\n| Recruiter call | 30 min video | Recruiter | Day 3–5 |\n| Hiring mgr screen | 45 min video | Hiring Manager | Day 5–8 |\n| Technical / task | Take-home or live coding | Team | Day 8–12 |\n| Final panel | 2x45 min (values + depth) | Senior + HR | Day 12–16 |\n| Offer | Verbal then written | HR | Day 16–18 |\n-----------------------------\n\nRecruitment & Hiring Policy\n\nVersion 2.4 | Applies to all hiring managers and recruiters\n\n1. Opening a Role\nTo open a new or backfill position, the hiring manager must submit a Job Requisition (JR) via the\nHR portal. The JR requires:\n\n • Approved headcount in current budget (Finance sign-off required for new headcount)\n • Job description approved by HR\n • Target start date and budget range\n • VP approval for Manager-level roles and above\nTypical time from JR approval to first candidate presented: 5–10 business days.\n\n2. Interview Process\n\n3. Interview Best Practices\n\nStructured Interviews\nAll interviews must use pre-agreed structured questions from the HR question bank. Interviewers\nmust complete the scorecard in Lever within 24 hours.\n\nDiversity & Inclusion\n • Panels must include at least one interviewer of a different gender than the hiring manager\n • Job descriptions reviewed by HR for inclusive language before posting\n • Blind CV screening available on request\n\nProhibited Questions\nThe following topics must never be raised in interviews:\n\n • Age, date of birth, or graduation year (unless relevant to eligibility)\n • Marital status or family plans\n • Nationality or country of origin\n\n[PAGE 2]\n• Religious beliefs or political views\n • Disability or health conditions (pre-offer)\n\n4. Making an Offer\nVerbal offers can be made by the hiring manager after recruiter confirmation. Written offers are\nprepared by HR and must include:\n\n • Role title, level, and department\n • Base salary and bonus target\n • Start date and probation period\n • Equity grant (if applicable)\nOffers must remain within the approved salary band. Exceptions require VP and HR Director\nsign-off.\n\n5. Referral Programme\nEmployees can refer candidates via the HR portal. If the referred candidate is hired and completes 3\nmonths, the referring employee receives a €1,000 cash bonus in the next payroll. Referrals cannot\nbe made for roles within the same reporting line.\n\n6. Background Checks\nAll offers are conditional on satisfactory background checks:\n\n • Identity verification (passport / ID)\n • Right to work in Spain (or relevant jurisdiction)\n • Employment history verification (last 3 employers)\n • Criminal record check (roles with access to financial data or vulnerable populations)\nChecks are completed by our partner (Sterling) within 5 business days.",
       "metadata": {
         "source": "/home/sixtorapa/Aprendizaje/RAG_HR_ASSISTANT/knowledge_base/recruitment_talent/05_recruitment_and_hiring_policy.pdf",
         "file_type": "pdf",
@@ -11,32 +11,31 @@
         "source_file": "05_recruitment_and_hiring_policy.pdf",
         "relative_path": "05_recruitment_and_hiring_policy.pdf",
         "page_count": 2,
-        "ocr_used": false,
         "has_table": false,
         "folder_context": "recruitment_talent",
         "file_stem": "05_recruitment_and_hiring_policy",
         "pages_in_chunk": "1, 2",
         "chunking": "page_based_hybrid",
         "word_count": 478,
-        "char_count": 2844,
+        "char_count": 2834,
         "semantic_source": "05_recruitment_and_hiring_policy.pdf",
-        "chunk_id": "e9b65592706f8b2f",
+        "chunk_id": "3e710807e2bcfbdc",
         "chunk_type": "macro",
         "has_children": true,
-        "semantic_headline": "Política de Reclutamiento y Proceso de Entrevista",
-        "semantic_summary": "La política de reclutamiento establece un proceso estructurado que incluye la revisión de CV, entrevistas y pruebas técnicas, con un tiempo de respuesta de 16 a 18 días para la oferta. Se enfatiza la diversidad en los paneles de entrevistas y se prohíben preguntas sobre edad, estado civil y nacionalidad. Las referencias de empleados son incentivadas con un bono de €1,000.",
+        "semantic_headline": "Recruitment Process Timeline and Best Practices",
+        "semantic_summary": "The recruitment process includes several stages, from CV screening to final offer, typically taking 16-18 days. Structured interviews and diversity considerations are emphasized, with specific prohibited questions outlined to ensure fairness and compliance.",
         "contains_metrics": true,
         "contains_list": true,
-        "context_where": "05_recruitment_and_hiring_policy.pdf | págs. 1-2"
+        "context_where": "05_recruitment_and_hiring_policy.pdf | pp. 1-2"
       }
     },
     {
-      "text": "SOURCE: 05_recruitment_and_hiring_policy.pdf | pág. 1\nTITLE: Política de Reclutamiento y Proceso de Entrevista\nSUMMARY: La política de reclutamiento establece un proceso estructurado que incluye la revisión de CV, entrevistas y pruebas técnicas, con un tiempo de respuesta de 16 a 18 días para la oferta. Se enfatiza la diversidad en los paneles de entrevistas y se prohíben preguntas sobre edad, estado civil y nacionalidad. Las referencias de empleados son incentivadas con un bono de €1,000.\n\n[PÁGINA 1]\n--- DATOS TABULARES (Pág 1) ---\n| Stage | Format | Owner | SLA |\n| --- | --- | --- | --- |\n| CV screening | Async review | Recruiter | 2 days |\n| Recruiter call | 30 min video | Recruiter | Day 3–5 |\n| Hiring mgr screen | 45 min video | Hiring Manager | Day 5–8 |\n| Technical / task | Take-home or live coding | Team | Day 8–12 |\n| Final panel | 2x45 min (values + depth) | Senior + HR | Day 12–16 |\n| Offer | Verbal then written | HR | Day 16–18 |\n-----------------------------\n\nRecruitment & Hiring Policy\n\nVersion 2.4 | Applies to all hiring managers and recruiters\n\n1. Opening a Role\nTo open a new or backfill position, the hiring manager must submit a Job Requisition (JR) via the\nHR portal. The JR requires:",
+      "text": "SOURCE: 05_recruitment_and_hiring_policy.pdf | p. 1\nTITLE: Recruitment Process Timeline and Best Practices\nSUMMARY: The recruitment process includes several stages, from CV screening to final offer, typically taking 16-18 days. Structured interviews and diversity considerations are emphasized, with specific prohibited questions outlined to ensure fairness and compliance.\n\n[PAGE 1]\n--- TABLE DATA (p. 1) ---\n| Stage | Format | Owner | SLA |\n| --- | --- | --- | --- |\n| CV screening | Async review | Recruiter | 2 days |\n| Recruiter call | 30 min video | Recruiter | Day 3–5 |\n| Hiring mgr screen | 45 min video | Hiring Manager | Day 5–8 |\n| Technical / task | Take-home or live coding | Team | Day 8–12 |\n| Final panel | 2x45 min (values + depth) | Senior + HR | Day 12–16 |\n| Offer | Verbal then written | HR | Day 16–18 |\n-----------------------------\n\nRecruitment & Hiring Policy\n\nVersion 2.4 | Applies to all hiring managers and recruiters\n\n1. Opening a Role\nTo open a new or backfill position, the hiring manager must submit a Job Requisition (JR) via the\nHR portal. The JR requires:",
       "metadata": {
         "chunk_type": "micro",
-        "parent_chunk_id": "e9b65592706f8b2f",
+        "parent_chunk_id": "3e710807e2bcfbdc",
         "parent_pages": "1, 2",
-        "chunk_id": "8facc863cac93e4d",
+        "chunk_id": "2d47ce1ed0f39a6b",
         "micro_chunk_index": 1,
         "pages_in_chunk": "1",
         "chunking": "micro_token_split",
@@ -48,22 +47,22 @@
         "file_stem": "05_recruitment_and_hiring_policy",
         "file_type": "pdf",
         "folder_context": "recruitment_talent",
-        "semantic_headline": "Política de Reclutamiento y Proceso de Entrevista",
-        "semantic_summary": "La política de reclutamiento establece un proceso estructurado que incluye la revisión de CV, entrevistas y pruebas técnicas, con un tiempo de respuesta de 16 a 18 días para la oferta. Se enfatiza la diversidad en los paneles de entrevistas y se prohíben preguntas sobre edad, estado civil y nacionalidad. Las referencias de empleados son incentivadas con un bono de €1,000.",
+        "semantic_headline": "Recruitment Process Timeline and Best Practices",
+        "semantic_summary": "The recruitment process includes several stages, from CV screening to final offer, typically taking 16-18 days. Structured interviews and diversity considerations are emphasized, with specific prohibited questions outlined to ensure fairness and compliance.",
         "word_count": 152,
-        "char_count": 724,
+        "char_count": 716,
         "contains_metrics": false,
         "contains_list": true,
-        "context_where": "05_recruitment_and_hiring_policy.pdf | pág. 1"
+        "context_where": "05_recruitment_and_hiring_policy.pdf | p. 1"
       }
     },
     {
-      "text": "SOURCE: 05_recruitment_and_hiring_policy.pdf | págs. 1-2\nTITLE: Política de Reclutamiento y Proceso de Entrevista\nSUMMARY: La política de reclutamiento establece un proceso estructurado que incluye la revisión de CV, entrevistas y pruebas técnicas, con un tiempo de respuesta de 16 a 18 días para la oferta. Se enfatiza la diversidad en los paneles de entrevistas y se prohíben preguntas sobre edad, estado civil y nacionalidad. Las referencias de empleados son incentivadas con un bono de €1,000.\n\nRecruitment & Hiring Policy\n\nVersion 2.4 | Applies to all hiring managers and recruiters\n\n1. Opening a Role\nTo open a new or backfill position, the hiring manager must submit a Job Requisition (JR) via the\nHR portal. The JR requires:\n\n • Approved headcount in current budget (Finance sign-off required for new headcount)\n • Job description approved by HR\n • Target start date and budget range\n • VP approval for Manager-level roles and above\nTypical time from JR approval to first candidate presented: 5–10 business days.\n\n2. Interview Process\n\n3. Interview Best Practices\n\nStructured Interviews\nAll interviews must use pre-agreed structured questions from the HR question bank. Interviewers\nmust complete the scorecard in Lever within 24 hours.\n\nDiversity & Inclusion\n • Panels must include at least one interviewer of a different gender than the hiring manager\n • Job descriptions reviewed by HR for inclusive language before posting\n • Blind CV screening available on request\n\nProhibited Questions\nThe following topics must never be raised in interviews:",
+      "text": "SOURCE: 05_recruitment_and_hiring_policy.pdf | pp. 1-2\nTITLE: Recruitment Process Timeline and Best Practices\nSUMMARY: The recruitment process includes several stages, from CV screening to final offer, typically taking 16-18 days. Structured interviews and diversity considerations are emphasized, with specific prohibited questions outlined to ensure fairness and compliance.\n\nRecruitment & Hiring Policy\n\nVersion 2.4 | Applies to all hiring managers and recruiters\n\n1. Opening a Role\nTo open a new or backfill position, the hiring manager must submit a Job Requisition (JR) via the\nHR portal. The JR requires:\n\n • Approved headcount in current budget (Finance sign-off required for new headcount)\n • Job description approved by HR\n • Target start date and budget range\n • VP approval for Manager-level roles and above\nTypical time from JR approval to first candidate presented: 5–10 business days.\n\n2. Interview Process\n\n3. Interview Best Practices\n\nStructured Interviews\nAll interviews must use pre-agreed structured questions from the HR question bank. Interviewers\nmust complete the scorecard in Lever within 24 hours.\n\nDiversity & Inclusion\n • Panels must include at least one interviewer of a different gender than the hiring manager\n • Job descriptions reviewed by HR for inclusive language before posting\n • Blind CV screening available on request\n\nProhibited Questions\nThe following topics must never be raised in interviews:",
       "metadata": {
         "chunk_type": "micro",
-        "parent_chunk_id": "e9b65592706f8b2f",
+        "parent_chunk_id": "3e710807e2bcfbdc",
         "parent_pages": "1, 2",
-        "chunk_id": "b384ddd7d3f4c259",
+        "chunk_id": "2f9b6c47eca84b8d",
         "micro_chunk_index": 2,
         "pages_in_chunk": "1, 2",
         "chunking": "micro_token_split",
@@ -75,22 +74,22 @@
         "file_stem": "05_recruitment_and_hiring_policy",
         "file_type": "pdf",
         "folder_context": "recruitment_talent",
-        "semantic_headline": "Política de Reclutamiento y Proceso de Entrevista",
-        "semantic_summary": "La política de reclutamiento establece un proceso estructurado que incluye la revisión de CV, entrevistas y pruebas técnicas, con un tiempo de respuesta de 16 a 18 días para la oferta. Se enfatiza la diversidad en los paneles de entrevistas y se prohíben preguntas sobre edad, estado civil y nacionalidad. Las referencias de empleados son incentivadas con un bono de €1,000.",
+        "semantic_headline": "Recruitment Process Timeline and Best Practices",
+        "semantic_summary": "The recruitment process includes several stages, from CV screening to final offer, typically taking 16-18 days. Structured interviews and diversity considerations are emphasized, with specific prohibited questions outlined to ensure fairness and compliance.",
         "word_count": 165,
         "char_count": 1057,
         "contains_metrics": false,
         "contains_list": true,
-        "context_where": "05_recruitment_and_hiring_policy.pdf | págs. 1-2"
+        "context_where": "05_recruitment_and_hiring_policy.pdf | pp. 1-2"
       }
     },
     {
-      "text": "SOURCE: 05_recruitment_and_hiring_policy.pdf | págs. 1-2\nTITLE: Política de Reclutamiento y Proceso de Entrevista\nSUMMARY: La política de reclutamiento establece un proceso estructurado que incluye la revisión de CV, entrevistas y pruebas técnicas, con un tiempo de respuesta de 16 a 18 días para la oferta. Se enfatiza la diversidad en los paneles de entrevistas y se prohíben preguntas sobre edad, estado civil y nacionalidad. Las referencias de empleados son incentivadas con un bono de €1,000.\n\nDiversity & Inclusion\n • Panels must include at least one interviewer of a different gender than the hiring manager\n • Job descriptions reviewed by HR for inclusive language before posting\n • Blind CV screening available on request\n\nProhibited Questions\nThe following topics must never be raised in interviews:\n\n • Age, date of birth, or graduation year (unless relevant to eligibility)\n • Marital status or family plans\n • Nationality or country of origin",
+      "text": "SOURCE: 05_recruitment_and_hiring_policy.pdf | pp. 1-2\nTITLE: Recruitment Process Timeline and Best Practices\nSUMMARY: The recruitment process includes several stages, from CV screening to final offer, typically taking 16-18 days. Structured interviews and diversity considerations are emphasized, with specific prohibited questions outlined to ensure fairness and compliance.\n\nDiversity & Inclusion\n • Panels must include at least one interviewer of a different gender than the hiring manager\n • Job descriptions reviewed by HR for inclusive language before posting\n • Blind CV screening available on request\n\nProhibited Questions\nThe following topics must never be raised in interviews:\n\n • Age, date of birth, or graduation year (unless relevant to eligibility)\n • Marital status or family plans\n • Nationality or country of origin",
       "metadata": {
         "chunk_type": "micro",
-        "parent_chunk_id": "e9b65592706f8b2f",
+        "parent_chunk_id": "3e710807e2bcfbdc",
         "parent_pages": "1, 2",
-        "chunk_id": "a6d546e1c92fe91d",
+        "chunk_id": "d4226759b9e51c09",
         "micro_chunk_index": 3,
         "pages_in_chunk": "1, 2",
         "chunking": "micro_token_split",
@@ -102,22 +101,22 @@
         "file_stem": "05_recruitment_and_hiring_policy",
         "file_type": "pdf",
         "folder_context": "recruitment_talent",
-        "semantic_headline": "Política de Reclutamiento y Proceso de Entrevista",
-        "semantic_summary": "La política de reclutamiento establece un proceso estructurado que incluye la revisión de CV, entrevistas y pruebas técnicas, con un tiempo de respuesta de 16 a 18 días para la oferta. Se enfatiza la diversidad en los paneles de entrevistas y se prohíben preguntas sobre edad, estado civil y nacionalidad. Las referencias de empleados son incentivadas con un bono de €1,000.",
+        "semantic_headline": "Recruitment Process Timeline and Best Practices",
+        "semantic_summary": "The recruitment process includes several stages, from CV screening to final offer, typically taking 16-18 days. Structured interviews and diversity considerations are emphasized, with specific prohibited questions outlined to ensure fairness and compliance.",
         "word_count": 72,
         "char_count": 456,
         "contains_metrics": false,
         "contains_list": true,
-        "context_where": "05_recruitment_and_hiring_policy.pdf | págs. 1-2"
+        "context_where": "05_recruitment_and_hiring_policy.pdf | pp. 1-2"
       }
     },
     {
-      "text": "SOURCE: 05_recruitment_and_hiring_policy.pdf | pág. 2\nTITLE: Política de Reclutamiento y Proceso de Entrevista\nSUMMARY: La política de reclutamiento establece un proceso estructurado que incluye la revisión de CV, entrevistas y pruebas técnicas, con un tiempo de respuesta de 16 a 18 días para la oferta. Se enfatiza la diversidad en los paneles de entrevistas y se prohíben preguntas sobre edad, estado civil y nacionalidad. Las referencias de empleados son incentivadas con un bono de €1,000.\n\n[PÁGINA 2]\n• Religious beliefs or political views\n • Disability or health conditions (pre-offer)\n\n4. Making an Offer\nVerbal offers can be made by the hiring manager after recruiter confirmation. Written offers are\nprepared by HR and must include:\n\n • Role title, level, and department\n • Base salary and bonus target\n • Start date and probation period\n • Equity grant (if applicable)\nOffers must remain within the approved salary band. Exceptions require VP and HR Director\nsign-off.\n\n5. Referral Programme\nEmployees can refer candidates via the HR portal. If the referred candidate is hired and completes 3\nmonths, the referring employee receives a €1,000 cash bonus in the next payroll. Referrals cannot\nbe made for roles within the same reporting line.\n\n6. Background Checks\nAll offers are conditional on satisfactory background checks:\n\n • Identity verification (passport / ID)\n • Right to work in Spain (or relevant jurisdiction)\n • Employment history verification (last 3 employers)\n • Criminal record check (roles with access to financial data or vulnerable populations)\nChecks are completed by our partner (Sterling) within 5 business days.",
+      "text": "SOURCE: 05_recruitment_and_hiring_policy.pdf | p. 2\nTITLE: Recruitment Process Timeline and Best Practices\nSUMMARY: The recruitment process includes several stages, from CV screening to final offer, typically taking 16-18 days. Structured interviews and diversity considerations are emphasized, with specific prohibited questions outlined to ensure fairness and compliance.\n\n[PAGE 2]\n• Religious beliefs or political views\n • Disability or health conditions (pre-offer)\n\n4. Making an Offer\nVerbal offers can be made by the hiring manager after recruiter confirmation. Written offers are\nprepared by HR and must include:\n\n • Role title, level, and department\n • Base salary and bonus target\n • Start date and probation period\n • Equity grant (if applicable)\nOffers must remain within the approved salary band. Exceptions require VP and HR Director\nsign-off.\n\n5. Referral Programme\nEmployees can refer candidates via the HR portal. If the referred candidate is hired and completes 3\nmonths, the referring employee receives a €1,000 cash bonus in the next payroll. Referrals cannot\nbe made for roles within the same reporting line.\n\n6. Background Checks\nAll offers are conditional on satisfactory background checks:\n\n • Identity verification (passport / ID)\n • Right to work in Spain (or relevant jurisdiction)\n • Employment history verification (last 3 employers)\n • Criminal record check (roles with access to financial data or vulnerable populations)\nChecks are completed by our partner (Sterling) within 5 business days.",
       "metadata": {
         "chunk_type": "micro",
-        "parent_chunk_id": "e9b65592706f8b2f",
+        "parent_chunk_id": "3e710807e2bcfbdc",
         "parent_pages": "1, 2",
-        "chunk_id": "46a94327687ad1f6",
+        "chunk_id": "9ea31b9d392f08ee",
         "micro_chunk_index": 4,
         "pages_in_chunk": "2",
         "chunking": "micro_token_split",
@@ -129,13 +128,13 @@
         "file_stem": "05_recruitment_and_hiring_policy",
         "file_type": "pdf",
         "folder_context": "recruitment_talent",
-        "semantic_headline": "Política de Reclutamiento y Proceso de Entrevista",
-        "semantic_summary": "La política de reclutamiento establece un proceso estructurado que incluye la revisión de CV, entrevistas y pruebas técnicas, con un tiempo de respuesta de 16 a 18 días para la oferta. Se enfatiza la diversidad en los paneles de entrevistas y se prohíben preguntas sobre edad, estado civil y nacionalidad. Las referencias de empleados son incentivadas con un bono de €1,000.",
+        "semantic_headline": "Recruitment Process Timeline and Best Practices",
+        "semantic_summary": "The recruitment process includes several stages, from CV screening to final offer, typically taking 16-18 days. Structured interviews and diversity considerations are emphasized, with specific prohibited questions outlined to ensure fairness and compliance.",
         "word_count": 178,
-        "char_count": 1148,
+        "char_count": 1146,
         "contains_metrics": true,
         "contains_list": true,
-        "context_where": "05_recruitment_and_hiring_policy.pdf | pág. 2"
+        "context_where": "05_recruitment_and_hiring_policy.pdf | p. 2"
       }
     }
   ]
