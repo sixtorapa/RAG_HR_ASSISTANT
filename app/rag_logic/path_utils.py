@@ -5,8 +5,8 @@ import re
 
 def norm_path(s: str) -> str:
     """
-    Normaliza un path/filename para comparación y filtrado de metadata.
-    Misma normalización usada al ingestar (relative_path_norm) y al detectar
+    Normalise a path or filename for comparison and metadata filtering.
+    The same normalisation used at ingest time (relative_path_norm) and when
     el filtro de documento en una pregunta, para que ambos lados coincidan
     siempre con un match exacto.
     """

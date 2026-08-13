@@ -1,4 +1,4 @@
-# app/rag_logic/agent_intermedios.py
+# app/rag_logic/agent_sql.py
 
 from __future__ import annotations
 
@@ -100,15 +100,10 @@ class SQLAgent:
     """
     Queries the HR analytics database.
 
-    It does NOT call the LLM, and that is deliberate. It used to make a
-    business-language rewriting pass whose output nobody read:
-    `ReasoningAgent._build_contributions_summary` and both consumers in the
-    dispatch loop take `sql_raw_output` in preference to `answer`, so the refined
-    text was discarded entirely.
-
-    That was one wasted LLM call per SQL query. The business-language reading is
-    already done by `HRDatabaseTool` itself, and the final formatting by
-    `ReasoningAgent`. The middle pass was redundant.
+    It does NOT call the LLM, and that is deliberate: every consumer downstream
+    reads `sql_raw_output` in preference to `answer`, so a rewriting pass here
+    would be paid for and then discarded. The business-language reading is done
+    by the SQL tool itself, and the final formatting by `ReasoningAgent`.
     """
 
     def __init__(

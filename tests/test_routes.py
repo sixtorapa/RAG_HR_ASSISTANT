@@ -1,12 +1,9 @@
 """
-test_routes.py — Tests de las rutas Flask.
+test_routes.py — the Flask routes.
 
-Estrategia: mockear todas las llamadas a LLM/ChromaDB con unittest.mock.
-Así los tests son rápidos (< 1s) y no dependen de API keys reales.
-
-Por qué esto importa en entrevistas:
-  "¿Cómo testeas endpoints que dependen de LLMs?"
-  → Mocking de dependencias externas + test del contrato HTTP
+Strategy: mock every LLM and ChromaDB call with unittest.mock, so the tests are
+fast (< 1s) and need no real API keys. What is asserted is the HTTP contract,
+not the content of the answer.
 """
 
 import json
@@ -15,7 +12,7 @@ from unittest.mock import patch, MagicMock
 
 
 class TestAuthRoutes:
-    """Tests de login/logout sin mock de LLM."""
+    """Login and logout, no LLM mocking needed."""
 
     def test_login_page_accessible(self, client):
         response = client.get("/login")
@@ -36,11 +33,11 @@ class TestAuthRoutes:
             data={"username": "testuser", "password": "WrongPassword!"},
             follow_redirects=True,
         )
-        # Debe mostrar error o redirigir al login
+        # Must show an error or redirect to the login page
         assert response.status_code == 200
 
     def test_protected_route_redirects_unauthenticated(self, client):
-        """Las rutas protegidas redirigen al login si no hay sesión."""
+        """Protected routes redirect to the login page when there is no session."""
         response = client.get("/", follow_redirects=False)
         assert response.status_code in (302, 401)
 
@@ -52,31 +49,28 @@ class TestAuthRoutes:
 
 class TestAskEndpoint:
     """
-    Tests del endpoint /ask/<session_id>.
+    The /ask/<session_id> endpoint.
 
     Se mockea todo el stack de LLM en app.main.pipeline, que es donde se
     construyen el router y las herramientas.
     Lo que validamos:
       - El contrato HTTP (status codes, JSON response shape)
-      - Que se rechaza correctamente si falta la pregunta
+      - Que se rechaza correctamente si falta la question
       - Que el auth funciona (403 sin sesión)
     """
 
     @pytest.fixture
     def mock_llm_stack(self):
-        """Mock de toda la cadena de LLM para tests de rutas."""
+        """Mocks the whole LLM chain so the route tests stay fast and offline."""
         mock_result = {
             "answer": "La política de vacaciones establece 23 días anuales.",
             "source_documents": [],
             "origin": "chat_with_documents",
         }
 
-        # La costura se movió DOS veces el 3-ago-2026: primero de DocumentQAAgent
-        # a la tool (el envoltorio se eliminó tras medir que su aportación caía
-        # dentro del ruido del juez), y luego de routes.py a pipeline.py al
-        # partir el fichero. Ahí es donde se construyen las herramientas ahora.
-        # Igual que pasó con ChatOpenAI al introducir la factoría: el mock en
-        # rojo es la señal de que el desacoplamiento ocurrió de verdad.
+        # The tools are built in pipeline.py, so that is where the seam is. A mock
+        # that turns red after moving a boundary is the signal that the decoupling
+        # actually happened, rather than a test to be patched around.
         with patch("app.main.pipeline.AgentRouter") as mock_router, \
             patch("app.main.pipeline.ChatWithDocumentTool") as mock_doc_tool, \
             patch("app.main.pipeline.SummarizeDocumentTool"), \
@@ -85,21 +79,21 @@ class TestAskEndpoint:
             patch("app.main.pipeline.SQLAgent"), \
             patch("app.main.pipeline.ReasoningAgent") as mock_reasoning:
 
-            # El router devuelve una tool call de documentos
+            # The router returns a document tool call
             mock_router_instance = MagicMock()
             mock_router_instance.route.return_value = MagicMock(
                 tool_calls=[{"name": "chat_with_documents", "args": {}}]
             )
             mock_router.return_value = mock_router_instance
 
-            # La tool de documentos: su .name debe coincidir con el del tool_call,
+            # The document tool: its .name must match the one in the tool_call,
             # porque _run_tools despacha comparando nombres.
             mock_doc_instance = MagicMock()
             mock_doc_instance.name = "chat_with_documents"
             mock_doc_instance.run.return_value = mock_result
             mock_doc_tool.return_value = mock_doc_instance
 
-            # El agente de formato final
+            # The final formatting agent
             mock_reasoning_instance = MagicMock()
             mock_reasoning_instance.run.return_value = mock_result
             mock_reasoning.return_value = mock_reasoning_instance
@@ -150,7 +144,7 @@ class TestAskEndpoint:
                     content_type="application/json",
                 )
 
-        # Debe ser 200 con un campo "answer"
+        # Must be 200 with an "answer" field
         if response.status_code == 200:
             data = response.get_json()
             assert "answer" in data

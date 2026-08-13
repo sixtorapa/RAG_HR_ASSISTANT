@@ -51,7 +51,7 @@ one dispatch loop over the chosen tools
    │
    ├─► chat_with_documents ─► retrieval (below) ─► answer + sources
    ├─► query_hr_database   ─► LLM-generated SQL, SELECT-only, read-only connection
-   ├─► analista_de_excel   ─► pandas agent, bounded iterations and timeout
+   ├─► excel_analyst       ─► pandas agent, bounded iterations and timeout
    └─► summarise_document  ─► full-document summarisation
    ▼
 ReasoningAgent formats the result  →  persisted  →  JSON with sources

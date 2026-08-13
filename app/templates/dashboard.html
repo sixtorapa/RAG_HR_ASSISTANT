@@ -11,7 +11,7 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 
   <style>
-    /* Bloqueo del body para evitar el scroll infinito */
+    /* Lock the body to prevent runaway scrolling */
     body {
       overflow: hidden; 
     }
@@ -29,7 +29,7 @@
     
     .layout {
       display: flex;
-      /* Altura estricta para evitar que la página crezca infinitamente */
+      /* Strict height so the page cannot grow indefinitely */
       height: calc(100vh - 60px); 
       overflow: hidden;
     }
@@ -81,7 +81,7 @@
       margin: 1.5rem 1rem 0.5rem;
     }
 
-    /* Scroll interno solo para la lista de chats */
+    /* Internal scroll for the chat list only */
     .chat-list { flex: 1; overflow-y: auto; margin: 0 -0.5rem; padding: 0 0.5rem; }
     
     .chat-item {
@@ -94,7 +94,7 @@
     .chat-item.active { background: var(--sidebar-hover); color: white; }
     .chat-item-text { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-    /* Scroll interno solo para el panel principal */
+    /* Internal scroll for the main panel only */
     .main {
       flex: 1; 
       padding: 2rem; 
@@ -395,7 +395,7 @@
         new Chart(ctx, {
           type: "line",
           data: {
-            labels: labels.length ? labels : ["Sin datos"],
+            labels: labels.length ? labels : ["No data"],
             datasets: [{
               label: "Sesiones",
               data: values.length ? values : [0],
@@ -411,7 +411,7 @@
           },
           options: {
             responsive: true,
-            maintainAspectRatio: false, // Ahora es seguro usarlo gracias al wrapper relativo
+            maintainAspectRatio: false, // Safe to use thanks to the relative wrappero
             plugins: { legend: { display: false } },
             scales: {
               x: { grid: { display: false } },

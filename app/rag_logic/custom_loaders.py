@@ -20,14 +20,10 @@ class LoaderConfig:
     """
     Document loading settings.
 
-    There used to be OCR here: poor-page detection, visual cues, DPI rendering
-    and tesseract. It was removed because it COULD NOT RUN — neither
-    `pytesseract` is in requirements-prod.txt nor `tesseract` in either
-    Dockerfile, so the whole branch was unreachable in any deployed image.
-
-    Keeping it would have meant maintaining, and describing, a capability the
-    system does not have. If the corpus ever brings scans without a text layer,
-    the dependency gets added and this gets rewritten. Today's PDFs carry text.
+    There is no OCR path: neither `pytesseract` nor `tesseract` is installed in
+    the deployed images, so any OCR branch would be unreachable and would
+    advertise a capability the system does not have. The corpus is text-layer
+    PDFs. If scans ever arrive, the dependency is added first.
     """
 
     pdf_extract_tables: bool = (
@@ -112,7 +108,7 @@ class BetterPDFLoader(BaseLoader):
                     documents.append(doc_page)
 
                 print(
-                    f"✅ PDF leído (pdfplumber fallback) | total_pages={page_count} | "
+                    f"✅ PDF read (pdfplumber fallback) | total_pages={page_count} | "
                     f"pages_with_text={page_count - len(empty_pages)} | empty_pages={len(empty_pages)}"
                 )
                 if empty_pages:
@@ -178,7 +174,7 @@ class BetterPDFLoader(BaseLoader):
         # it would require a full re-ingest and would invalidate the measured
         # evaluation numbers. It is content, not a comment.
         if (table_text or "").strip():
-            parts.append(f"--- DATOS TABULARES (Pág {pidx + 1}) ---\n{table_text.strip()}\n-----------------------------")
+            parts.append(f"--- TABLE DATA (p. {pidx + 1}) ---\n{table_text.strip()}\n-----------------------------")
 
         # 2. Base text, with the lines the table just captured removed
         base_text = self._strip_table_lines(base_text, table_text)
@@ -188,7 +184,7 @@ class BetterPDFLoader(BaseLoader):
         page_out = "\n\n".join(parts).strip()
         is_empty = not page_out or len(page_out.split()) < 3
         if is_empty:
-            page_out = f"[Página {pidx + 1} — contenido visual sin text extraíble]"
+            page_out = f"[Page {pidx + 1} — visual content, no extractable text]"
 
         return Document(
             page_content=page_out,
@@ -215,7 +211,7 @@ class BetterPDFLoader(BaseLoader):
                     return []
                 per_page_text, per_page_visual = [], []
                 for page in doc:
-                    # MEJORA: sort=True para respetar columnas y layout visual
+                    # sort=True to respect columns and visual layout
                     t = (page.get_text("text", sort=True) or "").strip()
                     
                     has_images = bool(page.get_images(full=True))
@@ -228,7 +224,7 @@ class BetterPDFLoader(BaseLoader):
 
                 total_chars = sum(len(t) for t in per_page_text)
 
-                # MEJORA: Extracción de tablas a Markdown
+                # Table extraction to Markdown
                 table_map = {}
                 if self.loader_cfg.pdf_extract_tables:
                     try:
@@ -256,7 +252,7 @@ class BetterPDFLoader(BaseLoader):
                     documents.append(doc_page)
 
                 print(
-                    f"✅ PDF leído (PyMuPDF Enhanced) | total_pages={page_count} | "
+                    f"✅ PDF read (PyMuPDF Enhanced) | total_pages={page_count} | "
                     f"pages_with_text={page_count - len(empty_pages)} | pages_with_tables={len(table_map)} | "
                     f"empty_pages={len(empty_pages)} | total_chars={total_chars}"
                 )
@@ -312,12 +308,12 @@ class BetterPowerPointLoader(BaseLoader):
             page_out = slide_text.strip()
             is_empty = not page_out or len(page_out.split()) < 3
             if is_empty:
-                page_out = f"[Slide {s_i} — contenido visual sin text extraíble]"
+                page_out = f"[Slide {s_i} — visual content, no extractable text]"
             out_docs.append(Document(page_content=page_out, metadata={
                 "source": self.file_path, "file_type": "ppt",
                 "filename": fname, "source_file": fname, "relative_path": fname,
                 "slide": s_i, "slide_number": s_i, "slide_count": slide_count,
                 "is_empty_slide": is_empty, "text_chars": len(page_out),
             }))
-        print("✅ PPT leído")
+        print("✅ PPT read")
         return out_docs

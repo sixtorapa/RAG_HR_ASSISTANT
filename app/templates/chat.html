@@ -19,7 +19,7 @@
             --panel-border: rgba(15, 23, 42, 0.10);
             --panel-shadow: 0 16px 40px rgba(15, 23, 42, 0.14);
 
-            /* ✅ Tipografía base responsive (mejor en 32") */
+            /* Responsive base typography (better on 32" screens) */
             --base-font: clamp(14px, 0.9vw, 16px);
         }
 
@@ -54,7 +54,7 @@
             flex-direction: column;
         }
 
-        /* ✅ Si está embebido dentro de un panel con padding, aún se ve bien */
+        /* Still looks right when embedded in a padded panel */
         @media (min-width: 992px){
             .chat-container{
                 border-radius: 18px;
@@ -111,7 +111,7 @@
         }
         .chat-box::-webkit-scrollbar-thumb:hover{ background: rgba(15,23,42,0.28); }
 
-        /* --- 4. DISEÑO DE MENSAJES (BURBUJAS) --- */
+        /* --- 4. MESSAGE BUBBLES --- */
         .message-row{
             display: flex;
             align-items: flex-start;
@@ -155,8 +155,8 @@
         }
 
         .message-bubble{
-            /* ✅ CLAVE: en pantallas grandes NO dejamos que se vaya al 90%,
-               pero tampoco la hacemos pequeña. clamp = legibilidad perfecta. */
+            /* KEY: on large screens do NOT let it stretch to 90%,
+               but do not shrink it either. clamp = readable at any width. */
             max-width: clamp(520px, 72%, 980px);
 
             padding: 16px 18px;
@@ -247,7 +247,7 @@
         }
         .action-btn:hover{ color: var(--up-accent); }
 
-        /* --- 4.2 Edición inline --- */
+        /* --- 4.2 Inline editing --- */
         .edit-textarea{
             width: 100%;
             min-height: 44px;
@@ -269,7 +269,7 @@
             margin-top: 10px;
         }
 
-        /* --- 5. TABLAS DE DATOS --- */
+        /* --- 5. DATA TABLES --- */
         .message-bubble table{
             width: 100%;
             border-collapse: collapse;
@@ -314,7 +314,7 @@
             color: white;
         }
 
-        /* --- 6. ACORDEÓN DE FUENTES --- */
+        /* --- 6. SOURCES ACCORDION --- */
         .accordion-item{ border: none; background: transparent; }
         .accordion-button{
             padding: 10px 12px;
@@ -375,7 +375,7 @@
             box-shadow: 0 0 0 4px rgba(103,55,225,0.12);
         }
 
-        /* ✅ Móvil */
+        /* Mobile */
         @media (max-width: 576px){
             .chat-container{
                 height: calc(100vh - 16px);
@@ -781,10 +781,10 @@
                 let loc = null;
 
                 if (meta.page_number != null) {
-                    loc = `pág. ${meta.page_number}`;
+                    loc = `p. ${meta.page_number}`;
                 } else if (meta.page != null) {
                     const p = Number(meta.page);
-                    loc = Number.isFinite(p) ? `pág. ${p + 1}` : `pág. ${meta.page}`;
+                    loc = Number.isFinite(p) ? `p. ${p + 1}` : `p. ${meta.page}`;
                 } else if (meta.slide_number != null) {
                     loc = `slide ${meta.slide_number}`;
                 } else if (meta.slide != null) {
@@ -815,13 +815,13 @@
                     .filter(x => x !== null)
                     .sort((a, b) => a - b);
 
-                let locsText = 'sin página/slide';
+                let locsText = 'no page/slide';
 
                 if (pages.length === 1) {
-                    locsText = `pág. ${pages[0]}`;
+                    locsText = `p. ${pages[0]}`;
                 } else if (pages.length > 1) {
                     const last = pages.pop();
-                    locsText = `pág. ${pages.join(', ')} y ${last}`;
+                    locsText = `pp. ${pages.join(', ')} and ${last}`;
                 }
 
                 items += `
@@ -836,7 +836,7 @@
                         <div id="${collapseId}" class="accordion-collapse collapse" data-bs-parent="#${accId}">
                             <div class="accordion-body">
                                 <div><strong>Document:</strong> ${escapeHtml(filename)}</div>
-                                <div class="mt-1"><strong>Páginas/Slides utilizados:</strong> ${escapeHtml(locsText)}</div>
+                                <div class="mt-1"><strong>Pages/slides used:</strong> ${escapeHtml(locsText)}</div>
                             </div>
                         </div>
                     </div>
@@ -1105,7 +1105,7 @@
             title.style.fontSize = '0.85rem';
             title.style.color = '#334155';
             title.style.marginBottom = '8px';
-            title.innerText = 'Gráfico';
+            title.innerText = 'Chart';
 
             const canvas = document.createElement('canvas');
 

@@ -1,44 +1,44 @@
 """
-Paso 3 — crear el repositorio de ECR y subir la imagen.
+Step 3 — create the ECR repository and push the image.
 
-ECR es el almacén de imágenes de AWS. La imagen está en tu máquina; Lambda no
-puede cogerla de ahí, así que hay que dejarla en un sitio del que pueda tirar.
+ECR is the AWS image store. The image is on your machine and Lambda cannot pull
+it from there, so it has to be left somewhere Lambda can reach.
 
-Dos cosas que costaron tiempo y conviene que estén escritas:
+Two things that cost time and are worth writing down:
 
-1. NO hace falta el AWS CLI. El token de acceso a ECR se saca con boto3 y se le
-   pasa a `docker login` por stdin.
+1. The AWS CLI is NOT required. The ECR access token is obtained with boto3 and
+   piped into `docker login` through stdin.
 
-2. Lambda RECHAZA los manifiestos OCI. Docker los genera por defecto, y falla con
-   "The image manifest, config or layer media type is not supported".
-   `--provenance=false` NO basta: hay que forzar `oci-mediatypes=false`. Por eso
-   se construye y se sube con `docker buildx` en un solo paso, en vez de
-   `docker build` + `docker push`.
+2. Lambda REJECTS OCI manifests. Docker produces them by default, and it fails
+   with "The image manifest, config or layer media type is not supported".
+   `--provenance=false` is NOT enough: `oci-mediatypes=false` must be forced.
+   That is why the image is built and pushed with `docker buildx` in one step,
+   rather than `docker build` + `docker push`.
 
-Uso:  python infra/03_push_to_ecr.py
+Usage:  python infra/03_push_to_ecr.py
 """
 
 import base64
 import subprocess
 import sys
 
-from _comun import NOMBRE_REPO_ECR, RAIZ_REPO, cliente, exigir_credenciales, uri_ecr
+from _common import ECR_REPO_NAME, REPO_ROOT, client, require_credentials, ecr_uri
 
-exigir_credenciales()
-ecr = cliente("ecr")
+require_credentials()
+ecr = client("ecr")
 
 # ── El repositorio ───────────────────────────────────────────────────────────
 try:
     ecr.create_repository(
-        repositoryName=NOMBRE_REPO_ECR,
-        imageScanningConfiguration={"scanOnPush": True},  # análisis de vulnerabilidades
+        repositoryName=ECR_REPO_NAME,
+        imageScanningConfiguration={"scanOnPush": True},  # vulnerability scanning
         imageTagMutability="MUTABLE",
     )
     print("  repositorio creado")
 except ecr.exceptions.RepositoryAlreadyExistsException:
-    print("  repositorio ya existía")
+    print("  repository already existed")
 
-URI = uri_ecr()
+URI = ecr_uri()
 print(f"  URI: {URI}")
 
 # ── Autenticar docker contra ECR ─────────────────────────────────────────────
@@ -50,24 +50,24 @@ login = subprocess.run(
     input=clave, text=True, capture_output=True,
 )
 if login.returncode != 0:
-    sys.exit(f"  ✗ docker login falló: {login.stderr.strip()}")
+    sys.exit(f"  ✗ docker login failed: {login.stderr.strip()}")
 print("  docker autenticado")
 
-# ── Construir y subir con manifiesto Docker v2 ───────────────────────────────
+# ── Build and push with a Docker v2 manifest ─────────────────────────────────
 print("  construyendo y subiendo (unos minutos)...")
 build = subprocess.run(
     [
         "docker", "buildx", "build",
         "--provenance=false", "--sbom=false",
-        # oci-mediatypes=false es la parte que Lambda necesita
+        # oci-mediatypes=false is the part Lambda needs
         "--output", "type=image,oci-mediatypes=false,push=true",
         "-f", "Dockerfile.lambda",
         "-t", f"{URI}:latest",
         ".",
     ],
-    cwd=RAIZ_REPO,
+    cwd=REPO_ROOT,
 )
 if build.returncode != 0:
-    sys.exit("  ✗ el build falló")
+    sys.exit("  ✗ the build failed")
 
-print(f"  ✓ imagen en {URI}:latest")
+print(f"  ✓ image at {URI}:latest")

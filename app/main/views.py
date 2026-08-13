@@ -1,5 +1,5 @@
 # app/main/views.py
-"""Pantallas HTML: home, chat, ajustes."""
+"""HTML screens: home, chat, activity."""
 
 from datetime import datetime, timedelta
 
@@ -14,12 +14,12 @@ from app.models import ChatSession, LoginSession, Message, User
 @bp.route("/")
 @login_required
 def index():
-    """Pantalla única: home, chat y actividad."""
+    """Single screen: home, chat and activity."""
     tab = (request.args.get("tab") or "home").lower().strip()
     if tab not in ("home", "chat", "activity"):
         tab = "home"
 
-    # Si no es admin, activity no está permitido
+    # Non-admins are not allowed into the activity view
     if tab == "activity" and getattr(current_user, "role", None) != "admin":
         tab = "home"
 
@@ -27,13 +27,13 @@ def index():
     session_id = (request.args.get("session") or "").strip()
     session = None
 
-    # Si viene session id, solo si es del usuario
+    # If a session id is given, accept it only if it belongs to the user
     if session_id:
         session = ChatSession.query.filter_by(
             id=session_id, user_id=current_user.id,
         ).first()
 
-    # Lista de sesiones del usuario (para sidebar tipo ChatGPT)
+    # The user's sessions, for the sidebar
     sessions_list = (
         ChatSession.query
         .filter_by(user_id=current_user.id)
@@ -41,18 +41,18 @@ def index():
         .all()
     )
 
-    # Si no viene session_id válido, usamos la última del usuario
+    # With no valid session_id, fall back to the user's most recent one
     if session is None:
         session = sessions_list[0] if sessions_list else None
 
-    # Si no hay ninguna, crear una nueva (IMPORTANTE: add+commit para evitar Detached)
+    # If there is none, create one. add+commit is required to avoid a detached instance
     if session is None:
         session = ChatSession(name="New chat", user_id=current_user.id)
         db.session.add(session)
         db.session.commit()
-        sessions_list = [session]  # opcional: para que aparezca inmediatamente
+        sessions_list = [session]  # so it shows up in the sidebar straight away
 
-    # ✅ Evitar lazy-load sobre session.messages (evita DetachedInstanceError)
+    # Avoid lazy-loading session.messages, which raises DetachedInstanceError
     messages = (
         Message.query
         .filter_by(session_id=session.id, user_id=current_user.id)
@@ -62,10 +62,10 @@ def index():
 
 
     activity_sessions = []
-    admin_activity = None  # <-- resumen + series para dashboard (solo admin)
+    admin_activity = None  # summary + series for the dashboard (admin only)
 
     if tab == "activity" and getattr(current_user, "role", None) == "admin":
-        # Tabla (detalle): últimas 200 sesiones
+        # Detail table: the last 200 sessions
         activity_sessions = (
             db.session.query(LoginSession, User)
             .join(User, User.id == LoginSession.user_id)
@@ -74,7 +74,7 @@ def index():
             .all()
         )
 
-        # Dashboard (resumen): últimos 30 días
+        # Dashboard summary: the last 30 days
         since = datetime.utcnow() - timedelta(days=30)
 
         last_30 = (
@@ -92,7 +92,7 @@ def index():
         durations = [int(ls.duration_sec) for (ls, _) in last_30 if ls.duration_sec is not None]
         avg_duration_sec_30d = int(sum(durations) / len(durations)) if durations else 0
 
-        # Series: sesiones por día
+        # Series: sessions per day
         by_day = {}
         for (ls, _) in last_30:
             key = (ls.started_at.date().isoformat() if ls.started_at else None)
@@ -103,7 +103,7 @@ def index():
         days = sorted(by_day.keys())
         sessions_per_day = [by_day[d] for d in days]
 
-        # Ranking: top usuarios por preguntas (y sesiones)
+        # Ranking: top users by questions and sessions
         per_user = {}
         for (ls, u) in last_30:
             item = per_user.get(u.username) or {"sessions": 0, "questions": 0}
@@ -140,14 +140,14 @@ def index():
         sessions=sessions_list,
         active_tab=tab,
         activity_sessions=activity_sessions,
-        admin_activity=admin_activity,  # <-- NUEVO
+        admin_activity=admin_activity,  
     )
 @bp.route("/chat/<session_id>")
 @login_required
 def chat_session(session_id):
-    # Legacy: redirige al shell único
+    # Legacy route: redirect to the single shell
     return redirect(url_for("main.index", tab="chat", session=session_id))
 @bp.route("/check_status")
 def check_status():
-    """Estado de la base de conocimiento para el sondeo de la UI."""
+    """Knowledge-base status, polled by the UI."""
     return jsonify({"status": "READY", "name": current_app.config["UP_PROJECT_NAME"]})

@@ -1,28 +1,30 @@
 """
-Paso 2 — el rol de ejecución de la Lambda.
+Step 2 — the Lambda execution role.
 
-Una Lambda no lleva usuario ni contraseña. Asume un ROL, y AWS le inyecta
-credenciales temporales que caducan solas. No hay nada que guardar ni que rotar.
+A Lambda carries no username or password. It assumes a ROLE, and AWS injects
+temporary credentials that expire on their own. There is nothing to store and
+nothing to rotate.
 
-El rol tiene dos mitades:
-    - Quién puede asumirlo  -> solo el servicio Lambda
-    - Qué puede hacer       -> invocar DOS modelos concretos, y nada más
+The role has two halves:
+    - Who may assume it  -> only the Lambda service
+    - What it may do     -> invoke TWO specific models, and nothing else
 
-Ese "nada más" es la decisión que importa: ni bedrock:*, ni Resource "*". Si
-alguien compromete la función, lo máximo que consigue es hacerle preguntas a
-Claude. El usuario IAM del desarrollador sí tiene permisos amplios; el servicio no.
+That "nothing else" is the decision that matters: no bedrock:*, no Resource "*".
+If someone compromises the function, the most they get is to ask Claude
+questions. The developer's IAM user does have broad permissions; the service
+does not.
 
-Uso:  python infra/02_create_iam_role.py
+Usage:  python infra/02_create_iam_role.py
 """
 
 import json
 
-from _comun import MODELOS, NOMBRE_ROL, REGION, cliente, cuenta, exigir_credenciales
+from _common import MODELS, ROLE_NAME, REGION, client, account, require_credentials
 
-exigir_credenciales()
-iam = cliente("iam")
+require_credentials()
+iam = client("iam")
 
-# ── Quién puede asumir el rol ────────────────────────────────────────────────
+# ── Who may assume the role ──────────────────────────────────────────────────
 CONFIANZA = {
     "Version": "2012-10-17",
     "Statement": [{
@@ -34,29 +36,29 @@ CONFIANZA = {
 
 try:
     r = iam.create_role(
-        RoleName=NOMBRE_ROL,
+        RoleName=ROLE_NAME,
         AssumeRolePolicyDocument=json.dumps(CONFIANZA),
         Description="Rol de ejecucion del RAG HR Assistant en Lambda",
     )
     print(f"  rol creado: {r['Role']['Arn']}")
 except iam.exceptions.EntityAlreadyExistsException:
-    print(f"  rol ya existía: {iam.get_role(RoleName=NOMBRE_ROL)['Role']['Arn']}")
+    print(f"  role already existed: {iam.get_role(RoleName=ROLE_NAME)['Role']['Arn']}")
 
-# ── Permiso 1: escribir logs en CloudWatch ───────────────────────────────────
-# Lo mínimo imprescindible. Sin esto la función corre pero no puedes depurarla.
+# ── Permission 1: write logs to CloudWatch ───────────────────────────────────
+# The bare minimum. Without it the function runs but cannot be debugged.
 iam.attach_role_policy(
-    RoleName=NOMBRE_ROL,
+    RoleName=ROLE_NAME,
     PolicyArn="arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
 )
 print("  + AWSLambdaBasicExecutionRole (logs)")
 
 # ── Permiso 2: invocar Bedrock, acotado ──────────────────────────────────────
-ID_CUENTA = cuenta()
+ID_CUENTA = account()
 recursos = [
-    f"arn:aws:bedrock:{REGION}:{ID_CUENTA}:inference-profile/{m}" for m in MODELOS
+    f"arn:aws:bedrock:{REGION}:{ID_CUENTA}:inference-profile/{m}" for m in MODELS
 ]
-# Los inference profiles enrutan a los foundation models subyacentes, así que
-# hace falta permiso sobre ambos. Se acota igualmente a modelos de Anthropic.
+# Inference profiles route to the underlying foundation models, so permission
+# on both is required. Still scoped to Anthropic models only.
 recursos.append("arn:aws:bedrock:*::foundation-model/anthropic.claude-*")
 
 POLITICA = {
@@ -69,10 +71,10 @@ POLITICA = {
 }
 
 iam.put_role_policy(
-    RoleName=NOMBRE_ROL,
+    RoleName=ROLE_NAME,
     PolicyName="InvokeClaudeOnly",
     PolicyDocument=json.dumps(POLITICA),
 )
 print("  + InvokeClaudeOnly — solo InvokeModel, solo estos modelos:")
-for m in MODELOS:
+for m in MODELS:
     print(f"      {m}")

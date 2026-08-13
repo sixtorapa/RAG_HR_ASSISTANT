@@ -8,7 +8,7 @@ import time
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Union
 
-# Compatibilidad LangChain (nuevo / viejo)
+# LangChain compatibility (new / old)
 try:
     from langchain_core.callbacks import BaseCallbackHandler  # type: ignore
 except Exception:
@@ -19,7 +19,7 @@ except Exception:
 # Utils
 # ==============================
 def _enable_windows_ansi() -> None:
-    """Activa ANSI en Windows si es posible. Si falla, no pasa nada."""
+    """Enable ANSI on Windows when possible. Failing is harmless."""
     if os.name != "nt":
         return
     try:
@@ -101,7 +101,7 @@ def _extract_tool_calls_from_message(msg: Any) -> List[Dict[str, Any]]:
     except Exception:
         pass
 
-    # Algunas versiones exponen msg.tool_calls
+    # Some versions expose msg.tool_calls
     try:
         tc2 = getattr(msg, "tool_calls", None)
         if isinstance(tc2, list):
@@ -165,22 +165,22 @@ class _RunInfo:
 
 class ConsoleLogger(BaseCallbackHandler):
     """
-    Logger COMPACTO para producción/debug rápido.
+    COMPACT logger for production and quick debugging.
 
     Objetivo:
     - No inundar PowerShell con prompts y dumps enormes
-    - Sí mostrar el flujo: Chain/Router -> Tool -> Retriever -> LLM End
-    - Sí mostrar duraciones y herramientas elegidas
-    - Sí mostrar tool_calls cuando el LLM responde con finish_reason=tool_calls
+    - DOES show the flow: Chain/Router -> Tool -> Retriever -> LLM End
+    - DOES show durations and the tools chosen
+    - DOES show tool_calls when the LLM answers with finish_reason=tool_calls
 
-    Por defecto imprime ~1 línea por evento.
+    Prints roughly one line per event by default.
     """
 
     def __init__(
         self,
-        # Modo: "compact" (default) o "debug" (muestra inputs/output cortos)
+        # Mode: "compact" (default) or "debug" (shows truncated inputs/outputs)
         mode: str = "compact",
-        # Cuántos caracteres máximos para inputs/outputs si mode="debug"
+        # Max characters for inputs/outputs when mode="debug"
         max_debug_chars: int = 220,
         # Mostrar retriever (docs recuperados)
         show_retriever: bool = True,
@@ -245,7 +245,7 @@ class ConsoleLogger(BaseCallbackHandler):
 
         p = self._pad(run_id)
 
-        # ✅ 1) Mostrar SIEMPRE la pregunta del usuario en el chain raíz (depth==0)
+        # 1) ALWAYS show the user question on the root chain (depth == 0)
         q = None
         if self._depth(run_id) == 0:
             if isinstance(inputs, dict):
@@ -257,7 +257,7 @@ class ConsoleLogger(BaseCallbackHandler):
         if q:
             extra += f" {_C.DIM}Q={_C.END}{_as_text(q, self.max_debug_chars)}"
 
-        # En debug añadimos un poquito más, pero sin inundar
+        # Debug mode shows a little more, without flooding
         if self.mode == "debug":
             payload = inputs.get("input") if isinstance(inputs, dict) else inputs
             extra += self._debug_kv("in", payload)
@@ -330,7 +330,7 @@ class ConsoleLogger(BaseCallbackHandler):
     # LLM / ChatModel
     # ==========================
     def on_llm_start(self, serialized: Dict[str, Any], prompts: List[str], **kwargs: Any) -> None:
-        # En compacto NO imprimimos prompts (es el ruido principal)
+        # Compact mode does NOT print prompts (they are the main noise)
         run_id = str(kwargs.get("run_id") or "")
         parent = kwargs.get("parent_run_id")
         name = _get_name(serialized, "LLM")
@@ -338,7 +338,7 @@ class ConsoleLogger(BaseCallbackHandler):
 
         if self.mode == "debug":
             p = self._pad(run_id)
-            # Solo 1 prompt truncado, nada más
+            # One truncated prompt, nothing else
             pr = prompts[0] if prompts else ""
             self._print(f"{p}{_C.CYAN}▶ llm{_C.END} {name}{self._debug_kv('prompt', pr)}")
 
@@ -376,11 +376,11 @@ class ConsoleLogger(BaseCallbackHandler):
                 tcs = _extract_tool_calls_from_message(msg)
                 tool_calls_summary = _summarize_tool_calls(tcs)
 
-                # ✅ 2) Si el router escribe ROUTE: ... en content, lo mostramos (1 línea)
+                # 2) If the router writes ROUTE: ... into content, show it on one line
                 content = getattr(msg, "content", "") if msg else ""
                 content = (content or "").strip()
                 if content:
-                    # Solo una línea corta para no meter ruido
+                    # A single short line, to keep the noise down
                     first_line = content.splitlines()[0].strip()
                     if first_line.upper().startswith("ROUTE:"):
                         route_line = " " + _truncate(first_line, self.max_debug_chars)

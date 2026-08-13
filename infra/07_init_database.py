@@ -1,38 +1,38 @@
 """
-Paso 7 — crear el esquema en RDS y conectar la Lambda a él.
+Step 7 — create the schema on RDS and connect the Lambda to it.
 
-Se ejecuta DESDE FUERA, no desde la Lambda, y eso es deliberado: así la función
-nunca necesita permisos para modificar el esquema. Solo lee y escribe filas. Es
-lo que hace innecesario ejecutar startup.sh dentro de Lambda.
+Run FROM OUTSIDE, not from the Lambda, and that is deliberate: the function then
+never needs permission to alter the schema. It only reads and writes rows. That
+is what makes running startup.sh inside Lambda unnecessary.
 
-⚠️ Contra una base de datos VACÍA no se puede hacer `flask db upgrade`. Las
-migraciones de este proyecto son ALTER TABLE que asumen que las tablas ya
-existen, así que la primera falla con:
+⚠️ `flask db upgrade` cannot be run against an EMPTY database. This project's
+migrations are ALTER TABLE statements that assume the tables already exist, so
+the first one fails with:
 
     relation "chat_session" does not exist
 
-Hay que crear el esquema de cero con db.create_all() y luego MARCAR las
-migraciones como aplicadas (stamp head). Es exactamente la bifurcación que ya
-hacía startup.sh.
+The schema has to be created from scratch with db.create_all() and the
+migrations then MARKED as applied (stamp head). It is exactly the branch
+startup.sh already had.
 
-Uso:  python infra/07_init_database.py
+Usage:  python infra/07_init_database.py
 """
 
 import os
 import sys
 
-from _comun import (
-    NOMBRE_FUNCION,
-    RAIZ_REPO,
-    cliente,
-    exigir_credenciales,
+from _common import (
+    FUNCTION_NAME,
+    REPO_ROOT,
+    client,
+    require_credentials,
 )
 
-sys.path.insert(0, str(RAIZ_REPO))
-os.chdir(RAIZ_REPO)
+sys.path.insert(0, str(REPO_ROOT))
+os.chdir(REPO_ROOT)
 
 if not os.environ.get("DATABASE_URL"):
-    sys.exit("✗ No hay DATABASE_URL en el .env. ¿Terminó de crearse la RDS (paso 6)?")
+    sys.exit("✗ No DATABASE_URL in .env. Has the RDS finished being created (step 6)?")
 
 print(f"  destino: {os.environ['DATABASE_URL'].split('@')[-1]}")
 
@@ -45,21 +45,21 @@ from config import Config  # noqa: E402
 app = create_app(Config)
 
 with app.app_context():
-    tablas = set(db.inspect(db.engine).get_table_names())
-    print(f"  tablas al empezar: {sorted(tablas) or '(ninguna)'}")
+    tables = set(db.inspect(db.engine).get_table_names())
+    print(f"  tables at start: {sorted(tables) or '(none)'}")
 
-    if "user" in tablas:
-        print("  BD existente → aplicando migraciones pendientes")
+    if "user" in tables:
+        print("  existing database → applying pending migrations")
         upgrade()
     else:
-        print("  BD vacía → creando esquema de cero")
+        print("  empty database → creating the schema from scratch")
         db.session.execute(text("DROP TABLE IF EXISTS alembic_version"))
         db.session.commit()
         db.create_all()
-        stamp()   # marca las migraciones como ya aplicadas
-        print("  esquema creado y migraciones marcadas (stamp head)")
+        stamp()   # mark the migrations as already applied
+        print("  schema created and migrations stamped (stamp head)")
 
-    print(f"  tablas ahora: {', '.join(sorted(db.inspect(db.engine).get_table_names()))}")
+    print(f"  tables now: {', '.join(sorted(db.inspect(db.engine).get_table_names()))}")
 
     from app.models import User
     if not User.query.filter_by(username="admin").first():
@@ -69,33 +69,30 @@ with app.app_context():
         db.session.commit()
         print("  usuario admin creado")
     else:
-        print("  usuario admin ya existía")
+        print("  admin user already existed")
 
-# ── Conectar la Lambda a la BD ───────────────────────────────────────────────
-# Aquí se añaden las variables con secretos, que el paso 4 dejó fuera a propósito.
-exigir_credenciales()
-lam = cliente("lambda")
-env = lam.get_function_configuration(FunctionName=NOMBRE_FUNCION)["Environment"]["Variables"]
+# ── Connect the Lambda to the database ───────────────────────────────────────
+# The secret-bearing variables are added here; step 4 deliberately left them out.
+require_credentials()
+lam = client("lambda")
+env = lam.get_function_configuration(FunctionName=FUNCTION_NAME)["Environment"]["Variables"]
 env.update({
     "DATABASE_URL": os.environ["DATABASE_URL"],
-    # Los embeddings siguen en OpenAI por decisión consciente: cambiarlos
-    # invalidaría el índice vectorial y las métricas de evaluación ya medidas.
+    # Embeddings stay on OpenAI by deliberate decision: changing them would
+    # invalidate the vector index and the evaluation numbers already measured.
     "OPENAI_API_KEY": os.environ.get("OPENAI_API_KEY", ""),
     "SECRET_KEY": os.environ.get("SECRET_KEY", "cambiar-en-produccion"),
-    # Tope de coste: Bedrock es pago por uso SIN techo automático, y las alarmas
-    # de presupuesto de AWS avisan pero no cortan. El contador vive en Postgres,
-    # no en memoria: cada contenedor tiene la suya, y N contenedores en paralelo
-    # multiplicarían un contador en RAM.
+    # Cost cap: Bedrock is pay-per-use with NO automatic ceiling, and AWS budget
+    # alarms warn but do not stop. The counter lives in Postgres, not in memory:
+    # each container has its own, and N parallel containers would multiply
+    # a RAM counter.
     "DAILY_QUESTION_LIMIT": os.environ.get("DAILY_QUESTION_LIMIT", "15"),
 })
 lam.update_function_configuration(
-    FunctionName=NOMBRE_FUNCION, Environment={"Variables": env}
+    FunctionName=FUNCTION_NAME, Environment={"Variables": env}
 )
-lam.get_waiter("function_updated_v2").wait(FunctionName=NOMBRE_FUNCION)
-print("\n  ✓ Lambda conectada a la base de datos")
+lam.get_waiter("function_updated_v2").wait(FunctionName=FUNCTION_NAME)
+print("\n  ✓ Lambda connected to the database")
 
-# ⚠️ Project.vector_store_path es una COLUMNA de la BD, no un ajuste. Cambiar la
-# variable de entorno NO mueve un proyecto ya creado: hay que actualizar la fila.
-print("\n  RECUERDA: si el proyecto ya existe en la BD, actualiza su")
-print("  vector_store_path a /tmp/vector_store/info — es una columna, no una")
-print("  variable de entorno.")
+# The vector store path is configuration (UP_VECTOR_STORE_PATH), not a database
+# column, so pointing the function at /tmp only takes an environment variable.

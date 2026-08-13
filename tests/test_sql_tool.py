@@ -1,15 +1,14 @@
 """
-test_sql_tool.py — Tests del HRDatabaseTool con SQLite real.
+test_sql_tool.py — HRDatabaseTool against a real SQLite database.
 
-Por qué importa:
-  El SQL tool es uno de los diferenciadores del proyecto (Text-to-SQL).
-  En entrevistas preguntan: "¿Cómo garantizas que el SQL generado es seguro?"
+Text-to-SQL is the part of the system where a mistake is most expensive, so
+what is covered is the boundary rather than the happy path:
 
-  Aquí testeamos:
-  1. Que la conexión a SQLite funciona correctamente
-  2. Que la ejecución de queries válidas produce resultados esperados
-  3. Que queries maliciosas son rechazadas por el prompt (no por whitelisting)
-  4. El schema del tool es correcto
+  1. The connection works and valid queries return the expected rows.
+  2. Destructive statements are rejected.
+  3. The tool schema is correct.
+  4. A failing query is retried with the real SQLite error fed back, and gives
+     up after a bounded number of attempts instead of looping.
 """
 
 import sqlite3
@@ -19,7 +18,7 @@ from unittest.mock import patch, MagicMock
 
 @pytest.fixture(scope="module")
 def hr_sqlite_db(tmp_path_factory):
-    """Crea una DB SQLite en memoria con datos de prueba para el HR tool."""
+    """An in-memory SQLite database with sample data for the HR tool."""
     db_path = tmp_path_factory.mktemp("data") / "hr_test.db"
     conn = sqlite3.connect(str(db_path))
     cursor = conn.cursor()
@@ -63,7 +62,7 @@ def hr_sqlite_db(tmp_path_factory):
 
 
 class TestHRDatabaseToolSchema:
-    """Tests del schema y configuración del tool."""
+    """The tool schema and configuration."""
 
     def test_schema_has_employees_columns(self):
         from app.rag_logic.sql_tool import HRDatabaseTool
@@ -83,7 +82,7 @@ class TestHRDatabaseToolSchema:
 
         tool = HRDatabaseTool(model_name="gpt-4o-mini")
         desc_lower = tool.description.lower()
-        # Debe mencionar al menos uno de estos casos de uso
+        # Must mention at least one of these use cases
         assert any(kw in desc_lower for kw in ["salary", "department", "headcount", "hr"])
 
     def test_args_schema_has_query_field(self):
@@ -94,7 +93,7 @@ class TestHRDatabaseToolSchema:
 
 
 class TestHRDatabaseDirectSQL:
-    """Tests de SQL directo sobre la DB de prueba (sin LLM)."""
+    """Direct SQL against the sample database, with no LLM involved."""
 
     def test_count_active_employees(self, hr_sqlite_db):
         conn = sqlite3.connect(hr_sqlite_db)
@@ -127,29 +126,29 @@ class TestHRDatabaseDirectSQL:
         assert count == 3
 
     def test_terminated_employees_excluded_by_default(self, hr_sqlite_db):
-        """El prompt instruye al LLM a filtrar status='active' por defecto."""
+        """The prompt instructs the LLM to filter on status='active' by default."""
         conn = sqlite3.connect(hr_sqlite_db)
         cursor = conn.cursor()
-        # Con filtro (como haría el LLM)
+        # With the filter, as the LLM would write it
         cursor.execute("SELECT COUNT(*) FROM employees WHERE status='active'")
         active = cursor.fetchone()[0]
         # Sin filtro
         cursor.execute("SELECT COUNT(*) FROM employees")
         total = cursor.fetchone()[0]
         conn.close()
-        assert active < total  # hay al menos 1 terminado
+        assert active < total  # at least one is finished
 
 
 class TestHRDatabaseToolMocked:
     """
-    Tests del HRDatabaseTool con LLM mockeado.
+    HRDatabaseTool with the LLM mocked.
     Verifica que el tool orquesta correctamente: LLM → SQL → Execute → Interpret.
     """
 
     def test_tool_returns_error_on_bad_sql(self, app, hr_sqlite_db):
-        """El tool no debe crashear si el LLM genera SQL contra una tabla inexistente.
+        """The tool must not crash when the LLM writes SQL against a missing table.
 
-        Tras agotar los reintentos de autocorrección, debe devolver un mensaje
+        After exhausting the self-correction retries it must return a message
         genérico para el usuario (sin exponer el error crudo de SQLite)."""
         with app.app_context():
             from app.rag_logic.sql_tool import HRDatabaseTool, MAX_SQL_ATTEMPTS
@@ -167,24 +166,24 @@ class TestHRDatabaseToolMocked:
 
                 result = tool._run("Pregunta que genera SQL inválido")
 
-            # Debe retornar un mensaje de error, no lanzar excepción
+            # Must return an error message, not raise
             assert isinstance(result, str)
-            # Se reintenta MAX_SQL_ATTEMPTS veces antes de rendirse
+            # Retried MAX_SQL_ATTEMPTS times before giving up
             assert mock_llm.invoke.call_count == MAX_SQL_ATTEMPTS
-            # Mensaje genérico para el usuario, no el error crudo de SQLite
+            # A generic message for the user, not the raw SQLite error
             assert "couldn't run a valid query" in result.lower()
             assert "tabla_inexistente" not in result
 
 
 class TestHRDatabaseToolSelfCorrection:
     """
-    Tests del bucle de autocorrección de _run(): si la query generada falla
-    en SQLite, se reintenta pasándole el error real al LLM, hasta
+    The self-correction loop in _run(): when the generated query fails
+    in SQLite it is retried with the real error fed back to the LLM, up to
     MAX_SQL_ATTEMPTS veces en total.
     """
 
     def test_self_corrects_after_invalid_column(self, app, hr_sqlite_db):
-        """1er intento referencia una columna inexistente (typo); el LLM
+        """The first attempt references a missing column (a typo); the LLM
         recibe el error real de SQLite y el 2º intento usa la columna correcta."""
         with app.app_context():
             from app.rag_logic.sql_tool import HRDatabaseTool
@@ -203,19 +202,19 @@ class TestHRDatabaseToolSelfCorrection:
 
                 result = tool._run("¿Cuántos empleados hay en el departamento X?")
 
-            # Se reintentó exactamente una vez (2 llamadas al LLM para generar SQL)
+            # Retried exactly once (2 LLM calls to generate SQL)
             assert mock_llm.invoke.call_count == 2
 
-            # El 2º prompt debe incluir el error real de SQLite del 1er intento
+            # The second prompt must carry the real SQLite error from the first attempt
             second_call_messages = mock_llm.invoke.call_args_list[1][0][0]
             joined = " ".join(getattr(m, "content", "") for m in second_call_messages)
             assert "departament_id" in joined or "no such column" in joined.lower()
 
-            # La query corregida es válida pero no devuelve filas
+            # The corrected query is valid but returns no rows
             assert result == "No results found for your query."
 
     def test_gives_up_after_max_attempts(self, app, hr_sqlite_db):
-        """Si el LLM nunca corrige la query, se reintenta MAX_SQL_ATTEMPTS veces
+        """If the LLM never fixes the query, it is retried MAX_SQL_ATTEMPTS times
         y se devuelve un mensaje genérico (sin exponer el error SQL crudo)."""
         with app.app_context():
             from app.rag_logic.sql_tool import HRDatabaseTool, MAX_SQL_ATTEMPTS

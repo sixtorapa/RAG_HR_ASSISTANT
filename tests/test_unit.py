@@ -1,12 +1,11 @@
 """
-test_unit.py — Tests unitarios de lógica pura.
-No requieren Flask app context ni llamadas a OpenAI.
+test_unit.py — unit tests for pure logic. No Flask app context, no OpenAI calls.
 
-Cubre:
+Covers:
   - cost_calculator.calculate_cost()
-  - routes._extract_user_mode()
-  - routes._make_chat_title_from_question()
-  - HRDatabaseTool: init, schema, SQL sanitization
+  - pipeline._extract_user_mode()
+  - pipeline._make_chat_title_from_question()
+  - HRDatabaseTool: init, schema, SQL sanitisation
 """
 
 import pytest
@@ -19,13 +18,12 @@ import re
 
 class TestCostCalculator:
     """
-    Por qué testeamos esto:
-    Errores en el cálculo de costes se acumulan silenciosamente en producción.
-    Un test simple protege contra refactors del pricing o la fórmula.
+    Errors in cost calculation accumulate silently in production, so a simple
+    test guards against refactors of the pricing table or the formula.
     """
 
     def test_gpt4o_mini_basic_cost(self, app):
-        """Verifica que el cálculo de coste es correcto para gpt-4o-mini."""
+        """The cost calculation is correct for gpt-4o-mini."""
         with app.app_context():
             from app.rag_logic.cost_calculator import calculate_cost
 
@@ -42,7 +40,7 @@ class TestCostCalculator:
             assert abs(cost - 9.20) < 0.01
 
     def test_unknown_model_returns_zero(self, app):
-        """Modelo desconocido no debe lanzar excepción, retorna 0."""
+        """An unknown model must not raise; it returns 0 and reports the error."""
         with app.app_context():
             from app.rag_logic.cost_calculator import calculate_cost
 
@@ -69,13 +67,13 @@ class TestCostCalculator:
 
 
 # ══════════════════════════════════════════════════════════════════
-# 2. _extract_user_mode  (lógica de routing explícito)
+# 2. _extract_user_mode  (explicit routing logic)
 # ══════════════════════════════════════════════════════════════════
 
 class TestExtractUserMode:
     """
-    _extract_user_mode detecta prefijos explícitos del usuario (SQL:, AMBAS:, DOC:)
-    para forzar la ruta del agente. Es crítico que funcione con variaciones de formato.
+    _extract_user_mode detects explicit user prefixes (SQL:, AMBAS:, DOC:)
+    para forzar la ruta del agent. Es crítico que funcione con variaciones de formato.
     """
 
     @pytest.fixture(autouse=True)
@@ -89,7 +87,7 @@ class TestExtractUserMode:
         assert mode == "sql"
         assert text == "dame el top 10 de salarios"
 
-    def test_sql_prefix_no_separator(self):
+    def test_sql_prefix_not_separator(self):
         mode, text = self.fn("SQL dame el top 10")
         assert mode == "sql"
         assert text == "dame el top 10"
@@ -103,7 +101,7 @@ class TestExtractUserMode:
         mode, text = self.fn("sql: lista departamentos")
         assert mode == "sql"
 
-    def test_no_prefix_returns_none(self):
+    def test_not_prefix_returns_none(self):
         mode, text = self.fn("¿Cuál es la política de vacaciones?")
         assert mode is None
         assert "vacaciones" in text
@@ -112,8 +110,8 @@ class TestExtractUserMode:
         mode, text = self.fn("")
         assert mode is None
 
-    def test_sql_only_no_question(self):
-        """Si solo hay el prefijo sin pregunta, la función no debe crashear."""
+    def test_sql_only_not_question(self):
+        """With only the prefix and no question, the function must not crash."""
         mode, text = self.fn("SQL")
         assert mode == "sql"
 
@@ -124,7 +122,7 @@ class TestExtractUserMode:
 
 class TestMakeChatTitle:
     """
-    _make_chat_title_from_question genera un título corto para la sesión.
+    _make_chat_title_from_question builds a short title for the session.
     Aparece en el sidebar del chat — mal formato es un bug visible al usuario.
     """
 
@@ -139,9 +137,9 @@ class TestMakeChatTitle:
         assert "empleados" in title
 
     def test_long_question_truncated(self):
-        long_q = "Esta es una pregunta muy larga sobre la política de vacaciones anuales de la empresa que supera los 46 caracteres"
+        long_q = "Esta es una question muy larga sobre la política de vacaciones anuales de la empresa que supera los 46 caracteres"
         title = self.fn(long_q)
-        assert len(title) <= 50  # margen por el ellipsis
+        assert len(title) <= 50  # margin for the ellipsis
 
     def test_empty_returns_default(self):
         title = self.fn("")
@@ -161,12 +159,12 @@ class TestMakeChatTitle:
 
 
 # ══════════════════════════════════════════════════════════════════
-# 4. HRDatabaseTool — lógica sin LLM
+# 4. HRDatabaseTool — logic without the LLM
 # ══════════════════════════════════════════════════════════════════
 
 class TestHRDatabaseToolInit:
     """
-    Verifica que HRDatabaseTool tiene las propiedades correctas.
+    HRDatabaseTool exposes the right properties.
     En entrevistas: "¿Cómo proteges contra SQL injection?" →
     el LLM genera el SQL, pero añadimos validación de keywords peligrosas.
     """
@@ -185,13 +183,13 @@ class TestHRDatabaseToolInit:
         assert "departments" in HRDatabaseTool.DB_SCHEMA_CONTEXT
 
     def test_dangerous_sql_keywords_in_prompt(self):
-        """El prompt del tool debe prohibir DDL/DML destructivos."""
+        """The tool prompt must forbid destructive DDL/DML."""
         from app.rag_logic.sql_tool import HRDatabaseTool
 
-        # El sistema prompt menciona explícitamente los keywords prohibidos
+        # The system prompt explicitly names the forbidden keywords
         schema = HRDatabaseTool.DB_SCHEMA_CONTEXT
-        # Al menos uno de DROP/DELETE/UPDATE debe estar mencionado en el contexto
-        # (están en el sql_prompt dentro de _run, pero podemos verificar la clase)
+        # At least one of DROP/DELETE/UPDATE must be named in the context
+        # (they live in the sql_prompt inside _run, but the class can be checked)
         tool = HRDatabaseTool(model_name="gpt-4o-mini")
         assert tool.model_name == "gpt-4o-mini"
 

@@ -3,6 +3,6 @@ from flask import Blueprint
 
 bp = Blueprint("main", __name__)
 
-# Los módulos se importan al final para que `bp` ya exista cuando registran sus
-# rutas. Cada uno cubre una responsabilidad; routes.py es solo el chat.
+# Modules are imported last so that `bp` already exists when they register their
+# routes. Each module covers one responsibility; routes.py is only the chat.
 from app.main import auth, chats, views, admin, routes  # noqa: E402,F401

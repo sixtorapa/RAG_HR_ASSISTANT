@@ -1,21 +1,20 @@
 """
-evaluate_pipeline.py — evalúa el pipeline QUE SE DESPLIEGA, no una copia de él.
+evaluate_pipeline.py — evaluates the pipeline THAT IS DEPLOYED, not a copy of it.
 
-Por qué existe
---------------
-`evaluate_rag.py` compara tres configuraciones de retrieval, y es útil para eso,
-pero construye su propio retriever: k=5, sin two-pass, sin guardarraíl de acceso,
-con su propio prompt de respuesta. Cero referencias a
-`get_conversational_qa_chain`, a la capa de agentes o al router. Es decir: sus
-números describen una reimplementación paralela, no el sistema que responde en
-producción con k_base=28, dos pasadas y ACL.
+Why it exists
+-------------
+`evaluate_rag.py` compares three retrieval configurations, which is useful for
+that purpose, but it builds its own retriever: k=5, no two-pass, no access
+guardrail, its own answer prompt. Zero references to
+`get_conversational_qa_chain`, to the agent layer or to the router. Its numbers
+therefore describe a parallel reimplementation, not the system that answers in
+production with k_base=28, two passes and an ACL.
 
-Este script llama a la cadena real y mide el efecto de UNA capa concreta:
+This script calls the real chain, measures ONE configuration of it, and stores
+the result tagged with the active granularity (RETRIEVAL_CHUNK_TYPE) so runs can
+be compared.
 
-Mide UNA configuración del pipeline real y guarda el resultado etiquetado con
-la granularidad activa (RETRIEVAL_CHUNK_TYPE), para poder comparar tiradas.
-
-Uso:
+Usage:
     .venv/bin/python -m evaluation.evaluate_pipeline
     RETRIEVAL_CHUNK_TYPE=all .venv/bin/python -m evaluation.evaluate_pipeline
 """
@@ -44,9 +43,9 @@ from evaluation.evaluate_rag import (                         # noqa: E402
 from langchain_community.callbacks import get_openai_callback  # noqa: E402
 
 MODELO = "gpt-4o-mini"
-MAX_CONTEXTOS = 10   # tope solo para el juez: RAGAS con 40 chunks infla el recall
-                     # y dispara el gasto. Es IDÉNTICO en las dos variantes, así
-                     # que no puede sesgar la comparación.
+MAX_CONTEXTOS = 10   # cap for the judge only: RAGAS with 40 chunks inflates recall
+                     # and drives the spend. It is IDENTICAL in both variants, so it
+                     # cannot bias the comparison.
 SALIDA = REPO_ROOT / "evaluation" / "pipeline_results.json"
 
 
@@ -55,8 +54,8 @@ def _contextos(docs) -> list[str]:
 
 
 def main() -> None:
-    preguntas = [q for q in GOLDEN_DATASET if q["category"] == "rag"]
-    print(f"▶ {len(preguntas)} preguntas de RAG del golden dataset")
+    questions = [q for q in GOLDEN_DATASET if q["category"] == "rag"]
+    print(f"▶ {len(questions)} RAG questions from the golden dataset")
     print(f"▶ modelo: {MODELO} · proveedor: {os.environ.get('LLM_PROVIDER', 'openai')}\n")
 
     app = create_app(Config)
@@ -64,10 +63,10 @@ def main() -> None:
         vector_store_path = app.config["UP_VECTOR_STORE_PATH"]
         print(f"▶ vector store: {vector_store_path}\n")
 
-        # allowed_departments=None -> sin restricción (equivale a un admin). Se fija
-        # a propósito: si el usuario de prueba tuviera ACL parcial, la mitad de las
-        # preguntas devolvería cero resultados y las métricas medirían el RBAC,
-        # no la calidad de la respuesta.
+        # allowed_departments=None -> unrestricted (equivalent to an admin). Set
+        # deliberately: with a partial ACL on the test user, half the questions
+        # would return zero results and the metrics would be measuring the RBAC,
+        # not the quality of the answer.
         ajustes = {"allowed_departments": None, "k_base": 28}
         grano = os.environ.get("RETRIEVAL_CHUNK_TYPE", "micro")
 
@@ -75,7 +74,7 @@ def main() -> None:
         t0 = time.time()
 
         with get_openai_callback() as cb:
-            for i, q in enumerate(preguntas, 1):
+            for i, q in enumerate(questions, 1):
                 pregunta = q["question"]
                 tool = ChatWithDocumentTool(
                     project_id="eval",
@@ -98,28 +97,28 @@ def main() -> None:
                     "ground_truth": q["ground_truth"],
                 })
                 chars = sum(len(d.page_content) for d in docs)
-                print(f"  [{i:2}/{len(preguntas)}] {q['id']:8} {dt:5.1f}s · "
+                print(f"  [{i:2}/{len(questions)}] {q['id']:8} {dt:5.1f}s · "
                       f"{len(docs):3} chunks · {chars:6,} chars")
 
-        segundos = time.time() - t0
-        print(f"\n▶ generación terminada en {segundos:.0f}s · "
-              f"{cb.prompt_tokens:,} tokens de prompt · {cb.completion_tokens:,} de completion "
+        seconds = time.time() - t0
+        print(f"\n▶ generation finished in {seconds:.0f}s · "
+              f"{cb.prompt_tokens:,} prompt tokens · {cb.completion_tokens:,} completion "
               f"· ${cb.total_cost:.4f}\n")
 
-        print("▶ puntuando con RAGAS (LLM-as-judge)...")
+        print("▶ scoring with RAGAS (LLM-as-judge)...")
         juez = get_llm(MODELO, 0.0)
         embeddings = get_embeddings()
         build_ragas_metrics(juez, embeddings)
         scores = run_ragas_evaluation(registros, juez, embeddings)
 
-        # Línea base: tirada del 3-ago-2026 SIN filtro de granularidad, sobre la
-        # misma cadena y el mismo golden dataset.
+        # Baseline: a run WITHOUT the granularity filter, over the same chain
+        # and the same golden dataset.
         BASE = {"context_precision": 0.7220, "context_recall": 0.8095,
                 "faithfulness": 0.9382, "answer_relevancy": 0.8327}
 
         print("\n" + "=" * 78)
         print(f"granularidad activa: RETRIEVAL_CHUNK_TYPE={grano}")
-        print(f"{'métrica':<22}{'base (all)':>14}{'ahora':>14}{'delta':>14}")
+        print(f"{'metric':<22}{'base (all)':>14}{'now':>14}{'delta':>14}")
         print("-" * 78)
         for m in ["context_precision", "context_recall", "faithfulness", "answer_relevancy"]:
             a, b = BASE[m], scores.get(m)
@@ -128,14 +127,14 @@ def main() -> None:
                 continue
             print(f"{m:<22}{a:>14.4f}{b:>14.4f}{b - a:>+14.4f}")
         print("=" * 78)
-        print("\nRecuerda el suelo de ruido del juez medido en la tirada pareada: +-0.004.")
+        print("\nNote the judge noise floor measured on the paired run: +-0.004.")
 
         SALIDA.write_text(json.dumps({
             "fecha": datetime.now().isoformat(),
             "modelo": MODELO,
-            "n_preguntas": len(preguntas),
+            "n_preguntas": len(questions),
             "max_contextos_para_el_juez": MAX_CONTEXTOS,
-            "segundos_generacion": round(segundos, 1),
+            "segundos_generacion": round(seconds, 1),
             "coste_generacion_usd": round(cb.total_cost, 4),
             "granularidad": grano,
             "resultados": scores,
@@ -145,7 +144,7 @@ def main() -> None:
                 "La linea base es la tirada del 3-ago-2026 sin filtro de granularidad."
             ),
         }, indent=2, ensure_ascii=False), encoding="utf-8")
-        print(f"\n✅ guardado en {SALIDA}")
+        print(f"\n✅ saved to {SALIDA}")
 
 
 if __name__ == "__main__":

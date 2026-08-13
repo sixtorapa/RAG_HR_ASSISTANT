@@ -41,7 +41,7 @@ def client(app):
     return app.test_client()
 
 
-# ── CLAVE: limpiar tablas después de cada test ───────────────────
+# ── KEY: clean the tables after every test ───────────────────
 @pytest.fixture(scope="function", autouse=True)
 def clean_db(app):
     yield
@@ -61,7 +61,7 @@ def db(app):
 
 @pytest.fixture(scope="function")
 def test_user(db):
-    # Nombre único por test para evitar UNIQUE constraint
+    # Unique name per test, to avoid the UNIQUE constraint
     unique = uuid.uuid4().hex[:8]
     user = User(username=f"testuser_{unique}", email=f"test_{unique}@example.com", role="user")
     user.set_password("Password123!")

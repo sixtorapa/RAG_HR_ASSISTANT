@@ -45,7 +45,7 @@ if os.path.isdir(_ORIGEN) and not os.path.isdir(_DESTINO):
 if os.path.isdir(_DESTINO):
     os.environ["UP_VECTOR_STORE_PATH"] = os.path.join(_DESTINO, "info")
 
-from app import create_app  # noqa: E402  (después de fijar rutas y cachés)
+from app import create_app  # noqa: E402  (after paths and caches are set)
 from config import Config  # noqa: E402
 
 app = create_app(Config)

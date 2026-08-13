@@ -1,8 +1,8 @@
 """
-test_models.py — Tests de los modelos SQLAlchemy.
+test_models.py — the SQLAlchemy models.
 
 Por qué importan:
-  - Validan constraints (unique, nullable) antes de que fallen en producción
+  - Validan constraints (unique, nullable) before de que fallen en producción
   - Verifican las relaciones entre modelos (cascade delete, backref)
   - Son el contrato entre la app y la DB
 """
@@ -13,7 +13,7 @@ from app.models import User, ChatSession, Message
 
 
 class TestUserModel:
-    """Tests del modelo User y su lógica de contraseñas."""
+    """The User model and its password logic."""
 
     def test_create_user(self, db):
         user = User(username="alice", email="alice@example.com")
@@ -28,7 +28,7 @@ class TestUserModel:
         assert fetched.is_active is True
 
     def test_password_hashing(self, db):
-        """La contraseña nunca se guarda en texto plano."""
+        """The password is never stored in plain text."""
         user = User(username="bob")
         user.set_password("MyPassword!")
         db.session.add(user)
@@ -39,7 +39,7 @@ class TestUserModel:
         assert user.check_password("WrongPassword") is False
 
     def test_username_unique_constraint(self, db):
-        """Dos usuarios con el mismo username deben fallar."""
+        """Two users with the same username must fail."""
         u1 = User(username="duplicate")
         u1.set_password("pass1")
         u2 = User(username="duplicate")
@@ -65,7 +65,7 @@ class TestUserModel:
         assert "testuser" in repr(test_user)
 
     def test_uuid_primary_key(self, db, test_user):
-        """El ID debe ser un UUID válido, no un int."""
+        """The ID must be a valid UUID, not an int."""
         assert len(test_user.id) == 36
         assert test_user.id.count("-") == 4
 
@@ -73,7 +73,7 @@ class TestUserModel:
 
 
 class TestChatSessionModel:
-    """Tests de la sesión de chat y sus mensajes."""
+    """The chat session and its messages."""
 
     def test_create_session(self, db, test_chat_session):
         assert test_chat_session.id is not None
@@ -108,7 +108,7 @@ class TestChatSessionModel:
         assert len(messages) == 2
 
     def test_message_sources_json(self, db, test_chat_session, test_user):
-        """Las fuentes se guardan como JSON y se recuperan correctamente."""
+        """Sources are stored as JSON and read back correctly."""
         sources = [
             {"file": "policy.pdf", "page": 1, "score": 0.87},
             {"file": "handbook.docx", "page": 5, "score": 0.72},
@@ -117,7 +117,7 @@ class TestChatSessionModel:
             session_id=test_chat_session.id,
             user_id=test_user.id,
             sender="bot",
-            content="Respuesta con fuentes",
+            content="Respuesta con sources",
             sources=sources,
         )
         db.session.add(msg)
@@ -128,7 +128,7 @@ class TestChatSessionModel:
         assert len(fetched.sources) == 2
 
     def test_cascade_delete_session_deletes_messages(self, db, test_user):
-        """Al borrar una sesión, sus mensajes se eliminan (cascade)."""
+        """Deleting a session deletes its messages (cascade)."""
         session = ChatSession(
             name="Temp",
             user_id=test_user.id,
@@ -152,7 +152,7 @@ class TestChatSessionModel:
         assert Message.query.get(msg_id) is None
 
     def test_message_sender_values(self, db, test_chat_session, test_user):
-        """Solo 'user' y 'bot' son valores válidos para sender."""
+        """Only 'user' and 'bot' are valid values for sender."""
         for sender in ("user", "bot"):
             msg = Message(
                 session_id=test_chat_session.id,

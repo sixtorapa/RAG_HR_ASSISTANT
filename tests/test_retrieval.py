@@ -1,9 +1,9 @@
 """
-test_retrieval.py — la factoría de provider y las dos piezas nuevas del
-retrieval: el filtro de granularidad y la expansión hijo -> padre.
+test_retrieval.py — the provider factory and the two retrieval pieces that
+carry the most decisions: the granularity filter and child -> parent expansion.
 
-Nada de esto llama a un modelo ni abre un índice: se comprueban las decisiones,
-que es donde están los fallos que importan.
+None of this calls a model or opens an index: what is checked are the
+decisions, which is where the failures that matter live.
 """
 
 import os
@@ -21,30 +21,30 @@ from app.rag_logic.qa_chain import (
 
 
 # ══════════════════════════════════════════════════════════════════════════
-# Factoría de provider
+# Provider factory
 # ══════════════════════════════════════════════════════════════════════════
 
 @pytest.fixture
-def sin_provider(monkeypatch):
+def no_provider(monkeypatch):
     monkeypatch.delenv("LLM_PROVIDER", raising=False)
     yield
 
 
-class TestFactoriaDeProveedor:
+class TestProviderFactory:
 
-    def test_el_defecto_es_openai(self, sin_provider):
+    def test_the_default_is_openai(self, no_provider):
         """
-        El defecto protege el despliegue existente: desplegar sin definir la
-        variable se comporta igual que antes de que la factoría existiera.
+        The default protects the existing deployment: deploying without setting
+        the variable behaves exactly as it did before.
         """
         with patch.object(llm_factory, "ChatOpenAI") as openai:
             llm_factory.get_llm("gpt-4o-mini", 0.0)
             openai.assert_called_once()
 
     @pytest.mark.parametrize("value", ["bedrock", "BEDROCK", "  Bedrock  ", "'bedrock'", '"bedrock"'])
-    def test_tolera_como_llegue_la_variable(self, monkeypatch, value):
+    def test_tolera_as_llegue_the_variable(self, monkeypatch, value):
         """
-        Una variable de entorno llega del .env, del panel de Railway, de la
+        An environment variable arrives from .env, from the Railway panel, from
         consola de Lambda o de un export: cada uno la trata distinto.
         """
         monkeypatch.setenv("LLM_PROVIDER", value)
@@ -52,23 +52,23 @@ class TestFactoriaDeProveedor:
             llm_factory.get_llm("gpt-4o-mini", 0.0)
             bedrock.assert_called_once()
 
-    def test_solo_espacios_cae_al_defecto(self, monkeypatch):
-        """Normalizar y DESPUÉS aplicar el defecto: '   ' es truthy."""
+    def test_only_spaces_cae_at_default(self, monkeypatch):
+        """Normalise and THEN apply the default: '   ' is truthy."""
         monkeypatch.setenv("LLM_PROVIDER", "   ")
         with patch.object(llm_factory, "ChatOpenAI") as openai:
             llm_factory.get_llm("gpt-4o-mini", 0.0)
             openai.assert_called_once()
 
-    def test_un_proveedor_desconocido_avisa_y_usa_openai(self, monkeypatch, caplog):
+    def test_a_provider_desconocido_avisa_and_usa_openai(self, monkeypatch, caplog):
         monkeypatch.setenv("LLM_PROVIDER", "azure")
         with patch.object(llm_factory, "ChatOpenAI") as openai:
             llm_factory.get_llm("gpt-4o-mini", 0.0)
             openai.assert_called_once()
         assert "not recognised" in caplog.text
 
-    def test_traduce_el_modelo_a_un_perfil_de_inferencia_europeo(self, monkeypatch):
+    def test_traduce_the_model_a_a_perfil_of_inferencia_europeo(self, monkeypatch):
         """
-        Bedrock solo ofrece estos modelos como INFERENCE_PROFILE. Con el ID a
+        Bedrock only offers these models as INFERENCE_PROFILE. With a bare
         secas responde ValidationException, y el prefijo `eu.` mantiene la
         inferencia dentro de la UE — que en un sistema con datos de personal
         es el mismo argumento que el RBAC.
@@ -78,9 +78,9 @@ class TestFactoriaDeProveedor:
             llm_factory.get_llm("gpt-4o", 0.0)
             assert bedrock.call_args.kwargs["model_id"].startswith("eu.")
 
-    def test_un_modelo_sin_equivalente_revienta_con_nombre_y_apellido(self, monkeypatch):
+    def test_an_unmapped_model_raises_with_a_named_error(self, monkeypatch):
         """
-        Caer a un modelo por defecto haría indistinguible "pedí este modelo" de
+        Falling back to a default model would make "I asked for this model" and
         "me dieron otro" — el mismo fallo silencioso que se corrigió en
         cost_calculator.
         """
@@ -88,15 +88,15 @@ class TestFactoriaDeProveedor:
         with pytest.raises(ValueError, match="gpt-5-turbo"):
             llm_factory.get_llm("gpt-5-turbo", 0.0)
 
-    def test_un_id_de_bedrock_pasa_tal_cual(self, monkeypatch):
+    def test_a_bedrock_id_passes_through_unchanged(self, monkeypatch):
         monkeypatch.setenv("LLM_PROVIDER", "bedrock")
         with patch.object(llm_factory, "ChatBedrockConverse") as bedrock:
             llm_factory.get_llm("eu.anthropic.claude-sonnet-4-6", 0.0)
             assert bedrock.call_args.kwargs["model_id"] == "eu.anthropic.claude-sonnet-4-6"
 
-    def test_los_embeddings_ignoran_el_proveedor(self, monkeypatch):
+    def test_the_embeddings_ignoran_the_provider(self, monkeypatch):
         """
-        Decisión consciente: cambiar el modelo de embeddings invalidaría el
+        A deliberate decision: changing the embedding model would invalidate the
         índice entero y las métricas ya medidas. La generación se migra; el
         espacio vectorial no se toca.
         """
@@ -105,15 +105,15 @@ class TestFactoriaDeProveedor:
             llm_factory.get_embeddings()
             emb.assert_called_once()
 
-    def test_reenvia_kwargs(self, sin_provider):
-        """Sin esto, `callbacks` se perdería en silencio y no habría logging."""
+    def test_forwards_kwargs(self, no_provider):
+        """Without this, `callbacks` would be dropped silently and logging would stop."""
         cb = [MagicMock()]
         with patch.object(llm_factory, "ChatOpenAI") as openai:
             llm_factory.get_llm("gpt-4o-mini", 0.0, callbacks=cb)
             assert openai.call_args.kwargs["callbacks"] is cb
 
-    def test_el_proveedor_se_lee_en_cada_llamada(self, monkeypatch):
-        """No se congela al importar: cambiarlo no exige reiniciar el proceso."""
+    def test_the_provider_is_read_on_every_call(self, monkeypatch):
+        """Not frozen at import: changing it does not require a restart."""
         monkeypatch.setenv("LLM_PROVIDER", "openai")
         with patch.object(llm_factory, "ChatOpenAI") as openai:
             llm_factory.get_llm("gpt-4o-mini", 0.0)
@@ -127,26 +127,26 @@ class TestFactoriaDeProveedor:
 # Filtro de granularidad
 # ══════════════════════════════════════════════════════════════════════════
 
-class TestFiltroDeGranularidad:
+class TestGranularityFilter:
 
-    def test_por_defecto_se_busca_por_los_hijos(self, monkeypatch):
+    def test_by_default_searches_by_the_children(self, monkeypatch):
         monkeypatch.delenv("RETRIEVAL_CHUNK_TYPE", raising=False)
         assert _chunk_type_filter() == {"chunk_type": "micro"}
 
     @pytest.mark.parametrize("value", ["all", "any", "  ALL  "])
-    def test_all_desactiva_el_filtro(self, monkeypatch, value):
+    def test_all_desactiva_the_filter(self, monkeypatch, value):
         monkeypatch.setenv("RETRIEVAL_CHUNK_TYPE", value)
         assert _chunk_type_filter() is None
 
-    def test_macro_busca_por_los_padres(self, monkeypatch):
+    def test_macro_searches_by_the_parents(self, monkeypatch):
         monkeypatch.setenv("RETRIEVAL_CHUNK_TYPE", "macro")
         assert _chunk_type_filter() == {"chunk_type": "macro"}
 
-    def test_un_valor_desconocido_cae_a_micro(self, monkeypatch):
+    def test_a_value_desconocido_cae_a_micro(self, monkeypatch):
         monkeypatch.setenv("RETRIEVAL_CHUNK_TYPE", "mediano")
         assert _chunk_type_filter() == {"chunk_type": "micro"}
 
-    def test_la_expansion_se_puede_apagar(self, monkeypatch):
+    def test_the_expansion_can_apagar(self, monkeypatch):
         monkeypatch.setenv("PARENT_EXPANSION", "0")
         assert _parent_expansion_enabled() is False
         monkeypatch.setenv("PARENT_EXPANSION", "1")
@@ -154,7 +154,7 @@ class TestFiltroDeGranularidad:
 
 
 # ══════════════════════════════════════════════════════════════════════════
-# Expansión hijo -> padre
+# Child -> parent expansion
 # ══════════════════════════════════════════════════════════════════════════
 
 def _hijo(chunk_id, parent_id):
@@ -166,11 +166,11 @@ def _hijo(chunk_id, parent_id):
 
 def _construir(base, vs, max_docs=12):
     """
-    `ParentExpansionRetriever` es un modelo Pydantic y sus campos están tipados
+    `ParentExpansionRetriever` is a Pydantic model and its fields are typed
     (`BaseRetriever`, `Chroma`), así que la validación rechaza un mock.
     `model_construct` la salta en el test y deja el contrato del código
-    intacto: relajar la anotación a `Any` para que pase un test sería empeorar
-    el código para poder probarlo.
+    strictly: loosening the annotation to `Any` just to make a test pass would
+    be making the code worse in order to test it.
     """
     return ParentExpansionRetriever.model_construct(
         base_retriever=base, vector_store=vs, max_docs=max_docs,
@@ -178,7 +178,7 @@ def _construir(base, vs, max_docs=12):
 
 
 def _almacen(padres):
-    """Chroma simulado: devuelve el padre cuyo chunk_id se pide."""
+    """Fake Chroma: returns the parent whose chunk_id is requested."""
     vs = MagicMock()
 
     def get(where=None, include=None, limit=None):
@@ -191,12 +191,12 @@ def _almacen(padres):
     return vs
 
 
-class TestExpansionAlPadre:
+class TestParentExpansion:
 
-    def test_varios_hijos_del_mismo_padre_colapsan_en_uno(self):
+    def test_several_children_of_the_same_parent_collapse_in_one(self):
         """
-        La propiedad que arregla la redundancia: tres fragmentos solapados de
-        la misma página llegaban al prompt como tres entradas.
+        The property that removes the redundancy: three overlapping fragments of
+        the same page used to reach the prompt as three entries.
         """
         base = MagicMock()
         base.get_relevant_documents.return_value = [
@@ -207,15 +207,15 @@ class TestExpansionAlPadre:
         assert len(out) == 1
         assert out[0].page_content == "página 1 entera"
 
-    def test_padres_distintos_se_conservan_todos(self):
+    def test_parents_distintos_conservan_all(self):
         base = MagicMock()
         base.get_relevant_documents.return_value = [_hijo("h1", "P1"), _hijo("h2", "P2")]
         r = _construir(base, _almacen({"P1": "página 1", "P2": "página 2"}))
         assert [d.page_content for d in r.get_relevant_documents("q")] == ["página 1", "página 2"]
 
-    def test_se_conserva_el_orden_del_retriever_de_abajo(self):
+    def test_keeps_the_orden_of_the_retriever_of_abajo(self):
         """
-        El padre ocupa la posición de su PRIMER hijo, así que el ranking del
+        The parent takes the position of its FIRST child, so the ranking of the
         híbrido no se pierde por el camino.
         """
         base = MagicMock()
@@ -225,8 +225,8 @@ class TestExpansionAlPadre:
         r = _construir(base, _almacen({"P1": "página 1", "P2": "página 2"}))
         assert [d.page_content for d in r.get_relevant_documents("q")] == ["página 2", "página 1"]
 
-    def test_si_el_padre_no_esta_se_devuelve_el_hijo(self):
-        """Degradación: sin padre en el índice, mejor el hijo que nada."""
+    def test_when_the_parent_is_missing_the_child_is_returned(self):
+        """Degradation: with no parent in the index, the child beats nothing."""
         base = MagicMock()
         base.get_relevant_documents.return_value = [_hijo("h1", "DESAPARECIDO")]
         r = _construir(base, _almacen({}))
@@ -234,27 +234,27 @@ class TestExpansionAlPadre:
         assert len(out) == 1
         assert out[0].page_content == "text del hijo h1"
 
-    def test_un_documento_sin_padre_pasa_tal_cual(self):
+    def test_a_document_without_a_parent_passes_through_unchanged(self):
         suelto = Document(page_content="chunk de un .md", metadata={"chunk_id": "s1"})
         base = MagicMock()
         base.get_relevant_documents.return_value = [suelto]
         r = _construir(base, _almacen({}))
         assert r.get_relevant_documents("q")[0].page_content == "chunk de un .md"
 
-    def test_se_respeta_el_tope_de_documentos(self):
+    def test_respeta_the_cap_of_documents(self):
         base = MagicMock()
         base.get_relevant_documents.return_value = [_hijo(f"h{i}", f"P{i}") for i in range(20)]
         padres = {f"P{i}": f"página {i}" for i in range(20)}
         r = _construir(base, _almacen(padres), max_docs=5)
         assert len(r.get_relevant_documents("q")) == 5
 
-    def test_sin_resultados_no_revienta(self):
+    def test_without_results_not_blows_up(self):
         base = MagicMock()
         base.get_relevant_documents.return_value = []
         r = _construir(base, _almacen({}))
         assert r.get_relevant_documents("q") == []
 
-    def test_un_fallo_del_almacen_no_tumba_la_consulta(self):
+    def test_a_fallo_of_the_store_not_brings_down_the_query(self):
         base = MagicMock()
         base.get_relevant_documents.return_value = [_hijo("h1", "P1")]
         vs = MagicMock()

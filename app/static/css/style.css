@@ -31,7 +31,7 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Tipografía y Textos */
+/* Typography and text */
 .text-muted-soft { color: var(--text-muted) !important; }
 .section-title {
   font-size: 0.75rem;
@@ -110,7 +110,7 @@ body {
   outline: none;
 }
 
-/* Badges y Métricas */
+/* Badges and metrics */
 .badge-soft {
   display: inline-flex;
   align-items: center;

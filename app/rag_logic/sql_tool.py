@@ -87,7 +87,7 @@ class HRDatabaseTool(BaseTool):
     model_name: str
     project_settings: dict = {}
 
-    # Guardarril de acceso: None = sin restricción (admin); list (incl. vacía) =
+    # Access guardrail: None = unrestricted (admin); a list (including empty) =
     # restringido a esos departamentos -> bloquea columnas sensibles asociadas
     # to departments NOT on the list (see _RESTRICTED_COLUMNS_BY_DEPARTMENT).
     allowed_departments: Optional[List[str]] = None

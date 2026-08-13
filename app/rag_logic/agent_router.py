@@ -19,11 +19,11 @@ def _norm(s: str) -> str:
 
 def _contains_whole_word(text_norm: str, key: str) -> bool:
     """
-    ¿Aparece `key` como palabra completa en `text_norm`?
+    Does `key` appear as a whole word inside `text_norm`?
 
-    `key in text` is SUBSTRING containment, and that was the defect: "suma"
-    matched inside "consumar", "file" inside "filete", "hoja" inside "hojalata".
-    Dangerous precisely here, because the router's forced path skips the LLM: a
+    `key in text` is SUBSTRING containment, which matches "suma" inside
+    "consumar", "file" inside "filete" and "hoja" inside "hojalata". That is
+    dangerous precisely here, because the router's forced path skips the LLM: a
     false positive sends the question to the wrong tool with nothing reviewing it.
 
     `(?<!\\w)` and `(?!\\w)` are used instead of `\\b` because some keys start
@@ -160,7 +160,7 @@ Use DOCS for:
 4) SUMMARISE → use 'summarise_document'
 Only if user asks to summarise a document.
 
-5) EXCEL → use 'analista_de_excel'
+5) EXCEL → use 'excel_analyst'
 CRITICAL RULE: NEVER call Excel unless the question explicitly mentions Excel/XLSX/sheet/dashboard
 (or clearly asks to compute from an Excel file). Otherwise DO NOT use Excel.
 
@@ -238,7 +238,7 @@ ROUTE: <route> — <reason in 8-15 words>
                 def __init__(self, tool_name: str, query: str):
                     self.tool_calls = [{"name": tool_name, "args": {"query": query, "file_name_hint": ""}}]
                     self.content = ""
-            return _ForcedChoice("analista_de_excel", user_input)
+            return _ForcedChoice("excel_analyst", user_input)
 
         payload = {"input": user_input, "chat_history": chat_history}
         if callbacks:

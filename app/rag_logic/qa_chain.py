@@ -281,28 +281,23 @@ class TwoPassDocShortlistRetriever(BaseRetriever):
 
 class ParentExpansionRetriever(BaseRetriever):
     """
-    Busca por el hijo y devuelve el padre.
+    Search with the child, return the parent.
 
-    Es la mitad que faltaba de la arquitectura parent-child. La ingesta ya
-    guardaba `parent_chunk_id` en cada micro-chunk, pero nadie lo usaba: la
-    búsqueda iba contra los dos tamaños a la vez y el mismo text competía
-    consigo mismo (153 de 154 micro son subcadena literal de su macro).
+    The chunking tension is well known: a small chunk is RETRIEVED better — its
+    embedding is specific and carries less noise — but ANSWERS worse, because it
+    lacks context. A large chunk is the reverse. Rather than hunting for a magic
+    size, ingestion indexes both and each is used for what it is good at: the
+    child is searched, the parent is delivered.
 
-    La tensión del chunking es conocida: el trozo pequeño se RECUPERA mejor
-    —su embedding es específico y tiene menos ruido— pero RESPONDE peor,
-    porque le falta context. En vez de buscar el tamaño mágico, se usan los
-    dos para lo que cada uno hace bien: se busca con el hijo y se entrega el
-    padre.
+    Without this step both sizes compete inside one collection and the corpus
+    repeats itself, since a micro chunk is a literal substring of its macro
+    parent. Collapsing several children of the same parent into ONE entry
+    removes that redundancy from the prompt.
 
-    El efecto sobre la precisión es directo: varios children del mismo padre
-    colapsan en UNA sola entrada, así que desaparece la redundancia que
-    medimos (21% de los caracteres recuperados eran text repetido, hasta un
-    56% en preguntas sobre un solo documento).
+    Ordering is preserved: the parent takes the position of its first child, so
+    the ranking produced by the retriever below is not lost.
 
-    El orden se conserva: la posición del padre la fija su primer hijo, así
-    que el ranking del retriever de abajo no se pierde.
-
-    Se desactiva con PARENT_EXPANSION=0.
+    Disabled with PARENT_EXPANSION=0.
     """
 
     base_retriever: BaseRetriever
@@ -321,7 +316,7 @@ class ParentExpansionRetriever(BaseRetriever):
             if texts:
                 return Document(page_content=texts[0], metadata=(metas[0] if metas else {}) or {})
         except Exception as e:
-            print(f"⚠️ Expansión al padre falló para {parent_id}: {e}")
+            print(f"⚠️ Parent expansion failed for {parent_id}: {e}")
         return None
 
     def _get_relevant_documents(self, query: str, *, run_manager=None) -> List[Document]:
@@ -346,7 +341,7 @@ class ParentExpansionRetriever(BaseRetriever):
                 break
 
         if out:
-            print(f"👪 Expansión hijo→padre: {len(children)} chunks → {len(out)} documentos únicos")
+            print(f"👪 Child→parent expansion: {len(children)} chunks → {len(out)} unique documents")
         return out
 
 
@@ -427,7 +422,7 @@ def _build_doc_catalog(vector_store: Chroma, cache_key: str) -> Dict[str, str]:
             out[_stem(fname)] = _norm(rel)  # key adicional por stem
 
     _catalog_cache[cache_key] = out
-    print(f"📚 Catálogo de docs: {len(out)} keys (cache_key={cache_key})")
+    print(f"📚 Doc catalog: {len(out)} keys (cache_key={cache_key})")
     return out
 
 
@@ -452,7 +447,7 @@ def _detect_doc_filter(question: str, catalog: Dict[str, str]) -> Optional[str]:
         st = _stem(candidate)
         if st in catalog:
             return catalog[st]
-        return candidate  # al menos intentarlo
+        return candidate  # at least try
 
     # 2) Fuzzy match against known stems, only if the question looks like it is
     #    asking about a document
@@ -587,9 +582,9 @@ def _detect_department(question: str) -> Optional[str]:
 def _build_security_filter(allowed_departments: Optional[List[str]]) -> Optional[dict]:
     """
     allowed_departments:
-        None -> sin restricción (admin / User.get_allowed_departments()).
-        []   -> sin acceso a ningún departamento (fail closed: el value por defecto
-                 si un caller olvida pasar este parámetro, ver get_conversational_qa_chain).
+        None -> unrestricted (admin / User.get_allowed_departments()).
+        []   -> no access to any department (fail closed: the default value
+                 when a caller forgets this parameter, see get_conversational_qa_chain).
         list -> restringido exactamente a esos departamentos.
     """
     if allowed_departments is None:
@@ -666,8 +661,8 @@ def get_conversational_qa_chain(
     detected_department = None if path_filter else _detect_department(project_settings.get("last_user_question", ""))
 
     # --- Cache key: filter, department and security scope ---
-    # Crítico: dos usuarios con distinto allowed_departments NUNCA deben compartir
-    # chain/retriever cacheados, aunque hagan la misma question.
+    # Critical: two users with different allowed_departments must NEVER share
+    # a cached chain/retriever, even for the same question.
     security_scope_key = "ADMIN" if allowed_departments is None else ",".join(sorted(allowed_departments)) or "NONE"
     # Granularity belongs in the key for the same reason the ACL does: two
     # configurations must not share a cached retriever, or flipping the variable
@@ -749,13 +744,13 @@ def get_conversational_qa_chain(
             try:
                 bm25 = load_bm25_index(vector_store_path)
                 if bm25 is not None:
-                    print("✅ BM25 activo (índice persistido)")
+                    print("✅ BM25 active (persisted index)")
                 else:
                     # Defensive fallback: vector store not yet re-indexed with the persistent flow.
                     data = vector_store.get(include=["documents", "metadatas"])
                     bm25 = build_bm25_retriever(data.get("documents", []) or [], data.get("metadatas", []) or [])
                     if bm25 is not None:
-                        print("⚠️ BM25 sin índice persistido: construido al vuelo (ejecuta ingest.py para persistirlo)")
+                        print("⚠️ BM25 has no persisted index: built on the fly (run ingest.py to persist it)")
                 if bm25 is not None:
                     bm25.k = min(30, max(10, k_base))
                     ensemble_retriever = EnsembleRetriever(
@@ -807,7 +802,7 @@ def get_conversational_qa_chain(
             )
             print(f"✅ Flashrank activo (top_n={top_n})")
         except Exception as e:
-            print(f"⚠️ Flashrank falló, continúo sin rerank: {e}")
+            print(f"⚠️ Flashrank failed, continuing without rerank: {e}")
     else:
         if _FLASHRANK_AVAILABLE and not flashrank_enabled:
             print("ℹ️ Flashrank instalado pero desactivado (FLASHRANK_ENABLED=0).")

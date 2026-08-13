@@ -1,61 +1,61 @@
 """
-Paso 5 — la puerta pública.
+Step 5 — the public door.
 
-Hasta aquí la Lambda existe y responde, pero NO tiene dirección web: solo se
-puede invocar desde dentro de AWS o con código. Esto le pone una URL.
+Up to here the Lambda exists and answers, but it has NO web address: it can only
+be invoked from inside AWS or from code. This gives it a URL.
 
-Por qué API Gateway y no una Lambda Function URL:
-    Se intentó primero la Function URL, que no tiene el corte de 29 s. Devolvió
-    403 permanente pese a AuthType NONE y una política con Principal "*". Causa
-    probable: AWS bloquea por defecto las URLs públicas de Lambda en cuentas
-    nuevas. API Gateway es otro servicio y no le afecta.
+Why API Gateway and not a Lambda Function URL:
+    The Function URL, which has no 29 s cut-off, was tried first. It returned a
+    permanent 403 despite AuthType NONE and a policy with Principal "*". Likely
+    cause: AWS blocks public Lambda URLs by default on new accounts. API Gateway
+    is a different service and is not affected.
 
-⚠️ API Gateway corta la petición a los 29 SEGUNDOS. Medido en este sistema: una
-consulta /ask tarda ~27 s con la cadena ya cacheada, y la primera de cada
-contenedor se pasa y devuelve 503. La función sí termina —se midió una de 49 s—
-así que es un límite de la puerta, no de Lambda.
+⚠️ API Gateway cuts the request at 29 SECONDS. Measured on this system: an /ask
+query takes around 27 s with the chain already cached, and the first one of each
+container goes over and returns 503. The function itself does finish — a 49 s
+run was measured — so it is a limit of the door, not of Lambda.
 
-Uso:  python infra/05_create_api_gateway.py
+Usage:  python infra/05_create_api_gateway.py
 """
 
-from _comun import (
-    NOMBRE_API,
-    NOMBRE_FUNCION,
+from _common import (
+    API_NAME,
+    FUNCTION_NAME,
     REGION,
-    cliente,
-    cuenta,
-    exigir_credenciales,
+    client,
+    account,
+    require_credentials,
 )
 
-exigir_credenciales()
-lam = cliente("lambda")
-api = cliente("apigatewayv2")
+require_credentials()
+lam = client("lambda")
+api = client("apigatewayv2")
 
-arn = lam.get_function_configuration(FunctionName=NOMBRE_FUNCION)["FunctionArn"]
+arn = lam.get_function_configuration(FunctionName=FUNCTION_NAME)["FunctionArn"]
 
-existentes = [a for a in api.get_apis()["Items"] if a["Name"] == NOMBRE_API]
+existentes = [a for a in api.get_apis()["Items"] if a["Name"] == API_NAME]
 if existentes:
     a = existentes[0]
-    print(f"  API ya existía: {a['ApiId']}")
+    print(f"  API already existed: {a['ApiId']}")
 else:
-    # Target= crea de una vez la integración, la ruta $default y el stage.
-    # $default enruta TODO a la Lambda, que es lo que queremos: el enrutado real
-    # lo hace Flask, no API Gateway.
-    a = api.create_api(Name=NOMBRE_API, ProtocolType="HTTP", Target=arn)
+    # Target= creates the integration, the $default route and the stage in one go.
+    # $default sends EVERYTHING to the Lambda, which is what we want: the real
+    # routing is done by Flask, not by API Gateway.
+    a = api.create_api(Name=API_NAME, ProtocolType="HTTP", Target=arn)
     print(f"  API creada: {a['ApiId']}")
 
-# Sin este permiso, API Gateway no puede invocar la función y todo da 500.
+# Without this permission API Gateway cannot invoke the function and everything 500s.
 try:
     lam.add_permission(
-        FunctionName=NOMBRE_FUNCION,
+        FunctionName=FUNCTION_NAME,
         StatementId="APIGatewayInvoke",
         Action="lambda:InvokeFunction",
         Principal="apigateway.amazonaws.com",
-        SourceArn=f"arn:aws:execute-api:{REGION}:{cuenta()}:{a['ApiId']}/*/*",
+        SourceArn=f"arn:aws:execute-api:{REGION}:{account()}:{a['ApiId']}/*/*",
     )
-    print("  permiso para API Gateway añadido")
+    print("  permission for API Gateway added")
 except lam.exceptions.ResourceConflictException:
-    print("  permiso ya existía")
+    print("  permission already existed")
 
 endpoint = a.get("ApiEndpoint") or api.get_api(ApiId=a["ApiId"])["ApiEndpoint"]
 print(f"\n  ENDPOINT: {endpoint}")

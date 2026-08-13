@@ -55,9 +55,9 @@ def sanitize_metadata(doc: Document):
 # Loaders
 # ============================================================
 def load_documents_from_path(data_path: str) -> List[Document]:
-    """Carga documentos soportados con OCR selectivo."""
+    """Load every supported document type."""
     documents: List[Document] = []
-    print(f"Escaneando directorio raíz: {data_path}")
+    print(f"Scanning root directory: {data_path}")
 
     loader_cfg = LoaderConfig()
 
@@ -163,17 +163,17 @@ def _despace_text(s: str) -> str:
 
 def _fix_common_spanish_ocr_glue(s: str) -> str:
     """
-    Separa palabras pegadas típicas del OCR en español y transiciones CamelCase.
-    Ej: 'dela' -> 'de la', 'Laeconomía' -> 'La economía'.
+    Split words the OCR glued together in Spanish text, and CamelCase transitions.
+    e.g. 'dela' -> 'de la', 'Laeconomía' -> 'La economía'.
     """
     if not s: return s
     
-    # 1. Separar CamelCase accidental (minúscula seguida de Mayúscula)
-    # Ej: "economíaLa" -> "economía La"
+    # 1. Split accidental CamelCase (lowercase followed by uppercase)
+    # e.g. "economíaLa" -> "economía La"
     s = re.sub(r'([a-záéíóúüñ])([A-ZÁÉÍÓÚÜÑ])', r'\1 \2', s)
     
-    # 2. Separar preposiciones/artículos pegados comunes en español
-    # Solo si están rodeados de espacios o bordes (para no romper palabras como 'adela')
+    # 2. Split common Spanish prepositions and articles that got glued together
+    # Only when surrounded by spaces or boundaries, so words like 'adela' survive
     glue_patterns = [
         (r'\bdela\b', 'de la'),
         (r'\bdelos\b', 'de los'),
@@ -218,7 +218,7 @@ def _clean_text_for_embeddings(s: str) -> str:
     """Pipeline completo de limpieza."""
     if not s: return s
     s = _despace_text(s)
-    s = _fix_common_spanish_ocr_glue(s) # ✅ Nueva función insertada
+    s = _fix_common_spanish_ocr_glue(s) 
     s = _normalize_caps_runs(s)
     s = _collapse_whitespace(s)
     return s
@@ -236,14 +236,14 @@ def _normalize_for_hash(s: str) -> str:
 # ============================================================
 def _dedup_repeated_blocks_across_pages(documents: List[Document], min_block_words: int = 30) -> List[Document]:
     """
-    Detecta bloques de texto (≥min_block_words) que se repiten idénticos
-    en múltiples páginas del mismo archivo y los elimina de las páginas
+    Detect text blocks (>= min_block_words) that repeat identically
+    across multiple pages of the same file, and removes them from the pages
     donde son redundantes (mantiene solo la primera ocurrencia).
     
-    Esto es común en presentaciones donde se repite la misma slide-template
-    (ej: 'DIMENSIÓN PEAK SALES... Buscadores Afiliación Programática...')
+    This is common in decks where the same slide template repeats
+    (e.g. a footer or a section header carried on every slide).
     """
-    # Agrupar por archivo
+    # Group by file
     docs_by_source = {}
     for doc in documents:
         meta = doc.metadata or {}
@@ -256,11 +256,11 @@ def _dedup_repeated_blocks_across_pages(documents: List[Document], min_block_wor
         if len(src_docs) < 2:
             continue
 
-        # Extraer bloques de N+ palabras de cada página
+        # Extract blocks of N+ words from each page
         page_blocks = {}  # block_normalized -> list of (doc_index, original_block)
         for idx, doc in enumerate(src_docs):
             text = doc.page_content or ""
-            # Dividir en párrafos (bloques separados por doble salto de línea)
+            # Split into paragraphs (blocks separated by a blank line)
             paragraphs = re.split(r'\n\s*\n', text)
             for para in paragraphs:
                 para_clean = para.strip()
@@ -274,11 +274,11 @@ def _dedup_repeated_blocks_across_pages(documents: List[Document], min_block_wor
             if len(occurrences) <= 1:
                 continue
 
-            # Mantener primera ocurrencia, eliminar el resto
+            # Keep the first occurrence, drop the rest
             for dup_idx, dup_text in occurrences[1:]:
                 doc = src_docs[dup_idx]
                 original = doc.page_content or ""
-                # Eliminar el bloque duplicado
+                # Remove the duplicated block
                 cleaned = original.replace(dup_text, "").strip()
                 cleaned = re.sub(r'\n{3,}', '\n\n', cleaned)
                 if cleaned != original:
@@ -286,7 +286,7 @@ def _dedup_repeated_blocks_across_pages(documents: List[Document], min_block_wor
                     total_blocks_removed += 1
 
     if total_blocks_removed > 0:
-        print(f"   🔄 Eliminados {total_blocks_removed} bloques de texto repetidos entre páginas")
+        print(f"   🔄 Removed {total_blocks_removed} text blocks repeated across pages")
 
     return documents
 
@@ -296,14 +296,14 @@ def _dedup_repeated_blocks_across_pages(documents: List[Document], min_block_wor
 # ============================================================
 def _detect_contamination(documents: List[Document]) -> None:
     """
-    Detecta posibles contaminaciones de contenido (ej: nombre de otra empresa
-    en un documento que debería ser de otra). Solo reporta, no modifica.
+    Detect possible content contamination (e.g. another company's name
+    inside a document that should belong to another). Reports only; changes nothing.
     """
-    # Recoger todos los nombres de empresa/marca que aparecen frecuentemente
+    # Collect every company or brand name that appears frequently
     all_text = " ".join((d.page_content or "") for d in documents).upper()
 
-    # Patrones sospechosos: nombres de empresa que aparecen pocas veces
-    # vs el nombre principal que aparece muchas veces
+    # Suspicious pattern: company names appearing a handful of times
+    # against the main name, which appears many times
     company_pattern = re.compile(r'\b([A-ZÁÉÍÓÚÜÑ]{2,}(?:\s+[A-ZÁÉÍÓÚÜÑ]{2,}){1,3})\s+\d{4}\b')
     matches = company_pattern.findall(all_text)
 
@@ -316,50 +316,50 @@ def _detect_contamination(documents: List[Document]) -> None:
     if len(company_counts) <= 1:
         return
 
-    # La empresa principal es la más frecuente
+    # The main company is the most frequent one
     main_company = company_counts.most_common(1)[0][0]
     for company, count in company_counts.items():
         if company != main_company and count <= 5:
-            # Buscar en qué páginas aparece
+            # Find which pages it appears on
             affected_pages = []
             for d in documents:
                 if company in (d.page_content or "").upper():
                     pg = (d.metadata or {}).get("page_number") or "?"
                     affected_pages.append(pg)
             print(
-                f"   ⚠️ CONTAMINACIÓN DETECTADA: '{company}' aparece {count}x "
-                f"en documento de '{main_company}' (páginas: {affected_pages}). "
-                f"Probable reutilización de plantilla."
+                f"   ⚠️ CONTAMINATION DETECTED: '{company}' appears {count}x "
+                f"in a '{main_company}' document (pages: {affected_pages}). "
+                f"Likely template reuse."
             )
 
 
 # ============================================================
-# Context injection (añade SOURCE + TITLE al texto)
+# Context injection (prepends SOURCE + TITLE to the text)
 # ============================================================
 def inject_context_to_chunks(chunks: List[Document]) -> List[Document]:
-    """Añade contexto mínimo al texto sin contaminar embeddings."""
-    print("🧠 Añadiendo contexto (metadata + línea SOURCE) a cada fragmento...")
+    """Prepend minimal context to the text without polluting the embedding."""
+    print("🧠 Adding context (metadata + SOURCE line) to each fragment...")
 
     for chunk in chunks:
         meta = chunk.metadata or {}
         path = meta.get("relative_path", "Documento desconocido")
 
-        # ✅ Usar rango de páginas del chunk
+        # Use the chunk's page range
         pages_in_chunk = meta.get("pages_in_chunk", None)
         if isinstance(pages_in_chunk, str) and pages_in_chunk:
             pages_in_chunk = [int(p.strip()) for p in pages_in_chunk.split(",") if p.strip().isdigit()]
 
         if pages_in_chunk and len(pages_in_chunk) > 1:
-            where = f"{path} | págs. {pages_in_chunk[0]}-{pages_in_chunk[-1]}"
+            where = f"{path} | pp. {pages_in_chunk[0]}-{pages_in_chunk[-1]}"
         elif pages_in_chunk and len(pages_in_chunk) == 1:
-            where = f"{path} | pág. {pages_in_chunk[0]}"
+            where = f"{path} | p. {pages_in_chunk[0]}"
         else:
             page_number = meta.get("page_number")
             page = meta.get("page")
             if page_number is not None:
-                where = f"{path} | pág. {page_number}"
+                where = f"{path} | p. {page_number}"
             elif page is not None:
-                where = f"{path} | pág. {int(page) + 1}"
+                where = f"{path} | p. {int(page) + 1}"
             else:
                 where = f"{path}"
 
@@ -368,11 +368,10 @@ def inject_context_to_chunks(chunks: List[Document]) -> List[Document]:
 
         text = (chunk.page_content or "").lstrip()
         headline = (meta.get("semantic_headline") or "").strip()
-        # El resumen se generaba en la fase 2, se pagaba, se guardaba en metadata
-        # y NO se anteponía al texto — así que no llegaba al embedding y no servía
-        # para nada. Se inyecta junto al titular: una pregunta de usuario se
-        # parece más a un titular y a un resumen que al cuerpo del documento, y
-        # es justo eso lo que acerca el vector del chunk al de la pregunta.
+        # The summary is injected alongside the headline so that it reaches the
+        # embedding: a user question resembles a headline and a summary far more
+        # than it resembles the body of a document, and that is what brings the
+        # chunk vector closer to the question vector.
         summary = (meta.get("semantic_summary") or "").strip()
         cabecera = f"SOURCE: {where}\n"
         if headline:
@@ -385,7 +384,7 @@ def inject_context_to_chunks(chunks: List[Document]) -> List[Document]:
 
 
 # ============================================================
-# FASE 1: Chunking determinista por páginas adyacentes
+# PHASE 1: deterministic chunking over adjacent pages
 # ============================================================
 def _page_based_chunking(
     documents: List[Document],
@@ -394,19 +393,19 @@ def _page_based_chunking(
     max_words: int = 700,
 ) -> List[Document]:
     """
-    Chunking DETERMINISTA basado en páginas.
+    DETERMINISTIC page-based chunking.
 
     PRINCIPIOS:
-    - Cada página de texto es la unidad atómica mínima
-    - Se agrupan páginas consecutivas hasta alcanzar target_words
-    - Las páginas vacías (is_empty_page) se absorben en el chunk más cercano
-    - GARANTIZA 100% de cobertura de todas las páginas con texto
-    - NO depende de ningún LLM para decidir los límites
+    - Each text page is the smallest atomic unit
+    - Consecutive pages are grouped until target_words is reached
+    - Empty pages (is_empty_page) are absorbed into the nearest chunk
+    - GUARANTEES 100% coverage of every page that has text
+    - Does NOT depend on any LLM to decide the boundaries
 
-    El resultado son chunks de ~200-500 palabras donde cada uno
-    corresponde a 1-4 páginas consecutivas del documento.
+    The result is chunks of ~200-500 words, each of which
+    maps to 1-4 consecutive pages of the document.
     """
-    # Agrupar por archivo fuente
+    # Group by file fuente
     docs_by_source = {}
     for doc in documents:
         meta = doc.metadata or {}
@@ -421,7 +420,7 @@ def _page_based_chunking(
     all_chunks: List[Document] = []
 
     for src, src_docs in docs_by_source.items():
-        # Ordenar por página
+        # Sort by page
         src_docs.sort(key=lambda d: int(
             (d.metadata or {}).get("page_number")
             or (d.metadata or {}).get("page")
@@ -430,7 +429,7 @@ def _page_based_chunking(
             or 0
         ))
 
-        # Separar páginas con contenido real vs vacías
+        # Separate pages with real content from empty ones
         content_pages = []
         empty_page_numbers = []
 
@@ -439,8 +438,8 @@ def _page_based_chunking(
             is_empty = meta.get("is_empty_page") or meta.get("is_empty_slide") or False
             t = (d.page_content or "").strip()
 
-            # Filtrar placeholders de páginas vacías
-            if is_empty or t.startswith("[Página ") or t.startswith("[Slide "):
+            # Filter out empty-page placeholders
+            if is_empty or t.startswith("[Page ") or t.startswith("[Slide "):
                 pg = meta.get("page_number") or meta.get("slide_number") or "?"
                 empty_page_numbers.append(pg)
                 continue
@@ -453,13 +452,13 @@ def _page_based_chunking(
             content_pages.append(d)
 
         if empty_page_numbers:
-            print(f"   📋 Páginas sin texto en '{src}': {empty_page_numbers} ({len(empty_page_numbers)} de {len(src_docs)})")
+            print(f"   📋 Pages without text in '{src}': {empty_page_numbers} ({len(empty_page_numbers)} of {len(src_docs)})")
 
         if not content_pages:
-            print(f"   ⚠️ '{src}' no tiene páginas con contenido. Saltando.")
+            print(f"   ⚠️ '{src}' has no pages with content. Skipping.")
             continue
 
-        # ✅ AGRUPAR páginas consecutivas en chunks
+        # GROUP consecutive pages into chunks
         chunks_for_file: List[Document] = []
         current_pages: List[Document] = []
         current_word_count = 0
@@ -467,27 +466,27 @@ def _page_based_chunking(
         for page_doc in content_pages:
             page_words = len((page_doc.page_content or "").split())
 
-            # Si una sola página ya excede max_words, va sola
+            # A single page over max_words stands alone
             if page_words >= max_words:
                 # Primero flush lo acumulado
                 if current_pages:
                     chunks_for_file.append(_merge_pages_into_chunk(current_pages, src))
                     current_pages = []
                     current_word_count = 0
-                # La página grande va sola
+                # The large page goes on its own
                 chunks_for_file.append(_merge_pages_into_chunk([page_doc], src))
                 continue
 
-            # ¿Añadir esta página al grupo actual o empezar nuevo?
+            # Add this page to the current group, or start a new one?
             would_be = current_word_count + page_words
 
             if current_pages and would_be > max_words:
-                # Flush: el grupo actual ya es suficiente
+                # Flush: the current group is already big enough
                 chunks_for_file.append(_merge_pages_into_chunk(current_pages, src))
                 current_pages = [page_doc]
                 current_word_count = page_words
             elif current_pages and would_be >= target_words:
-                # Incluir esta página y flush (llegamos al target)
+                # Include this page and flush: the target is reached
                 current_pages.append(page_doc)
                 chunks_for_file.append(_merge_pages_into_chunk(current_pages, src))
                 current_pages = []
@@ -499,21 +498,21 @@ def _page_based_chunking(
 
         # Flush final
         if current_pages:
-            # Si el último grupo es muy corto y hay chunks anteriores, fusionar
+            # If the last group is very short and there are previous chunks, merge
             if current_word_count < min_words and chunks_for_file:
                 last_chunk = chunks_for_file[-1]
                 last_words = len((last_chunk.page_content or "").split())
                 if last_words + current_word_count <= max_words:
-                    # Fusionar con el chunk anterior
+                    # Merge with the previous chunk
                     chunks_for_file.pop()
                     all_pages_docs = []
-                    # Recuperar las páginas del chunk anterior desde metadata
-                    # Más simple: reconstruir fusionando textos
+                    # Recover the previous chunk's pages from metadata
+                    # Simpler: rebuild by merging the texts
                     merged_text = (last_chunk.page_content or "").rstrip() + "\n\n" + \
-                        "\n\n".join(f"[PÁGINA {(d.metadata or {}).get('page_number', '?')}]\n{d.page_content}"
+                        "\n\n".join(f"[PAGE {(d.metadata or {}).get('page_number', '?')}]\n{d.page_content}"
                                     for d in current_pages)
                     last_meta = dict(last_chunk.metadata or {})
-                    # Actualizar páginas
+                    # Update the page list
                     prev_pages = last_meta.get("pages_in_chunk", "")
                     if isinstance(prev_pages, str):
                         prev_pages_list = [int(p.strip()) for p in prev_pages.split(",") if p.strip().isdigit()]
@@ -532,7 +531,7 @@ def _page_based_chunking(
             else:
                 chunks_for_file.append(_merge_pages_into_chunk(current_pages, src))
 
-        # Estadísticas
+        # Statistics
         chunk_words = [len((c.page_content or "").split()) for c in chunks_for_file]
         total_pages_covered = set()
         for c in chunks_for_file:
@@ -544,9 +543,9 @@ def _page_based_chunking(
                         total_pages_covered.add(int(p))
 
         print(
-            f"📄 '{src}': {len(content_pages)} páginas con texto → {len(chunks_for_file)} chunks "
-            f"(palabras: min={min(chunk_words)}, max={max(chunk_words)}, avg={sum(chunk_words)/len(chunk_words):.0f}) "
-            f"| páginas cubiertas: {len(total_pages_covered)}/{len(src_docs)}"
+            f"📄 '{src}': {len(content_pages)} pages with text → {len(chunks_for_file)} chunks "
+            f"(words: min={min(chunk_words)}, max={max(chunk_words)}, avg={sum(chunk_words)/len(chunk_words):.0f}) "
+            f"| pages covered: {len(total_pages_covered)}/{len(src_docs)}"
         )
 
         all_chunks.extend(chunks_for_file)
@@ -556,13 +555,13 @@ def _page_based_chunking(
 
 def _merge_pages_into_chunk(pages: List[Document], src: str) -> Document:
     """
-    Fusiona una lista de Documents (páginas consecutivas) en UN chunk.
-    Añade marcadores [PÁGINA X] para trazabilidad.
+    Merge a list of Documents (consecutive pages) into ONE chunk.
+    Adds [PAGE X] markers for traceability.
     """
     parts = []
     page_numbers = []
     base_meta = dict(pages[0].metadata or {})
-    # ✅ has_table solo si alguna página REALMENTE tiene contenido [TABLA]
+    # has_table only when some page REALLY carries table content
     has_real_table = False
 
     for d in pages:
@@ -570,8 +569,8 @@ def _merge_pages_into_chunk(pages: List[Document], src: str) -> Document:
         pg = meta.get("page_number") or meta.get("slide_number") or "?"
         page_numbers.append(int(pg) if str(pg).isdigit() else 0)
         page_text = (d.page_content or '').strip()
-        parts.append(f"[PÁGINA {pg}]\n{page_text}")
-        # ✅ Solo marcar tabla si el texto realmente contiene marcador [TABLA]
+        parts.append(f"[PAGE {pg}]\n{page_text}")
+        # Only mark a table when the text actually carries the marker
         if "[TABLA]" in page_text:
             has_real_table = True
 
@@ -579,7 +578,7 @@ def _merge_pages_into_chunk(pages: List[Document], src: str) -> Document:
 
     pages_str = ", ".join(str(p) for p in sorted(set(page_numbers)) if p > 0)
 
-    # ✅ Limpiar metadata heredada de la primera página que no aplica al chunk
+    # Drop metadata inherited from the first page that does not apply to the chunk
     for stale_key in ["is_empty_page", "is_empty_slide", "text_chars",
                        "page", "page_number", "slide", "slide_number",
                        "ocr_used_page", "ocr_used_slide"]:
@@ -592,7 +591,7 @@ def _merge_pages_into_chunk(pages: List[Document], src: str) -> Document:
     base_meta["has_table"] = has_real_table
     base_meta["semantic_source"] = src
 
-    # ✅ Generar chunk_id estable (hash del contenido + posición)
+    # Stable chunk_id (hash of content + position)
     hash_input = f"{src}|{pages_str}|{merged_text[:200]}"
     base_meta["chunk_id"] = hashlib.sha1(hash_input.encode("utf-8")).hexdigest()[:16]
 
@@ -600,7 +599,7 @@ def _merge_pages_into_chunk(pages: List[Document], src: str) -> Document:
 
 
 # ============================================================
-# FASE 1.5: Micro-chunks (child) para precisión en Q&A
+# PHASE 1.5: micro chunks (children) for retrieval precision
 # ============================================================
 def _generate_micro_chunks(
     macro_chunks: List[Document],
@@ -608,15 +607,15 @@ def _generate_micro_chunks(
     overlap_tokens: int = 60,
 ) -> List[Document]:
     """
-    Genera micro-chunks "hijo" de cada macro-chunk para Q&A preciso.
+    Generate "child" micro chunks from each macro chunk, for retrieval precision.
 
     ARQUITECTURA PARENT-CHILD:
-    - Macro-chunk (parent): ~250-500 palabras, agrupa 2-4 páginas → bueno para contexto/citas
-    - Micro-chunk (child): ~150-300 palabras con overlap → bueno para retrieval preciso
+    - Macro chunk (parent): ~250-500 words over 2-4 pages -> good for context and citations
+    - Micro chunk (child): ~150-300 words with overlap -> good for precise retrieval
     - Cada child lleva parent_chunk_id para reconstruir contexto
 
     RETRIEVAL PATTERN:
-      1. Buscar por micro-chunk (alta precisión)
+      1. Search by micro chunk (high precision)
       2. Expandir a parent para contexto completo
       3. Citar con pages_in_chunk del parent
     """
@@ -624,7 +623,7 @@ def _generate_micro_chunks(
         model_name="gpt-4o",
         chunk_size=target_tokens,
         chunk_overlap=overlap_tokens,
-        separators=["\n\n[PÁGINA ", "\n\n", "\n", ". ", "? ", "! ", " ", ""],
+        separators=["\n\n[PAGE ", "\n\n", "\n", ". ", "? ", "! ", " ", ""],
     )
 
     all_micro: List[Document] = []
@@ -635,12 +634,12 @@ def _generate_micro_chunks(
         parent_id = parent_meta.get("chunk_id", "")
         parent_text = parent.page_content or ""
 
-        # Extraer solo el texto limpio (sin SOURCE/TITLE headers que aún no se han añadido)
-        # Los marcadores [PÁGINA X] se mantienen para trazabilidad
+        # Take only the clean text; SOURCE/TITLE headers have not been added yet
+        # The [PAGE X] markers are kept for traceability
         splits = splitter.split_text(parent_text)
 
         if len(splits) <= 1:
-            # Parent ya es suficientemente pequeño — no generar micro-chunks
+            # The parent is already small enough: no micro chunks needed
             continue
 
         parents_with_children += 1
@@ -650,8 +649,8 @@ def _generate_micro_chunks(
             if not micro_text or len(micro_text.split()) < 20:
                 continue
 
-            # Extraer páginas referenciadas en este micro-chunk
-            micro_pages = re.findall(r'\[PÁGINA\s+(\d+)\]', micro_text)
+            # Extract the pages referenced by this micro chunk
+            micro_pages = re.findall(r'\[PAGE\s+(\d+)\]', micro_text)
             micro_pages_str = ", ".join(sorted(set(micro_pages))) if micro_pages else parent_meta.get("pages_in_chunk", "")
 
             # Generar micro_chunk_id estable
@@ -683,12 +682,12 @@ def _generate_micro_chunks(
 
             all_micro.append(Document(page_content=micro_text, metadata=micro_meta))
 
-        # Marcar el parent como tal
+        # Mark the parent as such
         parent_meta["chunk_type"] = "macro"
         parent_meta["has_children"] = True
         parent.metadata = parent_meta
 
-    # Parents sin children (ya eran pequeños) también se marcan
+    # Parents with no children (already small) are marked too
     for parent in macro_chunks:
         parent_meta = parent.metadata or {}
         if "chunk_type" not in parent_meta:
@@ -697,33 +696,50 @@ def _generate_micro_chunks(
             parent.metadata = parent_meta
 
     print(
-        f"🔬 Micro-chunks generados: {len(all_micro)} children de "
+        f"🔬 Micro chunks generated: {len(all_micro)} children from "
         f"{parents_with_children}/{len(macro_chunks)} parents"
     )
 
     if all_micro:
         micro_words = [len((m.page_content or "").split()) for m in all_micro]
         print(
-            f"   • Palabras/micro-chunk: min={min(micro_words)}, max={max(micro_words)}, "
+            f"   • Words per micro chunk: min={min(micro_words)}, max={max(micro_words)}, "
             f"avg={sum(micro_words)/len(micro_words):.0f}"
         )
 
     return all_micro
 
 # ============================================================
-# FASE 2: Enriquecimiento LLM (solo headline + summary)
+# PHASE 2: LLM enrichment (headline + summary only)
 # ============================================================
 class ChunkEnrichment(BaseModel):
-    headline: str = Field(description="Título corto y descriptivo del contenido (máx 12 palabras)")
-    summary: str = Field(description="Resumen de 2-4 frases orientado a recuperación RAG: tema, datos clave, conclusión")
+    headline: str = Field(description="Short, descriptive title for the content (max 12 words)")
+    summary: str = Field(description="A 2-4 sentence retrieval-oriented summary: topic, key figures, conclusion")
 
 
 class ChunkEnrichmentList(BaseModel):
-    enrichments: List[ChunkEnrichment] = Field(description="Lista de enriquecimientos, uno por chunk")
+    enrichments: List[ChunkEnrichment] = Field(description="List of enrichments, one per chunk")
 
 
 def _default_semantic_llm_model() -> str:
     return os.environ.get("SEMANTIC_CHUNKING_MODEL", "gpt-4o-mini")
+
+
+def _enrichment_language() -> str:
+    """
+    Language for the generated headline and summary.
+
+    Explicit on purpose. The instruction used to be "write in the same language
+    as the chunk content", which delegated the choice to the model — and the
+    model followed the language of the prompt rather than of the chunk. Since
+    the headline and summary are prepended to the text BEFORE embedding, the
+    wrong language pulls every chunk vector away from the questions it should
+    match, with no error and nothing in the logs to point at it.
+
+    It should match the language the questions are asked in, which is not
+    necessarily the language of the corpus.
+    """
+    return (os.environ.get("ENRICHMENT_LANGUAGE") or "English").strip() or "English"
 
 
 def _should_use_semantic_enrichment() -> bool:
@@ -752,12 +768,12 @@ def enrich_chunks_with_llm(
     batch_size: int = 8,
 ) -> List[Document]:
     """
-    FASE 2: Enriquece chunks con headline y summary generados por LLM.
+    PHASE 2: enrich chunks with an LLM-generated headline and summary.
     
-    EL LLM NO TOCA EL TEXTO — solo genera metadata semántica.
-    Esto es rápido, barato, y no puede perder contenido.
+    THE LLM DOES NOT TOUCH THE TEXT — it only generates semantic metadata.
+    That is fast, cheap, and cannot lose content.
     
-    Se envían en BATCHES de N chunks para minimizar llamadas API.
+    Sent in BATCHES of N chunks to minimise API calls.
     """
     if not chunks:
         return chunks
@@ -766,35 +782,37 @@ def enrich_chunks_with_llm(
     llm = get_llm(model_name, temperature)
     structured_llm = llm.with_structured_output(ChunkEnrichmentList)
 
+    language = _enrichment_language()
+
     system_prompt = (
-        "Eres un experto en RAG (Retrieval Augmented Generation).\n"
-        "Tu tarea es generar metadatos de calidad para chunks de texto que se usarán en búsqueda semántica.\n\n"
-        
-        "Para CADA chunk proporcionado, genera:\n"
-        "1. 'headline': Título descriptivo de máximo 12 palabras. Debe ser específico.\n"
-        "   - BUENO: 'Resultados PMAX por categoría H&A, HE e IT 2025'\n"
-        "   - MALO: 'Datos de resultados'\n\n"
-        
-        "2. 'summary': Resumen de 2-4 frases orientado a recuperación. Debe incluir:\n"
-        "   - Tema principal del chunk\n"
-        "   - Datos cuantitativos clave si los hay (cifras, porcentajes, KPIs)\n"
-        "   - Conclusión o insight principal\n"
-        "   - Contexto temporal/empresarial (ej: 'LG Electronics 2025')\n\n"
-        
-        "REGLAS:\n"
-        "- Un headline + summary por CADA chunk en el orden proporcionado\n"
-        "- El número de enrichments debe ser EXACTAMENTE igual al número de chunks\n"
-        "- Los marcadores [PÁGINA X] indican la fuente — úsalos para contexto pero no los incluyas en headline/summary\n"
-        "- Escribe en el mismo idioma que el contenido del chunk\n"
+        "You are an expert in RAG (Retrieval Augmented Generation).\n"
+        "Your task is to generate high-quality metadata for text chunks used in semantic search.\n\n"
+
+        "For EACH chunk provided, generate:\n"
+        "1. 'headline': a descriptive title of at most 12 words. It must be specific.\n"
+        "   - GOOD: 'Parental leave entitlement by caregiver type and notice period'\n"
+        "   - BAD: 'Leave information'\n\n"
+
+        "2. 'summary': a 2-4 sentence retrieval-oriented summary. It must include:\n"
+        "   - The main topic of the chunk\n"
+        "   - Key quantitative data if present (figures, percentages, KPIs)\n"
+        "   - The main conclusion or insight\n"
+        "   - Temporal or organisational context when the chunk carries it\n\n"
+
+        "RULES:\n"
+        "- One headline + summary for EACH chunk, in the order provided\n"
+        "- The number of enrichments must EXACTLY equal the number of chunks\n"
+        "- [PAGE X] markers indicate the source — use them for context but do not include them in headline/summary\n"
+        f"- Write the headline and the summary in {language}, whatever the language of the chunk\n"
     )
 
     workers = max(2, min((os.cpu_count() or 4), 8))
     if INSPECT_SEMANTIC_CHUNKS:
         workers = 1
 
-    print(f"🏷️ Enriquecimiento LLM: {len(chunks)} chunks en batches de {batch_size} (workers={workers})")
+    print(f"🏷️ LLM enrichment: {len(chunks)} chunks in batches of {batch_size} (workers={workers})")
 
-    # Dividir en batches
+    # Split into batches
     batches = []
     for i in range(0, len(chunks), batch_size):
         batches.append((i, chunks[i:i + batch_size]))
@@ -802,12 +820,12 @@ def enrich_chunks_with_llm(
     enrichment_results = {}  # idx -> (headline, summary)
 
     def _process_batch(batch_start: int, batch_chunks: List[Document]) -> dict:
-        """Procesa un batch de chunks y devuelve sus enriquecimientos."""
-        # Construir prompt con los textos de los chunks
+        """Process one batch of chunks and return their enrichments."""
+        # Build the prompt from the chunk texts
         chunk_texts = []
         for j, ch in enumerate(batch_chunks):
             text = (ch.page_content or "").strip()
-            # Truncar textos muy largos para no reventar contexto
+            # Truncate very long texts so the context does not overflow
             if len(text) > 3000:
                 text = text[:3000] + "..."
             chunk_texts.append(f"--- CHUNK {j+1} ---\n{text}")
@@ -836,7 +854,7 @@ def enrich_chunks_with_llm(
 
         return batch_results
 
-    # Ejecutar batches en paralelo
+    # Run the batches in parallel
     with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as executor:
         future_map = {
             executor.submit(_process_batch, b_start, b_chunks): b_start
@@ -849,8 +867,8 @@ def enrich_chunks_with_llm(
                 batch_results = future.result()
                 enrichment_results.update(batch_results)
             except Exception as e:
-                print(f"   ⚠️ Enriquecimiento falló para batch starting at {b_start}: {e}")
-                # Fallback: generar headline/summary básicos
+                print(f"   ⚠️ Enrichment failed for the batch starting at {b_start}: {e}")
+                # Fallback: generate a basic headline and summary
                 batch_end = min(b_start + batch_size, len(chunks))
                 for idx in range(b_start, batch_end):
                     text = (chunks[idx].page_content or "")[:200]
@@ -859,7 +877,7 @@ def enrich_chunks_with_llm(
                         "",
                     )
 
-    # Aplicar enriquecimientos a los chunks
+    # Apply the enrichments to the chunks
     enriched_count = 0
     for idx, chunk in enumerate(chunks):
         meta = chunk.metadata or {}
@@ -869,13 +887,13 @@ def enrich_chunks_with_llm(
             meta["semantic_summary"] = summary
             enriched_count += 1
         else:
-            # Fallback: usar primeras palabras como headline
+            # Fallback: use the first words as the headline
             text = (chunk.page_content or "")[:100].replace("\n", " ").strip()
             meta["semantic_headline"] = text[:80]
             meta["semantic_summary"] = ""
         chunk.metadata = meta
 
-    print(f"✅ Enriquecimiento completado: {enriched_count}/{len(chunks)} chunks enriquecidos")
+    print(f"✅ Enrichment complete: {enriched_count}/{len(chunks)} chunks enriched")
 
     if INSPECT_SEMANTIC_CHUNKS:
         for i, ch in enumerate(chunks):
@@ -899,7 +917,7 @@ def _enrich_chunk_metadata(docs: List[Document]) -> List[Document]:
         meta["word_count"] = len(text.split())
         meta["char_count"] = len(text)
 
-        # ✅ contains_metrics: presencia de datos cuantitativos (números con %, €, $, o KPIs)
+        # contains_metrics: presence of quantitative data (numbers with %, €, $, or KPIs)
         meta["contains_metrics"] = bool(re.search(
             r'\d+[.,]?\d*\s*%'           # porcentajes: 15%, 2.7%
             r'|\d+[.,]?\d*\s*[€$]'       # moneda: 331€, 52.000$
@@ -978,10 +996,10 @@ def _save_final_chunks(chunks: List[Document], base_dir: str):
 # ============================================================
 def process_and_store_documents(data_path: str, vector_store_path: str) -> bool:
     """
-    Pipeline HÍBRIDO:
-      FASE 1: Chunking determinista por páginas (100% cobertura garantizada)
-      FASE 2: Enriquecimiento LLM (solo headline + summary, nunca pierde texto)
-      FASE 3: Context injection + almacenamiento en ChromaDB
+    HYBRID pipeline:
+      PHASE 1: deterministic page-based chunking (100% coverage guaranteed)
+      PHASE 2: LLM enrichment (headline + summary only; never loses text)
+      PHASE 3: context injection + storage in ChromaDB
     """
 
     def _safe_norm(p: str) -> str:
@@ -1047,7 +1065,7 @@ def process_and_store_documents(data_path: str, vector_store_path: str) -> bool:
             pass
 
     def _backfill_relative_path_norm(vs: Chroma) -> int:
-        """Añade relative_path_norm/department a chunks ya indexados que no los tengan (sin re-embeber)."""
+        """Backfill relative_path_norm/department on already-indexed chunks, without re-embedding."""
         try:
             data = vs.get(include=["metadatas"])
         except Exception:
@@ -1084,7 +1102,7 @@ def process_and_store_documents(data_path: str, vector_store_path: str) -> bool:
 
         documents = load_documents_from_path(data_path)
         if not documents:
-            print("⚠️ No se encontraron documentos válidos.")
+            print("⚠️ No valid documents found.")
             return False
 
         os.makedirs(vector_store_path, exist_ok=True)
@@ -1122,19 +1140,19 @@ def process_and_store_documents(data_path: str, vector_store_path: str) -> bool:
             embedding_function=embeddings,
         )
 
-        # Backfill: chunks indexados antes de introducir relative_path_norm (prefiltro nativo
-        # por metadata). Solo actualiza metadata, no re-embebe nada.
+        # Backfill for chunks indexed before relative_path_norm existed, which the
+        # native metadata prefilter needs. Updates metadata only; nothing is re-embedded.
         _backfill_relative_path_norm(vector_store)
 
         for rel in deleted_files:
-            print(f"🗑️ Eliminando del índice: {rel}")
+            print(f"🗑️ Removing from the index: {rel}")
             _delete_by_source_file(vector_store, rel)
             (manifest.get("files") or {}).pop(rel, None)
 
         if not changed_files and not deleted_files:
-            print("✅ No hay cambios detectados. Índice ya actualizado.")
+            print("✅ No changes detected. The index is already up to date.")
             if not os.path.exists(os.path.join(vector_store_path, "_bm25_index.pkl")):
-                print("🔎 Backfill: construyendo índice BM25 persistente (primera vez)...")
+                print("🔎 Backfill: building the persistent BM25 index (first run)...")
                 persist_bm25_index(vector_store, vector_store_path)
             return True
 
@@ -1149,29 +1167,29 @@ def process_and_store_documents(data_path: str, vector_store_path: str) -> bool:
 
         docs_to_index = [d for d in documents if _doc_rel(d) in changed_set]
 
-        # Pre-limpieza de texto
+        # Text pre-cleaning
         for d in docs_to_index:
             d.page_content = _clean_text_for_embeddings(d.page_content or "")
 
         print(f"🧾 Cambios detectados: {len(changed_files)} archivo(s) a re-indexar.")
         if not docs_to_index:
-            print("⚠️ No se encontraron docs a re-indexar.")
+            print("⚠️ No documents found to re-index.")
             return False
 
         for rel in changed_files:
             print(f"♻️ Re-index: limpiando chunks previos de {rel}")
             _delete_by_source_file(vector_store, rel)
 
-        # Detectar contaminación (solo reporta, no modifica)
+        # Detect contamination (reports only, changes nothing)
         _detect_contamination(docs_to_index)
 
-        # Eliminar bloques repetidos entre páginas (ej: slides-template duplicadas)
+        # Remove blocks repeated across pages (e.g. duplicated slide templates)
         docs_to_index = _dedup_repeated_blocks_across_pages(docs_to_index, min_block_words=25)
 
         # ================================================================
-        # FASE 1: Chunking determinista por páginas
+        # PHASE 1: deterministic page-based chunking
         # ================================================================
-        print("\n📐 FASE 1: Chunking determinista por páginas...")
+        print("\n📐 PHASE 1: deterministic page-based chunking...")
         page_chunks = _page_based_chunking(
             docs_to_index,
             min_words=100,
@@ -1180,13 +1198,13 @@ def process_and_store_documents(data_path: str, vector_store_path: str) -> bool:
         )
 
         if not page_chunks:
-            print("⚠️ No se generaron chunks. Abortando.")
+            print("⚠️ No chunks were generated. Aborting.")
             return False
 
         # ================================================================
-        # FASE 1.5: Micro-chunks (child) para Q&A preciso
+        # PHASE 1.5: micro chunks (children) for precise Q&A
         # ================================================================
-        print("\n🔬 FASE 1.5: Generando micro-chunks (children)...")
+        print("\n🔬 PHASE 1.5: generating micro chunks (children)...")
         micro_chunks = _generate_micro_chunks(
             page_chunks,
             target_tokens=250,
@@ -1194,14 +1212,14 @@ def process_and_store_documents(data_path: str, vector_store_path: str) -> bool:
         )
 
         # ================================================================
-        # FASE 2: Enriquecimiento LLM (headline + summary)
+        # PHASE 2: LLM enrichment (headline + summary)
         # ================================================================
-        # Enriquecer macro-chunks (parents) con LLM
+        # Enrich the macro chunks (parents) with the LLM
         if _should_use_semantic_enrichment():
-            print("\n🏷️ FASE 2: Enriquecimiento LLM (headline + summary)...")
+            print("\n🏷️ PHASE 2: LLM enrichment (headline + summary)...")
             try:
                 page_chunks = enrich_chunks_with_llm(page_chunks, batch_size=8)
-                # Propagar headline/summary del parent a sus micro-chunks
+                # Propagate the parent's headline/summary to its micro chunks
                 parent_enrichments = {}
                 for ch in page_chunks:
                     pid = (ch.metadata or {}).get("chunk_id", "")
@@ -1216,25 +1234,25 @@ def process_and_store_documents(data_path: str, vector_store_path: str) -> bool:
                         micro.metadata["semantic_headline"] = parent_enrichments[pid]["semantic_headline"]
                         micro.metadata["semantic_summary"] = parent_enrichments[pid]["semantic_summary"]
             except Exception as e:
-                print(f"   ⚠️ Enriquecimiento LLM falló ({e}). Chunks se guardan sin headline/summary.")
+                print(f"   ⚠️ LLM enrichment failed ({e}). Chunks stored without headline/summary.")
 
-        # Guardar semantic chunks para evaluación
+        # Save the semantic chunks for evaluation
         _save_semantic_chunks(page_chunks, base_dir=vector_store_path)
 
-        # Enriquecer metadata (métricas, listas, etc.) en AMBOS niveles
+        # Enrich metadata (metrics, lists, ...) at BOTH levels
         page_chunks = _enrich_chunk_metadata(page_chunks)
         micro_chunks = _enrich_chunk_metadata(micro_chunks)
 
         # ================================================================
-        # FASE 3: Context injection + almacenamiento
+        # PHASE 3: context injection + storage
         # ================================================================
-        print("\n💾 FASE 3: Context injection + almacenamiento...")
+        print("\n💾 PHASE 3: context injection + storage...")
 
-        # Context injection para ambos niveles
+        # Context injection for both levels
         macro_final = inject_context_to_chunks(page_chunks)
         micro_final = inject_context_to_chunks(micro_chunks)
 
-        # Combinar: macro + micro → todos se indexan en ChromaDB
+        # Combine macro + micro: everything is indexed in ChromaDB
         final_chunks = macro_final + micro_final
 
         if not final_chunks:
@@ -1244,45 +1262,45 @@ def process_and_store_documents(data_path: str, vector_store_path: str) -> bool:
         if str(os.environ.get("SAVE_FINAL_CHUNKS_JSON", "1")).strip() in ("1", "true", "True", "yes", "YES"):
             _save_final_chunks(final_chunks, base_dir=vector_store_path)
 
-        # Normalizar metadata para ChromaDB
+        # Normalise metadata for ChromaDB
         for ch in final_chunks:
             meta = ch.metadata or {}
             rel = _chunk_source_rel(ch, data_path)
             meta["source_file"] = rel
             meta["relative_path"] = rel
             meta["relative_path_norm"] = norm_path(rel)  # clave estable para prefiltro nativo en Chroma
-            # department = PRIMER segmento de carpeta. os.path.dirname devuelve la
-            # ruta entera, así que con subcarpetas daba "compensation/2026" en vez
-            # de "compensation" y el filtro de acceso dejaba de casar.
+            # department = the FIRST folder segment. os.path.dirname returns the
+            # whole path, so with subfolders it would give "compensation/2026" instead
+            # of "compensation", and the access filter would stop matching.
             meta["department"] = (_safe_norm(rel).split("/")[0] if "/" in _safe_norm(rel) else "general").lower()
-            # ChromaDB no soporta listas — ya son strings desde _merge_pages_into_chunk
+            # ChromaDB does not support lists — these are already strings from _merge_pages_into_chunk
             ch.metadata = meta
 
-        # Estadísticas finales
+        # Statistics finales
         macro_count = sum(1 for c in final_chunks if (c.metadata or {}).get("chunk_type") == "macro")
         micro_count = sum(1 for c in final_chunks if (c.metadata or {}).get("chunk_type") == "micro")
         word_counts = [len((c.page_content or "").split()) for c in final_chunks]
         macro_words = [len((c.page_content or "").split()) for c in final_chunks if (c.metadata or {}).get("chunk_type") == "macro"]
         micro_words = [len((c.page_content or "").split()) for c in final_chunks if (c.metadata or {}).get("chunk_type") == "micro"]
 
-        print(f"\n📊 ESTADÍSTICAS FINALES:")
-        print(f"   • Docs entrada: {len(docs_to_index)} páginas")
-        print(f"   • Total chunks indexados: {len(final_chunks)}")
-        print(f"   • Macro-chunks (parents): {macro_count}")
+        print(f"\n📊 FINAL STATISTICS:")
+        print(f"   • Input docs: {len(docs_to_index)} pages")
+        print(f"   • Total chunks indexed: {len(final_chunks)}")
+        print(f"   • Macro chunks (parents): {macro_count}")
         if macro_words:
-            print(f"     Palabras: min={min(macro_words)}, max={max(macro_words)}, avg={sum(macro_words)/len(macro_words):.0f}")
-        print(f"   • Micro-chunks (children): {micro_count}")
+            print(f"     Words: min={min(macro_words)}, max={max(macro_words)}, avg={sum(macro_words)/len(macro_words):.0f}")
+        print(f"   • Micro chunks (children): {micro_count}")
         if micro_words:
-            print(f"     Palabras: min={min(micro_words)}, max={max(micro_words)}, avg={sum(micro_words)/len(micro_words):.0f}")
+            print(f"     Words: min={min(micro_words)}, max={max(micro_words)}, avg={sum(micro_words)/len(micro_words):.0f}")
         with_headline = sum(1 for c in final_chunks if (c.metadata or {}).get("semantic_headline"))
-        print(f"   • Con headline: {with_headline}/{len(final_chunks)}")
+        print(f"   • With headline: {with_headline}/{len(final_chunks)}")
 
         batch_size = 150
         total = len(final_chunks)
         for i in range(0, total, batch_size):
             batch = final_chunks[i: i + batch_size]
             vector_store.add_documents(batch)
-            print(f"💾 Guardando lote {i//batch_size + 1}. ({min(i + batch_size, total)}/{total})")
+            print(f"💾 Saving batch {i//batch_size + 1}. ({min(i + batch_size, total)}/{total})")
 
         files_dict = manifest.get("files") or {}
         for rel in changed_files:
@@ -1292,17 +1310,17 @@ def process_and_store_documents(data_path: str, vector_store_path: str) -> bool:
         manifest["files"] = files_dict
         _save_manifest(vector_store_path, manifest)
 
-        print("\n🔎 Reconstruyendo índice BM25 persistente...")
+        print("\n🔎 Rebuilding the persistent BM25 index...")
         if persist_bm25_index(vector_store, vector_store_path):
-            print("✅ Índice BM25 persistido en disco.")
+            print("✅ BM25 index persisted to disk.")
         else:
-            print("⚠️ No se pudo persistir el índice BM25 (¿vector store vacío?).")
+            print("⚠️ Could not persist the BM25 index (empty vector store?).")
 
-        print(f"\n✅ Ingesta INCREMENTAL finalizada en: {vector_store_path}")
+        print(f"\n✅ Incremental ingestion finished at: {vector_store_path}")
         return True
 
     except Exception as e:
-        print(f"❌ Error CRÍTICO en ingesta incremental: {e}")
+        print(f"❌ CRITICAL error during incremental ingestion: {e}")
         import traceback
         traceback.print_exc()
         return False

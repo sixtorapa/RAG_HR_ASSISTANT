@@ -39,7 +39,7 @@ def create_app(config_class=Config):
     def markdown_filter(text):
         return md.markdown(text or '', extensions=['extra', 'nl2br'])
 
-    # LangSmith (opcional, no rompe si no está configurado)
+    # LangSmith (optional; does not break when unconfigured)
     from observability import init_langsmith
     init_langsmith()
 

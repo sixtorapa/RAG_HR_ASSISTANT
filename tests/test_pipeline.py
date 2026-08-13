@@ -1,11 +1,11 @@
 """
-test_pipeline.py — lo que queda entre el endpoint y las herramientas:
-los guardarraíles a nivel de petición, el despacho de tools, el agente de
-formato final y el índice BM25.
+test_pipeline.py — what sits between the endpoint and the tools: the
+request-level guardrails, tool dispatch, the final formatting agent and the
+BM25 index.
 
-De los guardarraíles ya se prueba la lógica en test_guardrails.py. Aquí se
-prueba lo otro, que es lo que de verdad protege: que CORTEN, y que corten
-ANTES de llamar al modelo y antes de escribir nada en la base de datos.
+The logic of the guardrails is already tested in test_guardrails.py. What is
+tested here is what actually protects: that they CUT, and that they cut BEFORE
+the model is called and BEFORE anything is written to the database.
 """
 
 import os
@@ -35,23 +35,23 @@ from app.rag_logic.bm25_index import (
 
 
 # ══════════════════════════════════════════════════════════════════════════
-# Guardarraíles: que corten, y que corten a tiempo
+# Guardrails: that they cut, and that they cut in time
 # ══════════════════════════════════════════════════════════════════════════
 
-class TestCuotaDiaria:
+class TestDailyQuota:
 
-    def test_sin_variable_no_hay_cuota(self, app, monkeypatch):
-        """Railway no la necesita: OpenAI es prepago y se frena solo."""
+    def test_without_variable_not_there_is_quota(self, app, monkeypatch):
+        """Railway does not need it: OpenAI is prepaid and stops itself."""
         monkeypatch.delenv("DAILY_QUESTION_LIMIT", raising=False)
         with app.test_request_context():
             assert _quota_block() is None
 
-    def test_cero_desactiva_la_cuota(self, app, monkeypatch):
+    def test_zero_desactiva_the_quota(self, app, monkeypatch):
         monkeypatch.setenv("DAILY_QUESTION_LIMIT", "0")
         with app.test_request_context():
             assert _quota_block() is None
 
-    def test_por_debajo_del_tope_deja_pasar(self, app, db, test_user, test_chat_session, monkeypatch):
+    def test_by_below_of_the_cap_lets_pasar(self, app, db, test_user, test_chat_session, monkeypatch):
         monkeypatch.setenv("DAILY_QUESTION_LIMIT", "5")
         db.session.add(Message(session_id=test_chat_session.id, user_id=test_user.id,
                                sender="user", content="una"))
@@ -60,7 +60,7 @@ class TestCuotaDiaria:
             with patch("app.main.guards.current_user", test_user):
                 assert _quota_block() is None
 
-    def test_al_alcanzar_el_tope_devuelve_429(self, app, db, test_user, test_chat_session, monkeypatch):
+    def test_at_reaching_the_cap_returns_429(self, app, db, test_user, test_chat_session, monkeypatch):
         monkeypatch.setenv("DAILY_QUESTION_LIMIT", "2")
         for i in range(2):
             db.session.add(Message(session_id=test_chat_session.id, user_id=test_user.id,
@@ -70,12 +70,12 @@ class TestCuotaDiaria:
             with patch("app.main.guards.current_user", test_user):
                 blocked = _quota_block()
         assert blocked is not None
-        cuerpo, codigo = blocked
-        assert codigo == 429
-        assert cuerpo.get_json()["quota_limit"] == 2
+        body, status = blocked
+        assert status == 429
+        assert body.get_json()["quota_limit"] == 2
 
-    def test_solo_cuentan_los_mensajes_del_usuario(self, app, db, test_user, test_chat_session, monkeypatch):
-        """Las respuestas del bot no consumen cuota."""
+    def test_only_count_the_messages_of_the_user(self, app, db, test_user, test_chat_session, monkeypatch):
+        """Bot answers do not consume quota."""
         monkeypatch.setenv("DAILY_QUESTION_LIMIT", "2")
         for s in ("user", "bot", "bot"):
             db.session.add(Message(session_id=test_chat_session.id, user_id=test_user.id,
@@ -86,140 +86,140 @@ class TestCuotaDiaria:
                 assert _quota_block() is None
 
 
-class TestDLPEnElEndpoint:
+class TestDLPAtTheEndpoint:
 
-    def test_texto_limpio_pasa(self, app):
+    def test_text_clean_passes(self, app):
         with app.test_request_context():
             assert _dlp_block("¿cuántos días de vacaciones tengo?", "ctx") is None
 
-    def test_un_iban_devuelve_400(self, app):
+    def test_a_iban_returns_400(self, app):
         with app.test_request_context():
             blocked = _dlp_block("mi cuenta es ES9121000418450200051332", "ctx")
         assert blocked is not None
-        cuerpo, codigo = blocked
-        assert codigo == 400
+        body, status = blocked
+        assert status == 400
 
-    def test_el_mensaje_de_error_no_repite_el_dato(self, app):
-        """Devolver el value detectado en la respuesta sería filtrarlo igual."""
+    def test_the_message_of_error_not_repeats_the_value(self, app):
+        """Returning the detected value in the response would leak it anyway."""
         iban = "ES9121000418450200051332"
         with app.test_request_context():
-            cuerpo, _ = _dlp_block(f"cuenta {iban}", "ctx")
-        assert iban not in cuerpo.get_json()["error"]
+            body, _ = _dlp_block(f"cuenta {iban}", "ctx")
+        assert iban not in body.get_json()["error"]
 
 
-class TestOrdenDeLosGuardarrailes:
+class TestGuardrailOrdering:
 
-    def test_el_endpoint_corta_antes_de_construir_nada(self, auth_client, test_chat_session, monkeypatch):
+    def test_the_endpoint_cuts_before_of_construir_nothing(self, auth_client, test_chat_session, monkeypatch):
         """
-        La propiedad que importa: con PII en la question, ni se construyen las
-        herramientas ni se llama al router. Si el dato llega al modelo o a la
-        base de datos, ya ha salido del perímetro.
+        The property that matters: with PII in the question, neither the tools
+        nor the router are ever constructed. Once the data reaches the model or
+        the database, it has left the perimeter.
         """
         monkeypatch.delenv("DAILY_QUESTION_LIMIT", raising=False)
-        with patch("app.main.pipeline._ToolBox") as caja, \
+        with patch("app.main.pipeline._ToolBox") as box, \
              patch("app.main.pipeline.AgentRouter") as router:
             r = auth_client.post(
                 f"/ask/{test_chat_session.id}",
                 json={"question": "mi IBAN es ES9121000418450200051332"},
             )
         assert r.status_code == 400
-        caja.assert_not_called()
+        box.assert_not_called()
         router.assert_not_called()
 
-    def test_una_pregunta_bloqueada_no_se_persiste(self, auth_client, db, test_chat_session, monkeypatch):
+    def test_a_question_bloqueada_not_persists(self, auth_client, db, test_chat_session, monkeypatch):
         monkeypatch.delenv("DAILY_QUESTION_LIMIT", raising=False)
-        antes = Message.query.filter_by(session_id=test_chat_session.id).count()
+        before = Message.query.filter_by(session_id=test_chat_session.id).count()
         auth_client.post(
             f"/ask/{test_chat_session.id}",
             json={"question": "mi IBAN es ES9121000418450200051332"},
         )
-        assert Message.query.filter_by(session_id=test_chat_session.id).count() == antes
+        assert Message.query.filter_by(session_id=test_chat_session.id).count() == before
 
 
 # ══════════════════════════════════════════════════════════════════════════
-# Overrides y despacho de herramientas
+# Overrides and tool dispatch
 # ══════════════════════════════════════════════════════════════════════════
 
 @pytest.fixture
-def caja():
-    box = MagicMock()
-    box.docs.name = "chat_with_documents"
-    box.summary.name = "summarise_document"
-    box.sql.name = "query_hr_database"
-    box.excel.name = "analista_de_excel"
-    box.web = None
-    return box
+def box():
+    b = MagicMock()
+    b.docs.name = "chat_with_documents"
+    b.summary.name = "summarise_document"
+    b.sql.name = "query_hr_database"
+    b.excel.name = "excel_analyst"
+    b.web = None
+    return b
 
 
 class TestOverrides:
 
-    def test_sin_prefijo_decide_el_router(self, caja):
-        calls, _ = _calls_from_override("cuál es la política de teletrabajo", caja)
+    def test_no_prefix_lets_the_router_decide(self, box):
+        calls, _ = _calls_from_override("cuál es la política de teletrabajo", box)
         assert calls is None
 
-    def test_el_prefijo_sql_produce_la_misma_forma_que_el_router(self, caja):
+    def test_the_sql_prefix_produces_the_same_shape_as_the_router(self, box):
         """
-        Un override no es un camino distinto: es saltarse la decisión. Produce
-        la misma lista de tool_calls, así que después se ejecuta lo mismo.
+        An override is not a different path: it skips the decision. It produces
+        the same tool_calls list, so what runs afterwards is identical.
         """
-        calls, limpia = _calls_from_override("SQL: cuántos empleados hay", caja)
+        calls, cleaned = _calls_from_override("SQL: cuántos empleados hay", box)
         assert calls == [{"name": "query_hr_database", "args": {"query": "cuántos empleados hay"}}]
-        assert limpia == "cuántos empleados hay"
+        assert cleaned == "cuántos empleados hay"
 
-    def test_ambas_encadena_sql_y_documentos(self, caja):
-        calls, _ = _calls_from_override("AMBAS - salarios y política", caja)
+    def test_ambas_chains_sql_and_documents(self, box):
+        calls, _ = _calls_from_override("AMBAS - salarios y política", box)
         assert [c["name"] for c in calls] == ["query_hr_database", "chat_with_documents"]
 
-    def test_pedir_un_resumen_va_a_la_herramienta_de_resumen(self, caja):
-        calls, _ = _calls_from_override("dame un resumen del handbook", caja)
+    def test_asking_for_a_summary_goes_to_the_summary_tool(self, box):
+        calls, _ = _calls_from_override("dame un resumen del handbook", box)
         assert calls[0]["name"] == "summarise_document"
 
 
-class TestDespachoDeHerramientas:
+class TestToolDispatch:
 
-    def test_una_herramienta_desconocida_no_revienta(self, caja):
-        r = _run_tools([{"name": "no_existe", "args": {}}], caja, "q", [])
-        assert "No sé qué herramienta usar" in r[0]["answer"]
+    def test_an_unknown_tool_does_not_blow_up(self, box):
+        r = _run_tools([{"name": "no_existe", "args": {}}], box, "q", [])
+        assert "No tool available for" in r[0]["answer"]
         assert r[0]["source_documents"] == []
 
-    def test_el_resultado_siempre_es_un_dict(self, caja):
-        """Las tools pueden devolver str; aguas abajo se asume dict."""
-        caja.summary.run.return_value = "una cadena suelta"
-        r = _run_tools([{"name": "summarise_document", "args": {}}], caja, "q", [])
+    def test_the_result_always_is_a_dict(self, box):
+        """Tools may return a str; everything downstream assumes a dict."""
+        box.summary.run.return_value = "una cadena suelta"
+        r = _run_tools([{"name": "summarise_document", "args": {}}], box, "q", [])
         assert isinstance(r[0], dict)
         assert r[0]["answer"] == "una cadena suelta"
 
-    def test_se_etiqueta_el_origen_de_cada_paso(self, caja):
-        caja.summary.run.return_value = {"answer": "x", "source_documents": []}
-        r = _run_tools([{"name": "summarise_document", "args": {}}], caja, "q", [])
+    def test_tags_the_origin_of_each_step(self, box):
+        box.summary.run.return_value = {"answer": "x", "source_documents": []}
+        r = _run_tools([{"name": "summarise_document", "args": {}}], box, "q", [])
         assert r[0]["origin"] == "summarise_document"
 
-    def test_el_resultado_sql_se_encadena_a_la_consulta_documental(self, caja):
-        """El modo híbrido: lo que devuelve SQL entra como context en DOCS."""
-        caja.sql_agent.run.return_value = {"answer": "t", "sql_raw_output": "dept | n\nEng | 12",
+    def test_the_sql_result_is_chained_into_the_document_query(self, box):
+        """Hybrid mode: the SQL output is chained in as context for DOCS."""
+        box.sql_agent.run.return_value = {"answer": "t", "sql_raw_output": "dept | n\nEng | 12",
                                            "source_documents": []}
-        caja.docs.run.return_value = {"answer": "según la política...", "source_documents": []}
+        box.docs.run.return_value = {"answer": "según la política...", "source_documents": []}
         _run_tools([{"name": "query_hr_database", "args": {"query": "q"}},
-                    {"name": "chat_with_documents", "args": {"question": "q"}}], caja, "q", [])
-        question = caja.docs.run.call_args[0][0]["question"]
-        assert "SALIDA SQL" in question
+                    {"name": "chat_with_documents", "args": {"question": "q"}}], box, "q", [])
+        question = box.docs.run.call_args[0][0]["question"]
+        assert "SQL OUTPUT" in question
 
-    def test_sin_llamadas_devuelve_lista_vacia(self, caja):
-        assert _run_tools([], caja, "q", []) == []
-        assert _run_tools(None, caja, "q", []) == []
+    def test_no_calls_returns_an_empty_list(self, box):
+        assert _run_tools([], box, "q", []) == []
+        assert _run_tools(None, box, "q", []) == []
 
 
-class TestContextoSQL:
+class TestSQLContext:
 
-    def test_prefiere_la_salida_bruta(self):
+    def test_prefiere_the_salida_raw(self):
         doc = _sql_context_document({"sql_raw_output": "TABLA", "answer": "prosa"})
         assert "TABLA" in doc.page_content
 
-    def test_recorta_las_salidas_largas(self):
+    def test_recorta_the_salidas_largas(self):
         doc = _sql_context_document({"sql_raw_output": "\n".join(f"row {i}" for i in range(200))})
         assert len(doc.page_content.splitlines()) < 40
 
-    def test_sin_contenido_no_produce_documento(self):
+    def test_without_contenido_not_produces_document(self):
         assert _sql_context_document({"sql_raw_output": "", "answer": ""}) is None
 
 
@@ -227,12 +227,12 @@ class TestContextoSQL:
 # Agente de formato final
 # ══════════════════════════════════════════════════════════════════════════
 
-class TestAgenteDeFormato:
+class TestFormattingAgent:
 
-    def test_prefiere_la_salida_bruta_de_sql(self):
+    def test_prefiere_the_salida_raw_of_sql(self):
         """
-        Este detalle es el que hizo que la reformulación de SQLAgent fuese
-        código muerto: su `answer` no se leía nunca.
+        This is why a rewriting pass in SQLAgent would be dead code: its
+        `answer` is never the one read.
         """
         text = _build_contributions_summary([
             {"origin": "query_hr_database", "sql_raw_output": "TABLA CRUDA", "answer": "REFORMULADO"},
@@ -240,18 +240,18 @@ class TestAgenteDeFormato:
         assert "TABLA CRUDA" in text
         assert "REFORMULADO" not in text
 
-    def test_usa_answer_cuando_no_hay_salida_sql(self):
-        text = _build_contributions_summary([{"origin": "chat_with_documents", "answer": "la respuesta"}])
-        assert "la respuesta" in text
+    def test_usa_answer_when_not_there_is_salida_sql(self):
+        text = _build_contributions_summary([{"origin": "chat_with_documents", "answer": "la response"}])
+        assert "la response" in text
 
-    def test_trunca_los_bloques_enormes(self):
+    def test_trunca_the_bloques_enormes(self):
         text = _build_contributions_summary([{"origin": "x", "answer": "y" * 20000}])
         assert "TRUNCATED" in text
 
-    def test_sin_contribuciones_lo_dice(self):
+    def test_without_contribuciones_it_says(self):
         assert "No useful response" in _build_contributions_summary([])
 
-    def test_fusiona_las_fuentes_de_todos_los_pasos(self):
+    def test_fusiona_the_sources_of_all_the_pasos(self):
         docs = _merge_source_docs([
             {"source_documents": [Document(page_content="a")]},
             {"source_documents": [Document(page_content="b")]},
@@ -259,54 +259,54 @@ class TestAgenteDeFormato:
         ])
         assert [d.page_content for d in docs] == ["a", "b"]
 
-    def test_devuelve_respuesta_y_fuentes(self):
+    def test_returns_answer_and_sources(self):
         with patch("app.rag_logic.agent_reasoning.get_llm") as get_llm:
             llm = MagicMock()
-            llm.invoke.return_value = MagicMock(content="  respuesta final  ")
+            llm.invoke.return_value = MagicMock(content="  final answer  ")
             get_llm.return_value = llm
             r = ReasoningAgent(model_name="gpt-4o-mini").run(
                 "question", [{"origin": "x", "answer": "dato", "source_documents": [Document(page_content="f")]}],
             )
-        assert r["answer"] == "respuesta final"
+        assert r["answer"] == "final answer"
         assert len(r["source_documents"]) == 1
 
 
 # ══════════════════════════════════════════════════════════════════════════
-# Índice BM25 persistido
+# Persisted BM25 index
 # ══════════════════════════════════════════════════════════════════════════
 
 class TestBM25:
 
-    def test_construye_desde_textos_y_metadata(self):
+    def test_builds_from_texts_and_metadata(self):
         r = build_bm25_retriever(["text uno", "text dos"], [{"a": 1}, {"a": 2}])
         assert r is not None
 
-    def test_sin_documentos_devuelve_none(self):
+    def test_without_documents_returns_none(self):
         assert build_bm25_retriever([], []) is None
 
-    def test_longitudes_desiguales_devuelven_none(self):
-        """Un zip() silencioso perdería documentos sin avisar."""
+    def test_longitudes_desiguales_return_none(self):
+        """A silent zip() would drop documents without warning."""
         assert build_bm25_retriever(["a", "b"], [{"x": 1}]) is None
 
-    def test_ida_y_vuelta_por_disco(self, tmp_path):
+    def test_ida_and_vuelta_by_disco(self, tmp_path):
         vs = MagicMock()
         vs.get.return_value = {"documents": ["política de vacaciones", "guía de onboarding"],
                                "metadatas": [{"f": "a.pdf"}, {"f": "b.pdf"}]}
         assert persist_bm25_index(vs, str(tmp_path)) is True
         assert load_bm25_index(str(tmp_path)) is not None
 
-    def test_sin_fichero_devuelve_none(self, tmp_path):
+    def test_without_file_returns_none(self, tmp_path):
         assert load_bm25_index(str(tmp_path)) is None
 
-    def test_un_pickle_corrupto_no_tumba_la_consulta(self, tmp_path):
+    def test_a_pickle_corrupto_not_brings_down_the_query(self, tmp_path):
         """
-        Un pickle antiguo puede no abrirse tras actualizar una librería. La
-        consulta debe seguir funcionando sin la pata léxica, no reventar.
+        An old pickle may fail to load after a library upgrade. The query must
+        keep working without the lexical leg rather than blow up.
         """
         (tmp_path / "_bm25_index.pkl").write_bytes(b"esto no es un pickle")
         assert load_bm25_index(str(tmp_path)) is None
 
-    def test_un_vector_store_vacio_no_persiste_nada(self, tmp_path):
+    def test_a_vector_store_empty_not_persists_nothing(self, tmp_path):
         vs = MagicMock()
         vs.get.return_value = {"documents": [], "metadatas": []}
         assert persist_bm25_index(vs, str(tmp_path)) is False

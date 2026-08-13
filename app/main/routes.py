@@ -2,9 +2,8 @@
 """
 The chat endpoints. Nothing else.
 
-The pipeline lives in pipeline.py, the guardrails in guards.py, and the remaining
-screens in views.py, chats.py, auth.py and admin.py. This file once ran to 1,590
-lines doing all six jobs at once.
+The pipeline lives in pipeline.py, the guardrails in guards.py, and the screens
+in views.py, chats.py, auth.py and admin.py.
 """
 
 import os
@@ -45,14 +44,13 @@ def ask(session_id):
     The endpoint is only a doorman: it validates, applies both guardrails and
     delegates. The whole pipeline lives in _answer_question(), shared with
     edit_and_resubmit().
-    _answer_question(), compartido con edit_and_resubmit().
     """
     session = ChatSession.query.filter_by(id=session_id, user_id=current_user.id).first_or_404()
 
     payload = request.get_json(silent=True) or {}
     question_text = payload.get("question")
     if not question_text:
-        return jsonify({"error": "Falta la question."}), 400
+        return jsonify({"error": "Missing question."}), 400
 
     model_name = payload.get("model_name") or current_app.config["MODEL_NAME"]
 
@@ -70,34 +68,32 @@ def ask(session_id):
             use_web_search=payload.get("use_web_search", False),
         )
 
-        final_result, titulo = _answer_question(
+        final_result, heading = _answer_question(
             session, question_text, model_name, box,
         )
 
-        return _finalize(session, question_text, final_result, title_question=titulo)
+        return _finalize(session, question_text, final_result, title_question=heading)
 
     except Exception as e:
         import traceback
         traceback.print_exc()
-        return jsonify({"error": f"Error del servidor: {str(e)}"}), 500
+        return jsonify({"error": f"Server error: {str(e)}"}), 500
 @bp.route("/edit_and_resubmit/<int:message_id>", methods=["POST"])
 @login_required
 def edit_and_resubmit(message_id):
     """
     Rewrite an already-sent question and regenerate the answer.
 
-    This function used to repeat the entire ask() pipeline — router, dispatch
-    loop, formatting, persistence — around 270 duplicated lines. That copy-paste
-    produced the three `NameError: memory_store` crashes ruff exposed when F821
-    was re-enabled: someone duplicated the block and dropped a line.
-    Ahora las dos rutas comparten _answer_question().
+    Shares the whole pipeline with ask() through _answer_question(): the only
+    difference is that the user message already exists and the history is cut
+    at that point.
     """
     user_message = Message.query.filter_by(id=message_id, user_id=current_user.id).first_or_404()
     session = user_message.session
 
     new_text = (request.json or {}).get("new_question")
     if not new_text or user_message.sender != "user":
-        return jsonify({"error": "Inválido"}), 400
+        return jsonify({"error": "Invalid request"}), 400
 
     blocked = _dlp_block(new_text, f"user={current_user.id} message={message_id}")
     if blocked:
@@ -109,12 +105,12 @@ def edit_and_resubmit(message_id):
         # Everything after this message is deleted — only the current user's —
         # and its content rewritten. The history the router sees is what came
         # before this point, not what existed when it was first asked.
-        posteriores = Message.query.filter(
+        later = Message.query.filter(
             Message.session_id == session.id,
             Message.user_id == current_user.id,
             Message.timestamp > user_message.timestamp,
         ).all()
-        for m in posteriores:
+        for m in later:
             db.session.delete(m)
         user_message.content = new_text
 
@@ -122,7 +118,7 @@ def edit_and_resubmit(message_id):
 
         final_result, _ = _answer_question(
             session, new_text, model_name, box,
-            historial_hasta=user_message.timestamp,
+            history_until=user_message.timestamp,
         )
 
         return _finalize(
@@ -144,7 +140,7 @@ def clear_history(session_id):
     try:
         session.messages.delete()
         db.session.commit()
-        flash("Historial borrado.", "success")
+        flash("History cleared.", "success")
 
     except Exception as e:
         db.session.rollback()

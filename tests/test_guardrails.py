@@ -1,17 +1,15 @@
 """
-test_guardrails.py — los controles de seguridad, que hasta ahora se afirmaban
-sin poder demostrarse.
+test_guardrails.py — the security controls, asserted rather than assumed.
 
-Dos guardarraíles, dos propiedades que hay que poder enseñar:
+Two guardrails, two properties worth being able to demonstrate:
 
-  RBAC fail-closed: una lista de departamentos vacía tiene que DENEGAR, no
-  abrir. Es el fallo clásico y silencioso — tratar "vacío" como "sin
-  restricción" pasa los tests que no existen y filtra en producción.
+  RBAC fail-closed: an empty department list must DENY, not open up. That is
+  the classic silent failure — treating "empty" as "unrestricted" passes the
+  tests nobody wrote and leaks in production.
 
-  DLP de entrada: IBAN, tarjeta y DNI/NIE se validan por dígito de control, no
-  por parecido. Un checksum no tiene falsos positivos por azar, y eso es
-  comprobable: los números inventados con el formato correcto deben pasar sin
-  ser detectados.
+  Input-side DLP: IBAN, card and DNI/NIE are validated by check digit, not by
+  resemblance. A checksum has no random false positives, and that is testable:
+  invented numbers with the right shape must go through undetected.
 """
 
 import pytest
@@ -25,69 +23,71 @@ from app.rag_logic.qa_chain import _build_security_filter, _combine_filters
 
 
 # ══════════════════════════════════════════════════════════════════════════
-# RBAC — control de acceso por departamento
+# RBAC — department access control
 # ══════════════════════════════════════════════════════════════════════════
 
 class TestRBACFailClosed:
 
-    def test_lista_vacia_deniega_todo(self):
+    def test_empty_list_denies_everything(self):
         """
-        La propiedad central. `[]` no significa "sin restricción", significa
-        "sin acceso": se inyecta un departamento que ningún chunk puede tener,
+        The central property. `[]` does not mean "unrestricted", it means
+        "no access": a department no chunk can ever carry is injected,
         de modo que la consulta devuelve cero resultados.
         """
         f = _build_security_filter([])
         assert f == {"department": "__no_access__"}
 
-    def test_lista_vacia_no_produce_filtro_nulo(self):
+    def test_an_empty_list_does_not_produce_a_null_filter(self):
         """
-        El fallo que se está evitando: si devolviera None, el retriever
-        buscaría sobre TODO el corpus y el usuario sin permisos lo vería todo.
+        The failure being prevented: returning None here would let the
+        retriever search the WHOLE corpus, and a user with no permissions
+        would see everything.
         """
         assert _build_security_filter([]) is not None
 
-    def test_none_es_sin_restriccion_solo_para_admin(self):
-        # None lo produce User.get_allowed_departments() únicamente si role=admin.
+    def test_none_is_unrestricted_admin_only(self):
+        # None is produced by User.get_allowed_departments() only when role=admin.
         assert _build_security_filter(None) is None
 
-    def test_lista_con_departamentos_restringe_a_esos(self):
+    def test_a_list_restricts_to_those_departments(self):
         f = _build_security_filter(["hr", "it"])
         assert f == {"department": {"$in": ["hr", "it"]}}
 
-    def test_los_departamentos_se_ordenan(self):
+    def test_departments_are_sorted(self):
         """
-        Mismo permiso escrito en otro orden = mismo filtro. Importa porque el
-        alcance de seguridad forma parte de la clave de caché de cadenas.
+        The same permission written in another order is the same filter. It
+        matters because the
+        security scope is part of the chain cache key.
         """
         assert _build_security_filter(["it", "hr"]) == _build_security_filter(["hr", "it"])
 
-    def test_se_deduplican_y_se_normalizan(self):
+    def test_departments_are_deduplicated_and_normalised(self):
         f = _build_security_filter(["HR", "hr", " it "])
         assert f == {"department": {"$in": ["hr", "it"]}}
 
-    def test_una_lista_de_cadenas_vacias_tambien_deniega(self):
-        """Caso borde: ["", "  "] se queda sin valores válidos -> deny, no allow."""
+    def test_a_list_of_blank_strings_also_denies(self):
+        """Edge case: ["", "  "] leaves no valid values -> deny, not allow."""
         assert _build_security_filter(["", "   "]) == {"department": "__no_access__"}
 
 
-class TestFiltroSiempreEnAnd:
+class TestFilterAlwaysAnded:
 
-    def test_el_filtro_de_seguridad_se_combina_con_el_funcional(self):
+    def test_security_filter_is_combined_with_the_functional_one(self):
         seguridad = _build_security_filter(["hr"])
         funcional = {"relative_path_norm": "hr/politica.pdf"}
         combinado = _combine_filters(funcional, seguridad)
         assert combinado == {"$and": [funcional, seguridad]}
 
-    def test_un_filtro_solo_no_se_envuelve(self):
+    def test_a_single_filter_is_not_wrapped(self):
         assert _combine_filters(None, {"department": "hr"}) == {"department": "hr"}
 
-    def test_sin_filtros_devuelve_none(self):
+    def test_no_filters_returns_none(self):
         assert _combine_filters(None, None) is None
 
-    def test_el_de_seguridad_no_puede_perderse_al_combinar(self):
+    def test_the_security_filter_cannot_be_lost_when_combining(self):
         """
-        Un documento fuera del alcance no puede salir aunque el filtro
-        funcional lo pida explícitamente: los dos van en AND.
+        A document outside the scope cannot come back even when the
+        functional filter asks for it explicitly: the two are ANDed.
         """
         seguridad = _build_security_filter([])
         combinado = _combine_filters({"relative_path_norm": "finanzas/secreto.pdf"}, seguridad)
@@ -95,93 +95,93 @@ class TestFiltroSiempreEnAnd:
 
 
 # ══════════════════════════════════════════════════════════════════════════
-# DLP — detección de identificadores por dígito de control
+# DLP — identifier detection by check digit
 # ══════════════════════════════════════════════════════════════════════════
 
 class TestIBAN:
 
-    # IBANs con checksum mod-97 válido
+    # IBANs with a valid mod-97 checksum
     @pytest.mark.parametrize("iban", [
         "ES9121000418450200051332",
         "ES91 2100 0418 4502 0005 1332",
         "GB82WEST12345698765432",
         "DE89370400440532013000",
     ])
-    def test_detecta_iban_valido(self, iban):
-        hallazgos = find_sensitive_entities(f"mi cuenta es {iban}, gracias")
-        assert "IBAN" in {h.kind for h in hallazgos}
+    def test_detects_a_valid_iban(self, iban):
+        findings = find_sensitive_entities(f"mi cuenta es {iban}, gracias")
+        assert "IBAN" in {h.kind for h in findings}
 
-    @pytest.mark.parametrize("falso", [
-        "ES9121000418450200051333",   # mismo IBAN con el último dígito cambiado
+    @pytest.mark.parametrize("fake", [
+        "ES9121000418450200051333",   # same IBAN with the last digit changed
         "ES0000000000000000000000",
         "XX1234567890123456789012",
     ])
-    def test_no_detecta_un_iban_con_checksum_invalido(self, falso):
+    def test_does_not_detect_an_iban_with_a_broken_checksum(self, fake):
         """
-        Lo que hace valioso al checksum: un número con la PINTA de un IBAN
-        pero mal calculado no dispara. Sin él, cualquier cadena alfanumérica
-        larga sería un falso positivo.
+        What makes the checksum valuable: a number that LOOKS like an IBAN
+        but is miscalculated does not fire. Without it, any long alphanumeric
+        string would be a false positive.
         """
-        hallazgos = find_sensitive_entities(f"referencia {falso}")
-        assert "IBAN" not in {h.kind for h in hallazgos}
+        findings = find_sensitive_entities(f"referencia {fake}")
+        assert "IBAN" not in {h.kind for h in findings}
 
 
-class TestTarjeta:
+class TestCard:
 
-    @pytest.mark.parametrize("tarjeta", [
-        "4539578763621486",          # Visa de prueba, Luhn válido
+    @pytest.mark.parametrize("card", [
+        "4539578763621486",          # test Visa, valid Luhn
         "4539 5787 6362 1486",
         "5500005555555559",
     ])
-    def test_detecta_tarjeta_valida(self, tarjeta):
-        hallazgos = find_sensitive_entities(f"pagué con la {tarjeta}")
-        assert "CARD" in {h.kind for h in hallazgos}
+    def test_detects_a_valid_card(self, card):
+        findings = find_sensitive_entities(f"pagué con la {card}")
+        assert "CARD" in {h.kind for h in findings}
 
-    def test_no_detecta_un_numero_largo_cualquiera(self):
-        hallazgos = find_sensitive_entities("el pedido 1234567812345678 llegó tarde")
-        assert "CARD" not in {h.kind for h in hallazgos}
+    def test_does_not_detect_just_any_long_number(self):
+        findings = find_sensitive_entities("el pedido 1234567812345678 llegó tarde")
+        assert "CARD" not in {h.kind for h in findings}
 
 
-class TestDNIyNIE:
+class TestDNIAndNIE:
 
     @pytest.mark.parametrize("doc", ["12345678Z", "00000000T", "X1234567L"])
-    def test_detecta_documento_valido(self, doc):
-        hallazgos = find_sensitive_entities(f"mi documento es {doc}")
-        assert "DNI_NIE" in {h.kind for h in hallazgos}
+    def test_detects_document_valid(self, doc):
+        findings = find_sensitive_entities(f"mi documento es {doc}")
+        assert "DNI_NIE" in {h.kind for h in findings}
 
     @pytest.mark.parametrize("doc", ["12345678A", "00000000Z", "X1234567Z"])
-    def test_no_detecta_letra_de_control_incorrecta(self, doc):
-        hallazgos = find_sensitive_entities(f"referencia {doc}")
-        assert "DNI_NIE" not in {h.kind for h in hallazgos}
+    def test_does_not_detect_a_wrong_control_letter(self, doc):
+        findings = find_sensitive_entities(f"referencia {doc}")
+        assert "DNI_NIE" not in {h.kind for h in findings}
 
 
-class TestPoliticaDelGuardarrail:
+class TestGuardrailPolicy:
 
-    def test_texto_limpio_no_dispara_nada(self):
+    def test_clean_text_triggers_nothing(self):
         assert find_sensitive_entities("¿cuántos días de vacaciones tengo?") == []
         assert not contains_sensitive_data("¿cuál es la política de teletrabajo?")
 
-    def test_texto_vacio_no_revienta(self):
+    def test_empty_text_does_not_blow_up(self):
         assert find_sensitive_entities("") == []
         assert find_sensitive_entities(None) == []
 
-    def test_el_valor_detectado_nunca_se_registra_completo(self):
+    def test_the_value_detectado_never_records_completo(self):
         """
-        Los hallazgos van al log. Guardar el valor entero convertiría el
+        Findings go to the log. Storing the whole value would turn the
         detector de fugas en la fuga.
         """
         iban = "ES9121000418450200051332"
-        hallazgos = find_sensitive_entities(f"cuenta {iban}")
-        assert hallazgos
-        for h in hallazgos:
+        findings = find_sensitive_entities(f"cuenta {iban}")
+        assert findings
+        for h in findings:
             assert iban not in h.masked
             assert "*" in h.masked
 
-    def test_la_mascara_conserva_los_extremos(self):
+    def test_the_mascara_keeps_the_ends(self):
         assert mask("ES9121000418450200051332").startswith("ES")
         assert mask("ES9121000418450200051332").endswith("32")
 
-    def test_varias_entidades_en_el_mismo_texto(self):
-        texto = "soy 12345678Z y mi cuenta ES9121000418450200051332"
-        tipos = {h.kind for h in find_sensitive_entities(texto)}
+    def test_several_entities_in_the_same_text(self):
+        text = "soy 12345678Z y mi cuenta ES9121000418450200051332"
+        tipos = {h.kind for h in find_sensitive_entities(text)}
         assert {"DNI_NIE", "IBAN"} <= tipos

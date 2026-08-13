@@ -1,18 +1,18 @@
 # app/rag_logic/pii_guard.py
 """
-Guardarril de entrada (input-side DLP): detecta identificadores financieros/
+Input-side DLP guardrail: detects financial and personal identifiers
 personales estructurados en texto libre ANTES de que llegue al LLM o se
 persista en la base de datos propia.
 
 Deliberadamente NO intenta detectar nombres de persona en texto libre — eso
 necesita NER (Presidio, spaCy) o una llamada a un LLM clasificador, y tiene
-falsos positivos/negativos reales. Lo que hay aquí son identificadores
-ESTRUCTURADOS con dígito de control matemático (IBAN, tarjeta, DNI/NIE):
-barato, determinista, prácticamente cero falsos positivos.
+real false positives and negatives. What lives here are STRUCTURED
+identifiers with a mathematical check digit (IBAN, card, DNI/NIE):
+cheap, deterministic, and with practically zero false positives.
 
-Política: BLOQUEAR, no redactar y continuar (ver discusión de la sesión).
+Policy: BLOCK, do not redact and continue.
 Redactar y seguir es arriesgado — si el detector falla un campo, el dato se
-cuela igual. Bloquear con un mensaje claro es el patrón "fail closed" esperado
+still escapes. Blocking with a clear message is the expected fail-closed pattern
 en banca.
 """
 
@@ -24,11 +24,11 @@ from typing import List
 @dataclass
 class Finding:
     kind: str        # "IBAN" | "CARD" | "DNI_NIE"
-    masked: str       # seguro de loguear: nunca el valor completo
+    masked: str       # safe to log: never the full value
 
 
 def mask(value: str, keep_start: int = 2, keep_end: int = 2) -> str:
-    """Enmascara un valor sensible para logging seguro (nunca el valor completo)."""
+    """Mask a sensitive value for safe logging (never the full value)."""
     cleaned = re.sub(r"\s+", "", value)
     if len(cleaned) <= keep_start + keep_end:
         return "*" * len(cleaned)
@@ -76,7 +76,7 @@ def _luhn_valid(candidate: str) -> bool:
     return total % 10 == 0
 
 
-# ==================== DNI / NIE español ====================
+# ==================== Spanish DNI / NIE ====================
 
 _DNI_RE = re.compile(r"\b\d{8}[A-Za-z]\b")
 _NIE_RE = re.compile(r"\b[XYZxyz]\d{7}[A-Za-z]\b")
@@ -95,11 +95,11 @@ def _dni_nie_checksum_valid(candidate: str) -> bool:
     return _DNI_LETTERS[int(number) % 23] == letter
 
 
-# ==================== API pública ====================
+# ==================== Public API ====================
 
 def find_sensitive_entities(text: str) -> List[Finding]:
-    """Escanea texto libre y devuelve los identificadores financieros/personales
-    estructurados detectados (con checksum válido). Lista vacía = nada detectado."""
+    """Scan free text and return the financial and personal identifiers
+    structured identifiers found (with a valid checksum). Empty list = nothing found."""
     if not text:
         return []
 

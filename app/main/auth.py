@@ -1,5 +1,5 @@
 # app/main/auth.py
-"""Inicio y cierre de sesión, y el registro de sesiones de login."""
+"""Login and logout, and the login-session activity record."""
 
 from datetime import datetime
 
@@ -26,10 +26,10 @@ def login():
         if user and user.check_password(password):
             login_user(user)
 
-            # Auditoría básica (sin IP)
+            # Basic auditing (no IP recorded)
             user.last_login = datetime.utcnow()
 
-            # Cerrar sesión anterior abierta si existiera (por seguridad/consistencia)
+            # Close any previously open session, for security and consistency
             prev = (
                 LoginSession.query
                 .filter_by(user_id=user.id, ended_at=None)
@@ -41,7 +41,7 @@ def login():
                 prev.ended_at = now
                 prev.duration_sec = max(0, int((now - prev.started_at).total_seconds()))
 
-            # Crear nueva sesión de login
+            # Open a new login session
             ls = LoginSession(
                 user_id=user.id,
                 started_at=datetime.utcnow(),
@@ -57,7 +57,7 @@ def login():
 
 
 
-        flash("Credenciales incorrectas", "danger")
+        flash("Incorrect credentials", "danger")
 
     return render_template("login.html")
 @bp.route("/logout", methods=["GET", "POST"])
@@ -84,8 +84,8 @@ def logout():
     return redirect(url_for("main.login"))
 def _bump_login_session_question() -> None:
     """
-    Incrementa n_questions de la sesión de login activa (si existe).
-    No rompe si falta (p.ej. sesión antigua / key inexistente).
+    Increment n_questions on the active login session, if there is one.
+    Never raises when it is missing (e.g. a stale session, or no key at all).
     """
     try:
         ls_id = flask_session.get("login_session_id")
@@ -100,7 +100,7 @@ def _bump_login_session_question() -> None:
         ls.last_activity_at = datetime.utcnow()
         db.session.commit()
     except Exception:
-        # Silencioso: esto nunca debe tumbar /ask
+        # Silent on purpose: telemetry must never bring /ask down
         try:
             db.session.rollback()
         except Exception:

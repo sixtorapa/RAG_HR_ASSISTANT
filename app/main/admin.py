@@ -1,5 +1,5 @@
 # app/main/admin.py
-"""Panel de actividad y exportación en CSV. Solo para administradores."""
+"""Activity panel and CSV export. Admin only."""
 
 from datetime import datetime, timedelta
 
@@ -18,7 +18,7 @@ def admin_activity():
         abort(403)
 
 
-    # llevarte a una sesión válida para que el sidebar no rompa
+    # send you to a valid session so the sidebar does not break
     chat_sessions_list = (
         ChatSession.query
         .filter_by(user_id=current_user.id)
@@ -30,8 +30,8 @@ def admin_activity():
     if current_chat_session:
         return redirect(url_for("main.index", tab="activity", session=current_chat_session.id))
 
-    # Si por lo que sea no hay sesiones, index ya crea una al entrar,
-    # pero aquí le mandamos sin session
+    # If there are no sessions at all, index() creates one on entry,
+    # but here we send the user through without one
     return redirect(url_for("main.index", tab="activity"))
 @bp.route("/admin/activity/export_sessions.csv")
 @login_required
@@ -43,11 +43,11 @@ def export_sessions_csv():
     import io
 
     def row(v):
-        # Evita None y deja el CSV limpio
+        # Avoids None and keeps the CSV clean
         return "" if v is None else v
 
     def dt(v):
-        # Formato consistente y “humano” (sin milisegundos)
+        # Consistent, human-readable format, without milliseconds
         return "" if v is None else v.strftime("%Y-%m-%d %H:%M:%S")
 
     @stream_with_context
@@ -55,7 +55,7 @@ def export_sessions_csv():
         buffer = io.StringIO()
         writer = csv.writer(buffer)
 
-        # Cabecera
+        # Header row
         writer.writerow([
             "login_session_id",
             "user_id",
@@ -70,7 +70,7 @@ def export_sessions_csv():
         buffer.seek(0)
         buffer.truncate(0)
 
-        # Query histórico completo (streaming)
+        # Full historical query, streamed
         q = (
             db.session.query(LoginSession, User)
             .join(User, User.id == LoginSession.user_id)

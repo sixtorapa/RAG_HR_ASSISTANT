@@ -19,19 +19,19 @@ Example users.json:
 """
 
 
-# Crear usuario (te pedirá password por consola si no lo pasas):
+# Create a user (it will prompt for the password if you do not pass one):
 
 # python create_admin.py --username valeria --role user
 
-# Crear usuario con password en línea:
+# Create a user with an inline password:
 
 # python create_admin.py --username valeria --password "MiPass123!" --role user
 
-# Resetear password de un usuario existente:
+# Reset the password of an existing user:
 
 # python create_admin.py --username valeria --password "NuevaPass123!" --reset-password
 
-# Crear varios usuarios con JSON:
+# Create several users from JSON:
 
 # python create_admin.py --users-file users.json --reset-password
 
@@ -70,8 +70,8 @@ def _generate_password(length: int = 18) -> str:
 
 def _departments_from_any(v: Any) -> Optional[list]:
     """
-    Acepta una lista (del JSON bulk) o un string "dept_a,dept_b" (del CLI).
-    None -> no se especificó nada (no se toca el campo existente del usuario).
+    Accepts a list (from the bulk JSON) or a "dept_a,dept_b" string (from the CLI).
+    None -> nothing was specified (the user's existing field is left untouched).
     """
     if v is None:
         return None
@@ -96,7 +96,7 @@ def upsert_user(
     """Create user if missing; update basic fields; optionally reset password.
 
     allowed_departments (guardarril de acceso, ver User.get_allowed_departments):
-    None = no tocar el valor existente (o dejarlo vacío si el usuario es nuevo) ->
+    None = leave the existing value alone (or empty for a new user) ->
     fail closed por defecto para usuarios "user". Para "admin" no aplica (siempre
     acceso total, independientemente de este campo).
     """
@@ -268,16 +268,16 @@ def main(argv: Optional[list] = None) -> int:
         # - Existing user: password required only if --reset-password
 
         def _prompt_password(label: str) -> str:
-            # getpass oculta lo que se teclea (no verás caracteres). En algunos terminals puede fallar.
+            # getpass hides what is typed (no characters appear). It fails on some terminals.
             if not sys.stdin.isatty():
                 raise ValueError(
                     "No hay terminal interactiva (stdin no es TTY). Usa --password o --generate-password."
                 )
             try:
-                print("(La contraseña no se mostrará mientras se escribe. Pulsa Enter al terminar.)")
+                print("(The password will not be shown while typing. Press Enter when done.)")
                 return getpass(label)
             except Exception:
-                # Fallback para terminals que no soportan getpass bien (p.ej. algunos integrados)
+                # Fallback for terminals with poor getpass support (e.g. some embedded ones)
                 return input(label.replace(":", " (visible): "))
 
         if not existing and not password:
@@ -305,7 +305,7 @@ def main(argv: Optional[list] = None) -> int:
             f"active={res['is_active']} | allowed_departments={res.get('allowed_departments')}"
         )
         if generated_password:
-            print("🔑 Password generado (guárdalo ahora, no se volverá a mostrar):", generated_password)
+            print("🔑 Generated password (save it now, it will not be shown again):", generated_password)
         return 0
 
 

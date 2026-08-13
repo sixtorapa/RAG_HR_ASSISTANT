@@ -1,11 +1,11 @@
 # app/main/guards.py
 """
-Guardarraíles de entrada de /ask.
+Input guardrails for /ask.
 
-Los dos cortan ANTES de la primera call al LLM y ANTES de persistir nada: si
-el dato llega al modelo o a nuestra propia base de datos, ya ha salido del
-perímetro. Viven en su propio módulo porque son la parte de compliance del
-sistema y conviene que se vean.
+Both cut BEFORE the first LLM call and BEFORE anything is persisted: once the
+data reaches the model or our own database, it has left the perimeter. They live
+in their own module because they are the compliance surface of the system and it
+should be visible in the file tree.
 """
 
 import os
@@ -43,12 +43,12 @@ def _quota_block():
     if used_today < limit:
         return None
 
-    print(f"🚫 CUOTA: {used_today}/{limit} preguntas used_today today — bloqueada user={current_user.id}")
+    print(f"🚫 QUOTA: {used_today}/{limit} questions used today — blocked user={current_user.id}")
     return jsonify({
         "error": (
-            f"Esta demo tiene un límite de {limit} preguntas al día para "
-            f"controlar el cost de inferencia, y ya se han consumido. "
-            f"Vuelve a intentarlo mañana."
+            f"This demo is capped at {limit} questions per day to control "
+            f"inference cost, and today's quota is used up. "
+            f"Please try again tomorrow."
         ),
         "quota_used": used_today,
         "quota_limit": limit,
@@ -58,11 +58,11 @@ def _dlp_block(text, context):
     findings = find_sensitive_entities(text)
     if not findings:
         return None
-    print(f"🚫 DLP: bloqueado {context} — detectado: {sorted({f.kind for f in findings})}")
+    print(f"🚫 DLP: blocked {context} — detected: {sorted({f.kind for f in findings})}")
     return jsonify({
         "error": (
-            "Tu mensaje parece contener datos identificativos o financieros "
-            "(IBAN, tarjeta o documento de identidad). Por seguridad, no se procesa "
-            "ni se guarda. Reformula la question sin incluir esos datos."
+            "Your message appears to contain identifying or financial data "
+            "(IBAN, card or ID document). For security it is neither processed "
+            "nor stored. Please rephrase the question without those details."
         )
     }), 400

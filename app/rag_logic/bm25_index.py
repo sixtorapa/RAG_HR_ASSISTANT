@@ -1,12 +1,13 @@
 # app/rag_logic/bm25_index.py
 """
-Índice BM25 persistente.
+Persistent BM25 index.
 
-Antes, BM25 se reconstruía desde cero (full scan de Chroma + re-tokenizado)
-en cada cache-miss de la chain (qa_chain.chain_cache), lo cual ocurre con
-frecuencia porque la cache-key incluye el path_filter detectado por pregunta.
-Aquí lo construimos UNA VEZ durante la ingesta y lo persistimos a disco;
-qa_chain.py solo lo deserializa.
+BM25 needs corpus-wide statistics, so building it means a full Chroma scan plus
+re-tokenising everything. That cost belongs to ingestion, not to a query: the
+chain cache key includes the per-question path filter, so cache misses are
+frequent and rebuilding on each one would charge every user for the ingest.
+
+Built ONCE during ingestion and persisted to disk; qa_chain.py only loads it.
 """
 
 import os
@@ -25,7 +26,7 @@ def _bm25_path(vector_store_path: str) -> str:
 
 
 def build_bm25_retriever(docs_text: List[str], docs_meta: List[dict]) -> Optional[BM25Retriever]:
-    """Construye un BM25Retriever a partir de listas de texto/metadata ya obtenidas."""
+    """Build a BM25Retriever from already-fetched text and metadata lists."""
     if not docs_text or len(docs_text) != len(docs_meta):
         return None
     docs = [Document(page_content=t, metadata=(m or {})) for t, m in zip(docs_text, docs_meta)]
@@ -33,7 +34,7 @@ def build_bm25_retriever(docs_text: List[str], docs_meta: List[dict]) -> Optiona
 
 
 def persist_bm25_index(vector_store: Chroma, vector_store_path: str) -> bool:
-    """Reconstruye el índice BM25 desde el contenido actual de Chroma y lo persiste a disco."""
+    """Rebuild the BM25 index from the current Chroma contents and persist it to disk."""
     data = vector_store.get(include=["documents", "metadatas"])
     retriever = build_bm25_retriever(data.get("documents", []) or [], data.get("metadatas", []) or [])
     if retriever is None:
@@ -45,7 +46,7 @@ def persist_bm25_index(vector_store: Chroma, vector_store_path: str) -> bool:
 
 
 def load_bm25_index(vector_store_path: str) -> Optional[BM25Retriever]:
-    """Carga el índice BM25 persistido. None si no existe o no se pudo deserializar."""
+    """Load the persisted BM25 index. None if absent or if it could not be deserialised."""
     path = _bm25_path(vector_store_path)
     if not os.path.exists(path):
         return None

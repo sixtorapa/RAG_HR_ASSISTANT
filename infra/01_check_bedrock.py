@@ -1,58 +1,58 @@
 """
-Paso 1 — comprobar que las credenciales valen y que Bedrock responde.
+Step 1 — check the credentials work and that Bedrock answers.
 
-No crea nada. Es la primera comprobación porque todo lo demás depende de ella:
-si la cuenta no puede invocar el modelo, no tiene sentido construir imágenes ni
-funciones encima.
+Creates nothing. It comes first because everything else depends on it: if the
+account cannot invoke the model, there is no point building images or functions
+on top.
 
-Cuatro comprobaciones EN ORDEN, para que un fallo diga dónde está el problema y
-no solo que lo hay:
-    1. ¿La clave es válida?          -> si no, el problema son las credenciales
-    2. ¿Qué modelos hay?             -> si no, el problema es la región
-    3. ¿Cuáles son invocables?       -> te da el ID exacto que hay que usar
-    4. Una llamada real              -> la prueba de fuego
+Four checks IN ORDER, so a failure says where the problem is rather than only
+that there is one:
+    1. Is the key valid?        -> if not, the problem is the credentials
+    2. Which models are there?  -> if not, the problem is the region
+    3. Which are invocable?     -> gives the exact ID to use
+    4. A real call              -> the acid test
 
-Uso:  python infra/01_check_bedrock.py
+Usage:  python infra/01_check_bedrock.py
 """
 
 import sys
 
 from botocore.exceptions import ClientError, NoCredentialsError
 
-from _comun import MODELOS, REGION, cliente, exigir_credenciales
+from _common import MODELS, REGION, client, require_credentials
 
 
-def titulo(n, texto):
-    print(f"\n{'=' * 62}\n  PASO {n} — {texto}\n{'=' * 62}")
+def heading(n, text):
+    print(f"\n{'=' * 62}\n  STEP {n} — {text}\n{'=' * 62}")
 
 
-exigir_credenciales()
+require_credentials()
 
-# ── 1. ¿Quién soy con esta clave? ────────────────────────────────────────────
-titulo(1, "identidad")
+# ── 1. Who am I with this key? ───────────────────────────────────────────────
+heading(1, "identidad")
 try:
-    ident = cliente("sts").get_caller_identity()
+    ident = client("sts").get_caller_identity()
     print(f"  Cuenta : {ident['Account']}")
     print(f"  ARN    : {ident['Arn']}")
 except NoCredentialsError:
-    sys.exit("  ✗ No hay credenciales en el entorno.")
+    sys.exit("  ✗ No credentials in the environment.")
 except ClientError as e:
     sys.exit(f"  ✗ Credenciales rechazadas: {e.response['Error']['Code']}")
 
-# ── 2. Modelos de Anthropic en la región ─────────────────────────────────────
-titulo(2, f"modelos de Anthropic en {REGION}")
-bedrock = cliente("bedrock")
+# ── 2. Anthropic models available in the region ──────────────────────────────
+heading(2, f"modelos de Anthropic en {REGION}")
+bedrock = client("bedrock")
 try:
     for m in bedrock.list_foundation_models(byProvider="anthropic")["modelSummaries"]:
         tipos = ",".join(m.get("inferenceTypesSupported", []))
-        # ON_DEMAND = invocable con este ID tal cual.
-        # Solo INFERENCE_PROFILE = hay que usar el ID con prefijo del paso 3.
+        # ON_DEMAND = invocable with this ID as-is.
+        # INFERENCE_PROFILE only = the prefixed ID from step 3 is required.
         print(f"  {m['modelId']:<50} {tipos}")
 except ClientError as e:
     print(f"  ✗ {e.response['Error']['Code']}: {e.response['Error']['Message']}")
 
-# ── 3. Los IDs que de verdad se pueden invocar ───────────────────────────────
-titulo(3, "inference profiles — ESTOS son los IDs invocables")
+# ── 3. The IDs that can actually be invoked ──────────────────────────────────
+heading(3, "inference profiles — ESTOS son los IDs invocables")
 try:
     for p in bedrock.list_inference_profiles()["inferenceProfileSummaries"]:
         if "anthropic" in p["inferenceProfileId"].lower():
@@ -60,12 +60,12 @@ try:
 except ClientError as e:
     print(f"  ✗ {e.response['Error']['Code']}: {e.response['Error']['Message']}")
 
-# ── 4. Invocación real ───────────────────────────────────────────────────────
-titulo(4, "invocación real")
-modelo = MODELOS[0]
+# ── 4. A real invocation ─────────────────────────────────────────────────────
+heading(4, "real invocation")
+modelo = MODELS[0]
 print(f"  Modelo: {modelo}")
 try:
-    r = cliente("bedrock-runtime").converse(
+    r = client("bedrock-runtime").converse(
         modelId=modelo,
         messages=[{"role": "user", "content": [{"text": "Responde solo: OK"}]}],
         inferenceConfig={"maxTokens": 20, "temperature": 0},
@@ -76,7 +76,7 @@ except ClientError as e:
     code = e.response["Error"]["Code"]
     print(f"  ✗ {code}: {e.response['Error']['Message']}")
     if code == "AccessDeniedException":
-        print("    → falta bedrock:InvokeModel, o el 'use case details' de Anthropic")
+        print("    → missing bedrock:InvokeModel, or Anthropic's 'use case details'")
     elif code == "ValidationException":
-        print("    → el modelo exige el ID del inference profile (prefijo eu.)")
+        print("    → the model requires the inference profile ID (eu. prefix)")
     sys.exit(1)

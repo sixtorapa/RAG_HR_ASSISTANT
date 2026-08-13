@@ -1,12 +1,11 @@
 # app/main/pipeline.py
 """
-El pipeline de respuesta: de una question a una respuesta guardada.
+The answer pipeline: from a question to a stored answer.
 
-    override o router  ->  tool_calls  ->  un bucle de ejecución  ->  formato
+    override or router  ->  tool_calls  ->  one dispatch loop  ->  formatting
 
-Es el equivalente de `services/generation.py` en aviation-rag-service: la lógica
-vive aquí y los endpoints solo la invocan. Antes estaba todo dentro de
-`routes.py`, duplicado entre `ask()` y `edit_and_resubmit()`.
+The endpoints in routes.py only validate and delegate here, so ask() and
+edit_and_resubmit() run exactly the same path.
 """
 
 import re
@@ -21,7 +20,7 @@ from app import db
 from app.models import Message
 from app.rag_logic.agent_reasoning import ReasoningAgent
 from app.rag_logic.agent_router import AgentRouter
-from app.rag_logic.agent_intermedios import SQLAgent
+from app.rag_logic.agent_sql import SQLAgent
 from app.rag_logic.cost_calculator import calculate_cost
 from app.rag_logic.excel_tool import ExcelAnalysisTool
 from app.rag_logic.sql_tool import SQLDatabaseTool
@@ -49,31 +48,34 @@ def _settings_with_acl(base_settings, user) -> dict:
     return settings
 def _extract_user_mode(raw_text: str):
     """
-    Detecta modo explícito del usuario (case-insensitive) SOLO si aparece AL INICIO:
-      - "SQL"   -> fuerza ruta SQL
-      - "AMBAS" -> fuerza ruta híbrida (SQL -> DOCS)
+    Detect an explicit user mode (case-insensitive) ONLY at the START of the text:
+      - "SQL"   -> forces the SQL route
+      - "AMBAS" -> forces the hybrid route (SQL -> DOCS)
 
-    Formatos soportados (ejemplos):
-      - "SQL: dame el top 10..."
-      - "SQL dame el top 10..."
-      - "AMBAS - compara esto y dame context..."
+    Supported formats (examples):
+      - "SQL: give me the top 10..."
+      - "SQL give me the top 10..."
+      - "AMBAS - compare this and give me context..."
 
-    Devuelve: (mode, cleaned_text)
+    Returns: (mode, cleaned_text)
       - mode: "sql" | "ambas" | None
-      - cleaned_text: question sin el prefijo detectado
+      - cleaned_text: the question without the detected prefix
+
+    Note: the keywords stay in Spanish because they are the user-facing command,
+    not prose. Renaming them would break anyone already typing "AMBAS:".
     """
     if not raw_text:
         return None, raw_text
 
     text = raw_text.strip()
-    # Solo si aparece al prefix como palabra completa.
+    # Only when it appears as a whole word at the start.
     m = re.match(r"^(sql|ambas)\b", text, flags=re.IGNORECASE)
     if not m:
         return None, text
 
     mode = m.group(1).lower()
     cleaned = text[m.end():].strip()
-    # Limpia separadores típicos tras el prefijo: "SQL: ..." | "SQL - ..." | "SQL — ..."
+    # Strip the usual separators after the prefix: "SQL: ..." | "SQL - ..." | "SQL — ..."
     cleaned = re.sub(r"^[:\-—\s,.;/]+", "", cleaned).strip()
     
     return mode, (cleaned or text)
@@ -82,12 +84,11 @@ def _make_chat_title_from_question(q: str, max_len: int = 46) -> str:
     if not q:
         return "New chat"
 
-    # Limpieza rápida
+    # Quick clean-up
     q = re.sub(r"\s+", " ", q)
     q = q.replace("\n", " ").strip()
 
-    # Título estilo GPT: primeras palabras, sin hora
-    # (si es muy largo, recortamos)
+    # First few words, no timestamp. Truncated if too long.
     title = q
     if len(title) > max_len:
         title = title[:max_len].rsplit(" ", 1)[0].strip() + "…"
@@ -96,9 +97,9 @@ def _make_chat_title_from_question(q: str, max_len: int = 46) -> str:
 class _ToolBox:
     """The project's tools, built once per request."""
 
-    # Fixed collection identifier for the chain cache key. It used to be the
-    # uuid of a `project` row; the application serves one knowledge base, so a
-    # constant states the truth without a table behind it.
+    # Fixed collection identifier for the chain cache key. The application
+    # serves a single knowledge base, so a constant states that without needing
+    # a table behind it.
     COLLECTION = "kb"
 
     def __init__(self, model_name, user, logger, use_web_search=False):
@@ -145,9 +146,9 @@ def _sql_context_document(step_result):
     text = (step_result.get("sql_raw_output") or step_result.get("answer") or "").strip()
     if not text:
         return None
-    compacto = "\n".join([ln for ln in text.splitlines() if ln.strip()][:25])
+    compact = "\n".join([ln for ln in text.splitlines() if ln.strip()][:25])
     return Document(
-        page_content=f"[SALIDA SQL - RESUMEN]\n{compacto}",
+        page_content=f"[SQL OUTPUT - SUMMARY]\n{compact}",
         metadata={"source": "SQL", "type": "sql_context"},
     )
 def _calls_from_override(raw_text, box):
@@ -155,9 +156,9 @@ def _calls_from_override(raw_text, box):
     Explicit user modes (SQL:, AMBAS, or asking for a summary) produce the SAME
     tool_calls structure the router would return.
 
-    That is the simplification that removed three duplicated blocks: an override
-    is not a different path, it only skips the decision. What runs afterwards is
-    identical.
+    An override is not a different path: it only skips the decision. What runs
+    afterwards is identical, which is why there is a single dispatch loop rather
+    than one per mode.
 
     Returns (calls, clean_question). calls=None means "let the router decide".
     """
@@ -233,76 +234,76 @@ def _run_tools(calls, box, question, paired_history):
             step = box.web.run({"query": args.get("query") or question}, callbacks=[box.logger])
 
         else:
-            step = {"answer": f"No sé qué herramienta usar para: {name}", "source_documents": []}
+            step = {"answer": f"No tool available for: {name}", "source_documents": []}
 
         if not isinstance(step, dict):
-            step = {"answer": str(step) if step else "Error interno en la herramienta.", "source_documents": []}
+            step = {"answer": str(step) if step else "Internal tool error.", "source_documents": []}
         step["origin"] = name
         results.append(step)
 
     return results
-def _history_for(session, hasta=None, limit=10):
+def _history_for(session, until=None, limit=10):
     """
     Conversation history in the two shapes needed: LangChain messages for the
-    router, and (user, bot) pairs for the chain. `hasta` limits it to everything
+    router, and (user, bot) pairs for the chain. `until` limits it to everything
     before a given message, for regeneration.
     """
     q = Message.query.filter_by(session_id=session.id, user_id=current_user.id)
-    if hasta is not None:
-        mensajes = q.filter(Message.timestamp < hasta).order_by(Message.timestamp.asc()).all()
+    if until is not None:
+        messages = q.filter(Message.timestamp < until).order_by(Message.timestamp.asc()).all()
     else:
-        mensajes = q.order_by(Message.timestamp.desc()).limit(limit).all()
-        mensajes.reverse()
+        messages = q.order_by(Message.timestamp.desc()).limit(limit).all()
+        messages.reverse()
 
-    para_router = [
+    messages_for_router = [
         (HumanMessage(content=m.content) if m.sender == "user" else AIMessage(content=m.content))
-        for m in mensajes
+        for m in messages
     ]
     paired = [
-        (mensajes[i].content, mensajes[i + 1].content)
-        for i in range(0, len(mensajes) - 1, 2)
-        if mensajes[i].sender == "user" and mensajes[i + 1].sender == "bot"
+        (messages[i].content, messages[i + 1].content)
+        for i in range(0, len(messages) - 1, 2)
+        if messages[i].sender == "user" and messages[i + 1].sender == "bot"
     ]
-    return para_router, paired
+    return messages_for_router, paired
 def _answer_question(session, question, model_name, box,
-                     historial_hasta=None, use_router=True):
+                     history_until=None, use_router=True):
     """
     The whole pipeline, and the only place it lives.
 
     override or router → tool_calls → one dispatch loop → formatting agent.
     Returns (final_result, question_for_the_title).
     """
-    para_router, paired = _history_for(session, hasta=historial_hasta)
+    messages_for_router, paired = _history_for(session, until=history_until)
 
     calls, clean_question = _calls_from_override(question, box)
 
     if calls is None and use_router:
         router = AgentRouter(model_name=model_name, tools=box.all,
                              doc_path=current_app.config["KNOWLEDGE_BASE_PATH"])
-        eleccion = router.route(question, para_router, callbacks=[box.logger])
+        choice = router.route(question, messages_for_router, callbacks=[box.logger])
 
-        if not getattr(eleccion, "tool_calls", None):
+        if not getattr(choice, "tool_calls", None):
             # Router path 1: it answers directly, with no tools and no
             # retrieval, so there are no sources to cite.
-            crudo = (getattr(eleccion, "content", "") or "").strip()
-            if crudo:
-                primera, *resto = crudo.splitlines()
-                if primera.strip().upper().startswith("ROUTE:"):
-                    crudo = "\n".join(resto).strip()
-            return {"answer": crudo or "No tengo respuesta para eso.", "source_documents": []}, clean_question
+            raw = (getattr(choice, "content", "") or "").strip()
+            if raw:
+                first, *rest = raw.splitlines()
+                if first.strip().upper().startswith("ROUTE:"):
+                    raw = "\n".join(rest).strip()
+            return {"answer": raw or "I do not have an answer for that.", "source_documents": []}, clean_question
 
-        calls = eleccion.tool_calls
+        calls = choice.tool_calls
 
     with get_openai_callback() as cb:
         results = _run_tools(calls, box, clean_question, paired)
-    # El cost se registra por consulta. Antes se acumulaba en `project.cost`,
-    # una columna que ninguna pantalla mostraba.
+    # Cost is recorded per query, and logged rather than accumulated: in RAG the
+    # prompt dominates the bill, so retrieval breadth is a cost decision.
     cost = calculate_cost(model_name, cb.prompt_tokens, cb.completion_tokens)
     print(f"💶 Query cost: {cost:.6f} "
           f"({cb.prompt_tokens} prompt + {cb.completion_tokens} completion tokens)")
 
     if not results:
-        results = [{"answer": "No se ejecutó ninguna herramienta.", "source_documents": [], "origin": box.docs.name}]
+        results = [{"answer": "No tool was executed.", "source_documents": [], "origin": box.docs.name}]
 
     return box.reasoning.run(clean_question, results), clean_question
 def _finalize(session, question_text, final_result,
@@ -311,12 +312,10 @@ def _finalize(session, question_text, final_result,
     Common close of a response: format sources, persist the message pair, rename
     the chat if it is still untitled, and return the JSON.
 
-    This block was COPIED FIVE TIMES inside ask() and twice more in
-    edit_and_resubmit(). Not merely ugly: that copy-paste produced the three
-    `NameError: memory_store` crashes ruff exposed once F821 stopped being
-    ignored — someone duplicated the block and dropped a line on the way.
+    Every route that answers a question ends here, so persistence and the shape
+    of the JSON are defined in exactly one place.
     """
-    answer_text = final_result.get("answer") or "Error generando respuesta."
+    answer_text = final_result.get("answer") or "Error generating the answer."
 
     sources_formatted = []
     for doc in final_result.get("source_documents", []) or []:

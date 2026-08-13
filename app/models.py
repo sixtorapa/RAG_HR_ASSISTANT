@@ -5,16 +5,10 @@ from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 
 
-# The `project` table was removed. Of its eight columns, five were a copy of
-# environment variables (name, paths, model), `status` was always "READY", `id`
-# existed only for a foreign key, and `cost` accumulated in a column no screen
-# displayed. The only real state — the system instruction and the SQL context —
-# is configuration and lives in config.py.
-#
-# The cost was never the extra code: it was a duplicated source of truth.
-# Changing UP_VECTOR_STORE_PATH did not move an existing project, because the
-# path was frozen in the row — one of the three failures that only appeared on
-# Lambda.
+# The application serves a single knowledge base. Its paths, model and system
+# instruction are configuration and live in config.py, not in a table: a value
+# that also exists in the environment must have exactly one source of truth,
+# or the two drift and the row silently wins.
 
 
 class ChatSession(db.Model):
@@ -28,7 +22,7 @@ class ChatSession(db.Model):
 
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
-    # Relación: Una sesión tiene muchos mensajes
+    # Relationship: one session has many messages
     messages = db.relationship(
         'Message',
         backref='session',
@@ -71,7 +65,7 @@ class LoginSession(db.Model):
     started_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False, index=True)
     ended_at = db.Column(db.DateTime, nullable=True)
 
-    duration_sec = db.Column(db.Integer, nullable=True)  # se calcula al cerrar
+    duration_sec = db.Column(db.Integer, nullable=True)  # computed on close
     n_questions = db.Column(db.Integer, default=0, nullable=False)
 
     last_activity_at = db.Column(db.DateTime, nullable=True)
@@ -86,7 +80,7 @@ class LoginSession(db.Model):
 class User(UserMixin, db.Model):
 
     """
-    Usuario autenticado del sistema (tipo ChatGPT).
+    Authenticated user of the system.
     """
     id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     
@@ -106,7 +100,7 @@ class User(UserMixin, db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     last_login = db.Column(db.DateTime, nullable=True)
 
-    # Relación: un usuario tiene muchos chats
+    # Relationship: one user has many chats
     sessions = db.relationship(
         'ChatSession',
         backref='user',
