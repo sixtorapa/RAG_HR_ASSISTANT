@@ -134,18 +134,22 @@ RAM counter would apply the cap per container and N containers would multiply it
 retrieval, parent expansion — over a golden dataset of 21 RAG questions written against
 the real documents, and scores it with RAGAS.
 
-Figures are the mean of three runs, with the spread across them, because a single run
-does not settle these numbers.
+These figures are a single run, taken after the enrichment-language fix described below.
+The previous set — 0.818 / 0.762 / 0.946 / 0.859 — was the mean of three runs with a
+spread of ±0.011 or less, which is the noise floor to keep in mind when reading any one
+run: differences smaller than that are not differences.
 
-| Metric | Score | Spread | What it measures |
-|---|---|---|---|
-| Context precision | **0.818** | ±0.005 | Of what was retrieved, how much is relevant |
-| Context recall | 0.762 | ±0.000 | Whether the context holds everything the answer needs |
-| **Faithfulness** | **0.946** | ±0.011 | Whether the answer is anchored in the context |
-| Answer relevancy | 0.859 | ±0.011 | Whether it answers what was asked |
+| Metric | Score | What it measures |
+|---|---|---|
+| Context precision | **0.906** | Of what was retrieved, how much is relevant |
+| Context recall | **0.881** | Whether the context holds everything the answer needs |
+| **Faithfulness** | **0.940** | Whether the answer is anchored in the context |
+| Answer relevancy | 0.851 | Whether it answers what was asked |
 
-Context recall lands on exactly 0.762 in every run: the metric is quantised per question,
-so that is 16 of 21, and the gap is one specific question rather than noise.
+Context recall is quantised per question: with 21 questions it can only land on multiples
+of 1/21, so a stable 0.881 is 18.5 of 21 rather than noise. Precision moved monotonically
+with the share of Spanish headlines in the index (0.8155 → 0.8834 → 0.9063), and that
+dose-response is what separates "it coincided" from "it caused it".
 
 A query costs about **$0.0003** and 2,300 prompt tokens. Prompt tokens dominate in RAG —
 the retrieved chunks are large and the answer is short — which makes retrieval breadth a
